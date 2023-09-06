@@ -3,7 +3,7 @@ name: "\U0001F41B bug_issue_template"
 about: 버그 수정에 대한 템플릿입니다.
 title: "[Bug] "
 labels: "\U0001F41B BugFix"
-assignees: sohn919
+assignees: ''
 
 ---
 

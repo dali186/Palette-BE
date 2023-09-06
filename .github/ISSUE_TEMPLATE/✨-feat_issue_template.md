@@ -3,7 +3,7 @@ name: "✨ feat_issue_template"
 about: 기능 구현에 대한 템플릿입니다.
 title: "[Feat] "
 labels: "✨ Feature"
-assignees: sohn919
+assignees: ''
 
 ---
 

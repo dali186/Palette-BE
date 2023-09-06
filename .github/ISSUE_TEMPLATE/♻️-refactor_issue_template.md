@@ -3,7 +3,7 @@ name: "♻️ refactor_issue_template"
 about: 리팩토링에 대한 템플릿입니다.
 title: "[Refactor] "
 labels: "\U0001F528 Refactor"
-assignees: sohn919
+assignees: ''
 
 ---
 
