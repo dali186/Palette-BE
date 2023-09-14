@@ -24,7 +24,7 @@ public class Media {
     private String url;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false)
+    @JoinColumn(name = "meeting_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Meeting meeting;
 }

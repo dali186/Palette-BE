@@ -1,6 +1,7 @@
 package fc.server.palette.meeting.entity;
 
 import fc.server.palette._common.auditing.BaseEntity;
+import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
 import fc.server.palette.meeting.entity.type.*;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.entity.type.Job;
