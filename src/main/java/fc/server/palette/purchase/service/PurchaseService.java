@@ -22,6 +22,7 @@ public class PurchaseService {
         return purchases.stream().map(purchase ->
                 ProductDto.builder()
                         .id(purchase.getId())
+                        .member(purchase.getMember())
                         .title(purchase.getTitle())
                         .category(purchase.getCategory())
                         .endDate(purchase.getEndDate())

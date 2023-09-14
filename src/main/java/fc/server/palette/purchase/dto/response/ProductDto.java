@@ -1,5 +1,6 @@
 package fc.server.palette.purchase.dto.response;
 
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.entity.type.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class ProductDto {
     private Long id;
+    private Member member;
     private String title;
     private Category category;
     private Date endDate;
