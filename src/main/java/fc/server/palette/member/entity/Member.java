@@ -58,7 +58,4 @@ public class Member {
     @Column(nullable = false, length = 10)
     private Sex sex;
 
-
-
-
 }
