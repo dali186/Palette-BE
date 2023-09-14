@@ -1,5 +1,6 @@
 package fc.server.palette.secondhand.entity;
 
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.entity.type.Category;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,9 @@ public class Secondhand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
     @Column(nullable = false)
     private String title;

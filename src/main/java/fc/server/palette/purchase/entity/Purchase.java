@@ -1,5 +1,7 @@
 package fc.server.palette.purchase.entity;
 
+import fc.server.palette._common.auditing.BaseEntity;
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.entity.type.Category;
 import fc.server.palette.purchase.entity.type.ClosingType;
 import lombok.AllArgsConstructor;
@@ -16,10 +18,13 @@ import java.util.Date;
 @Builder
 @Getter
 @Entity
-public class Purchase {
+public class Purchase extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
     @Column(nullable = false)
     private String title;
