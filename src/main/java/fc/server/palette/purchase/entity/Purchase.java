@@ -40,9 +40,6 @@ public class Purchase {
     private Integer price;
 
     @Column(nullable = false)
-    private String url;
-
-    @Column(nullable = false)
     private String description;
 
     @Column(nullable = false, name = "closing_type")
