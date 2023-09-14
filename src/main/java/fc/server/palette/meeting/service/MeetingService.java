@@ -1,11 +1,17 @@
 package fc.server.palette.meeting.service;
 
+import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
+import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
+import fc.server.palette.meeting.dto.response.MeetingMemberResponseDto;
+import fc.server.palette.meeting.entity.Media;
 import fc.server.palette.meeting.entity.Meeting;
-import fc.server.palette.meeting.entity.type.Age;
-import fc.server.palette.meeting.entity.type.Day;
+import fc.server.palette.meeting.entity.type.*;
+import fc.server.palette.member.MemberRepository;
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.entity.type.Job;
 import fc.server.palette.member.entity.type.Position;
+import fc.server.palette.member.entity.type.Sex;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MeetingService {
     private final MeetingRepository meetingRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
     public List<MeetingListResponseDto> getMeetingList(Boolean isClose){
@@ -92,6 +99,78 @@ public class MeetingService {
             }
         }
         return meetingResponseDtoList;
+    }
+
+//    public List<MeetingListResponseDto> getMeetingFilterList(
+//            Boolean isClose, String filter, List<String> onOff,
+//            List<String> type, List<String> job, List<String> position) {
+//
+//    }
+
+    @Transactional
+    public MeetingDetailResponseDto createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Long loginUserId) {
+        Member member = memberRepository.findById(loginUserId)
+                .orElseThrow(()-> new RuntimeException("사용자를 찾을수없습니다."));
+
+        Meeting meeting = Meeting.builder()
+                .member(member)
+                .category(Category.fromValue(meetingCreateRequestDto.getCategory()))
+                .type(Type.fromValue(meetingCreateRequestDto.getType()))
+                .job(Job.fromValue(meetingCreateRequestDto.getJobs()))
+                .position(Position.fromValue(meetingCreateRequestDto.getPositions()))
+                .sex(Sex.fromValue(meetingCreateRequestDto.getSex()))
+                .ageRange(Age.fromValue(meetingCreateRequestDto.getAgeRange()))
+               // .image(convertToMediaList(meetingCreateRequestDto.getImage()))
+                .title(meetingCreateRequestDto.getTitle())
+                .description(meetingCreateRequestDto.getDescription())
+                .headCount(meetingCreateRequestDto.getHeadCount())
+                .startDate(meetingCreateRequestDto.getStartDate())
+                .endDate(meetingCreateRequestDto.getEndDate())
+                .onOff(meetingCreateRequestDto.isOnOff())
+                .place(meetingCreateRequestDto.getPlace())
+                .week(Week.fromValue(meetingCreateRequestDto.getWeek()))
+                .days(Day.fromValue(meetingCreateRequestDto.getDays()))
+                .time(meetingCreateRequestDto.getTime())
+                .progressTime(meetingCreateRequestDto.getProgressTime())
+                .acceptType(AcceptType.fromValue(meetingCreateRequestDto.getAcceptType()))
+                .build();
+
+        Meeting saveMeeting = meetingRepository.save(meeting);
+        MeetingMemberResponseDto responseMember = new MeetingMemberResponseDto(saveMeeting.getMember());
+        return MeetingDetailResponseDto.builder()
+                .meetingMemberResponseDto(responseMember)
+                .id(saveMeeting.getId())
+                .category(saveMeeting.getCategory().getDescription())
+                .type(saveMeeting.getType().getDescription())
+                .jobs(saveMeeting.getJob().stream()
+                        .map(Job::getValue)
+                        .collect(Collectors.toList()))
+                .positions(saveMeeting.getPosition().stream()
+                        .map(Position::getValue)
+                        .collect(Collectors.toList()))
+                .sex(saveMeeting.getSex().getValue())
+                .ageRange(saveMeeting.getAgeRange().stream()
+                        .map(Age::getDescription)
+                        .collect(Collectors.toList()))
+                .image(saveMeeting.getImage())
+                .title(saveMeeting.getTitle())
+                .description(saveMeeting.getDescription())
+                .headCount(saveMeeting.getHeadCount())
+                .startDate(saveMeeting.getStartDate())
+                .endDate(saveMeeting.getEndDate())
+                .onOff(saveMeeting.isOnOff())
+                .place(saveMeeting.getPlace())
+                .week(saveMeeting.getWeek().getDescription())
+                .days(saveMeeting.getDays().stream()
+                        .map(Day::getDescription)
+                        .collect(Collectors.toList()))
+                .time(saveMeeting.getTime())
+                .progressTime(saveMeeting.getProgressTime())
+                .acceptType(saveMeeting.getAcceptType().getDescription())
+                .build();
+
+
+
     }
 
 //    @Transactional

@@ -1,6 +1,11 @@
 package fc.server.palette.member.entity.type;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import fc.server.palette.meeting.entity.type.Week;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -14,4 +19,21 @@ public enum Job {
     ENGINEERING("엔지니어링 설계"), PRODUCTION("생산 품질");
 
     private final String value;
+
+    @JsonCreator
+    public static List<Job> fromValue(List<String> values) {
+        List<Job> jobs = new ArrayList<>();
+        for (String value : values) {
+            for (Job job : Job.values()) {
+                if (job.getValue().equals(value)) {
+                    jobs.add(job);
+                    break;
+                }
+            }
+        }
+        if (jobs.isEmpty()) {
+            throw new IllegalArgumentException("Invalid job values: " + values);
+        }
+        return jobs;
+    }
 }
