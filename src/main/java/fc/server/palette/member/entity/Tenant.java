@@ -1,6 +1,5 @@
 package fc.server.palette.member.entity;
 
-import fc.server.palette._common.auditing.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,15 +12,16 @@ import javax.persistence.*;
 @Builder
 @Getter
 @Entity
-public class Follow extends BaseEntity {
+public class Tenant {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "followed_id")
-    private Member followed;
+    @Column(length = 50)
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "following_id")
-    private Member following;
+    @JoinColumn(name = "building_id")
+    private Building building;
 }

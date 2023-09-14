@@ -1,5 +1,6 @@
 package fc.server.palette.member.entity;
 
+import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.member.entity.type.Job;
 import fc.server.palette.member.entity.type.Position;
 import fc.server.palette.member.entity.type.Sex;
@@ -14,7 +15,7 @@ import java.time.LocalDate;
 @Builder
 @Getter
 @Entity
-public class Member {
+public class Member extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -28,34 +29,40 @@ public class Member {
     @Column(nullable= false, length = 30)
     private String name;
 
-    @Column(name = "phone_number", nullable= false, length = 11)
+    @Column(length = 30)
+    private String nickname;
+
+    @Column(name = "phone_number", length = 11)
     private String phoneNumber;
 
-    @Column(nullable= false, length = 50)
+    @Column(length = 50)
     private String bio;
 
-    @Column(nullable= false)
     private LocalDate birthday;
 
-    @Column(nullable= false, length = 50)
-    private String office;
-
-    @Column(nullable= false, length = 45)
-    private String company;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private Position position;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 45)
+    @Column(length = 45)
     private Job job;
 
-    @Column(nullable = false, length=255)
     private String image;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(length = 10)
     private Sex sex;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "room_id")
+    private Room room;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "building_id")
+    private Building building;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tenant_id")
+    private Tenant tenant;
 }
