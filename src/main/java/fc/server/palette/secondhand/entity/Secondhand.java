@@ -1,5 +1,6 @@
 package fc.server.palette.secondhand.entity;
 
+import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.entity.type.Category;
 import lombok.AllArgsConstructor;
@@ -15,7 +16,7 @@ import java.sql.Time;
 @Builder
 @Getter
 @Entity
-public class Secondhand {
+public class Secondhand extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

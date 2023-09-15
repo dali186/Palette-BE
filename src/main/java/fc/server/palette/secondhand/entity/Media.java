@@ -1,5 +1,6 @@
 package fc.server.palette.secondhand.entity;
 
+import fc.server.palette._common.auditing.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,7 +14,7 @@ import javax.persistence.*;
 @Getter
 @Entity(name = "SecondhandMedia")
 @Table(name="secondhand_media")
-public class Media {
+public class Media extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
