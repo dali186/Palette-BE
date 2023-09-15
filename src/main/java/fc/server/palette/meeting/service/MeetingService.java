@@ -251,4 +251,9 @@ public class MeetingService {
 
     }
 
+
+    public void delete(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() -> new RuntimeException("찾을 수 없습니다"));
+        meetingRepository.deleteById(meetingId);
+    }
 }
