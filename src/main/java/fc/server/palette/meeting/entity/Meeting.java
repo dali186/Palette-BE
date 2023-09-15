@@ -42,11 +42,13 @@ public class Meeting extends BaseEntity {
     @Column(nullable = false)
     private Type type;
 
-    @ElementCollection(targetClass = Job.class)
+    @Builder.Default
+    @ElementCollection(targetClass = Job.class, fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private List<Job> job = new ArrayList<>();
 
+    @Builder.Default
     @ElementCollection(targetClass = Position.class)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,11 +58,13 @@ public class Meeting extends BaseEntity {
     @Column(nullable = false)
     private Sex sex;
 
+    @Builder.Default
     @ElementCollection(targetClass = Age.class)
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private List<Age> ageRange = new ArrayList<>();
 
+    @Builder.Default
     @Transient
     private List<Media> image = new ArrayList<>();
 

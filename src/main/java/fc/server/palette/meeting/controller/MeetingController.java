@@ -23,17 +23,19 @@ public class MeetingController {
         return ResponseEntity.ok(meetingResponseDtoList);
     }
 
-//    @GetMapping("/filter")
-//    public ResponseEntity<?> getMeetingFilterList(
-//            @RequestParam Boolean isClose,
-//            @RequestParam String filter,
-//            @RequestParam List<String> onOff,
-//            @RequestParam List<String> type,
-//            @RequestParam List<String> job,
-//            @RequestParam List<String> position){
-//        List<MeetingListResponseDto> meetingListResponseDtoList = meetingService.getMeetingFilterList(isClose, filter, onOff, type, job, position);
-//        return ResponseEntity.ok(meetingListResponseDtoList);
-//    }
+    @GetMapping("/filter")
+    public ResponseEntity<?> getMeetingFilterList(
+            @RequestParam Boolean isClose,
+            @RequestParam String filter,
+            @RequestParam String onOff,
+            @RequestParam String type,
+            @RequestParam List<String> job,
+            @RequestParam String position,
+            @RequestParam String sex
+    ){
+        List<MeetingListResponseDto> meetingListResponseDtoList = meetingService.getMeetingFilterList(isClose, filter, onOff, type, job, position, sex);
+        return ResponseEntity.ok(meetingListResponseDtoList);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<?> createMeeting(@RequestBody MeetingCreateRequestDto meetingCreateRequestDto){
