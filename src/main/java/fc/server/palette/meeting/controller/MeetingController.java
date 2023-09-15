@@ -1,11 +1,13 @@
 package fc.server.palette.meeting.controller;
 
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
+import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -41,6 +43,17 @@ public class MeetingController {
     public ResponseEntity<?> createMeeting(@RequestBody MeetingCreateRequestDto meetingCreateRequestDto){
         MeetingDetailResponseDto meetingDetailResponseDto = meetingService.createMeeting(meetingCreateRequestDto, 1L);
         return ResponseEntity.ok(meetingDetailResponseDto);
+    }
+
+
+    @PostMapping("/update/{meetingId}")
+    public ResponseEntity<?> updateMeeting(
+            @PathVariable Long meetingId,
+            @RequestBody MeetingUpdateRequestDto meetingUpdateRequestDto
+    ){
+        meetingService.updateMeeting(meetingId, meetingUpdateRequestDto);
+        return ResponseEntity.ok("업데이트 완료");
+
     }
 
     @PostMapping("/delete/{meetingId}")

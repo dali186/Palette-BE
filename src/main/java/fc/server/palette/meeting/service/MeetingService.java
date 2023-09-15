@@ -1,6 +1,7 @@
 package fc.server.palette.meeting.service;
 
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
+import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingMemberResponseDto;
@@ -251,9 +252,15 @@ public class MeetingService {
 
     }
 
-
     public void delete(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(() -> new RuntimeException("찾을 수 없습니다"));
         meetingRepository.deleteById(meetingId);
+    }
+
+    @Transactional
+    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
+                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        meeting.update(meetingUpdateRequestDto);
     }
 }
