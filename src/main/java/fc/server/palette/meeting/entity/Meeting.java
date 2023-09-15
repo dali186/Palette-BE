@@ -2,6 +2,7 @@ package fc.server.palette.meeting.entity;
 
 import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
+import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.entity.type.*;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.entity.type.Job;
@@ -119,5 +120,20 @@ public class Meeting extends BaseEntity {
     @Builder.Default
     @Column(nullable = false)
     private Integer likes = 0;
+
+    public void update(MeetingUpdateRequestDto meetingUpdateRequestDto){
+        this.title = meetingUpdateRequestDto.getTitle();
+        this.description = meetingUpdateRequestDto.getDescription();
+        this.headCount = meetingUpdateRequestDto.getHeadCount();
+        this.startDate = meetingUpdateRequestDto.getStartDate();
+        this.endDate = meetingUpdateRequestDto.getEndDate();
+        this.onOff = meetingUpdateRequestDto.isOnOff();
+        this.place = meetingUpdateRequestDto.getPlace();
+        this.week = Week.fromValue(meetingUpdateRequestDto.getWeek());
+        this.days = Day.fromValue(meetingUpdateRequestDto.getDays());
+        this.time = meetingUpdateRequestDto.getTime();
+        this.progressTime = meetingUpdateRequestDto.getProgressTime();
+        this.acceptType = AcceptType.fromValue(meetingUpdateRequestDto.getAcceptType());
+    }
 
 }

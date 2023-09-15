@@ -14,24 +14,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 public class MeetingMemberResponseDto {
-    private Long id;
-    private String email;
-    private String name;
+    private String nickname;
     private String bio;
-    private Position position;
-    private Job job;
     private String image;
-    private Sex sex;
 
-    public MeetingMemberResponseDto(Member member){
-        this.id = member.getId();
-        this.email = member.getEmail();
-        this.name = member.getName();
+    public MeetingMemberResponseDto(Member member) {
+        this.nickname = member.getNickname();
         this.bio = member.getBio();
-        this.position = member.getPosition();
-        this.job = member.getJob();
         this.image = member.getImage();
-        this.sex = member.getSex();
     }
-
 }
