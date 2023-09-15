@@ -73,6 +73,12 @@ public class MeetingController {
         return ResponseEntity.ok("좋아요를 눌렀습니다.");
     }
 
+    @PostMapping("/like/cancel/{meetingId}")
+    public ResponseEntity<?> dislikesMeeting(@PathVariable Long meetingId){
+        meetingService.dislikesMeeting(meetingId, 1L);
+        return ResponseEntity.ok("좋아요를 취소했습니다.");
+    }
+
 
 
 }
