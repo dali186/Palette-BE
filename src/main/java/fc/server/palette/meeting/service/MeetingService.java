@@ -36,68 +36,14 @@ public class MeetingService {
         if(isClose) {
             for (Meeting meeting : meetings) {
                 if (!meeting.isClosing()) {
-                    MeetingListResponseDto meetingResponseDto = MeetingListResponseDto.builder()
-                            .id(meeting.getId())
-                            .category(meeting.getCategory().getDescription())
-                            .type(meeting.getType().getDescription())
-                            .jobs(meeting.getJob().stream()
-                                    .map(Job::getValue)
-                                    .collect(Collectors.toList()))
-                            .positions(meeting.getPosition().stream().map(Position::getValue).collect(Collectors.toList()))
-                            .sex(meeting.getSex().getValue())
-                            .ageRange(meeting.getAgeRange().stream().map(Age::getDescription).collect(Collectors.toList()))
-                            .image(meeting.getImage())
-                            .title(meeting.getTitle())
-                            .description(meeting.getDescription())
-                            .headCount(meeting.getHeadCount())
-                            .recruitedPersonnel(meeting.getRecruitedPersonnel())
-                            .startDate(meeting.getStartDate())
-                            .endDate(meeting.getEndDate())
-                            .onOff(meeting.isOnOff())
-                            .place(meeting.getPlace())
-                            .week(meeting.getWeek().getDescription())
-                            .days(meeting.getDays().stream().map(Day::getDescription).collect(Collectors.toList()))
-                            .time(meeting.getTime())
-                            .progressTime(meeting.getProgressTime())
-                            .isClosing(meeting.isClosing())
-                            .hits(meeting.getHits())
-                            .likes(meeting.getLikes())
-                            .createdAt(meeting.getCreatedAt())
-                            .build();
+                    MeetingListResponseDto meetingResponseDto = meetingListResponseDtoBuilder(meeting);
                     meetingResponseDtoList.add(meetingResponseDto);
                 }
             }
         }
         else {
             for (Meeting meeting : meetings){
-                MeetingListResponseDto meetingResponseDto = MeetingListResponseDto.builder()
-                        .id(meeting.getId())
-                        .category(meeting.getCategory().getDescription())
-                        .type(meeting.getType().getDescription())
-                        .jobs(meeting.getJob().stream()
-                                .map(Job::getValue)
-                                .collect(Collectors.toList()))
-                        .positions(meeting.getPosition().stream().map(Position::getValue).collect(Collectors.toList()))
-                        .sex(meeting.getSex().getValue())
-                        .ageRange(meeting.getAgeRange().stream().map(Age::getDescription).collect(Collectors.toList()))
-                        .image(meeting.getImage())
-                        .title(meeting.getTitle())
-                        .description(meeting.getDescription())
-                        .headCount(meeting.getHeadCount())
-                        .recruitedPersonnel(meeting.getRecruitedPersonnel())
-                        .startDate(meeting.getStartDate())
-                        .endDate(meeting.getEndDate())
-                        .onOff(meeting.isOnOff())
-                        .place(meeting.getPlace())
-                        .week(meeting.getWeek().getDescription())
-                        .days(meeting.getDays().stream().map(Day::getDescription).collect(Collectors.toList()))
-                        .time(meeting.getTime())
-                        .progressTime(meeting.getProgressTime())
-                        .isClosing(meeting.isClosing())
-                        .hits(meeting.getHits())
-                        .likes(meeting.getLikes())
-                        .createdAt(meeting.getCreatedAt())
-                        .build();
+                MeetingListResponseDto meetingResponseDto = meetingListResponseDtoBuilder(meeting);
                 meetingResponseDtoList.add(meetingResponseDto);
             }
         }
@@ -149,40 +95,7 @@ public class MeetingService {
         }
 
         meetingListResponseDtoList = meetings.stream().map(meeting -> {
-            MeetingListResponseDto meetingListResponseDto = MeetingListResponseDto.builder()
-                    .id(meeting.getId())
-                    .category(meeting.getCategory().getDescription())
-                    .type(meeting.getType().getDescription())
-                    .jobs(meeting.getJob().stream()
-                            .map(Job::getValue)
-                            .collect(Collectors.toList()))
-                    .positions(meeting.getPosition().stream()
-                            .map(Position::getValue)
-                            .collect(Collectors.toList()))
-                    .sex(meeting.getSex().getValue())
-                    .ageRange(meeting.getAgeRange().stream()
-                            .map(Age::getDescription)
-                            .collect(Collectors.toList()))
-                    .image(meeting.getImage())
-                    .title(meeting.getTitle())
-                    .description(meeting.getDescription())
-                    .headCount(meeting.getHeadCount())
-                    .recruitedPersonnel(meeting.getRecruitedPersonnel())
-                    .startDate(meeting.getStartDate())
-                    .endDate(meeting.getEndDate())
-                    .onOff(meeting.isOnOff())
-                    .place(meeting.getPlace())
-                    .week(meeting.getWeek().getDescription())
-                    .days(meeting.getDays().stream()
-                            .map(Day::getDescription)
-                            .collect(Collectors.toList()))
-                    .time(meeting.getTime())
-                    .progressTime(meeting.getProgressTime())
-                    .isClosing(meeting.isClosing())
-                    .hits(meeting.getHits())
-                    .likes(meeting.getLikes())
-                    .createdAt(meeting.getCreatedAt())
-                    .build();
+            MeetingListResponseDto meetingListResponseDto = meetingListResponseDtoBuilder(meeting);
             return meetingListResponseDto;
         }).collect(Collectors.toList());
         return meetingListResponseDtoList;
@@ -248,6 +161,9 @@ public class MeetingService {
                 .time(saveMeeting.getTime())
                 .progressTime(saveMeeting.getProgressTime())
                 .acceptType(saveMeeting.getAcceptType().getDescription())
+                .hits(saveMeeting.getHits())
+                .likes(saveMeeting.getLikes())
+                .createdAt(saveMeeting.getCreatedAt())
                 .build();
 
     }
@@ -262,5 +178,76 @@ public class MeetingService {
         Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
                 () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         meeting.update(meetingUpdateRequestDto);
+    }
+
+    public MeetingDetailResponseDto getDetailMeeting(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
+                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        MeetingMemberResponseDto responseMember = new MeetingMemberResponseDto(meeting.getMember());
+        return MeetingDetailResponseDto.builder()
+                .meetingMemberResponseDto(responseMember)
+                .id(meeting.getId())
+                .category(meeting.getCategory().getDescription())
+                .type(meeting.getType().getDescription())
+                .jobs(meeting.getJob().stream()
+                        .map(Job::getValue)
+                        .collect(Collectors.toList()))
+                .positions(meeting.getPosition().stream()
+                        .map(Position::getValue)
+                        .collect(Collectors.toList()))
+                .sex(meeting.getSex().getValue())
+                .ageRange(meeting.getAgeRange().stream()
+                        .map(Age::getDescription)
+                        .collect(Collectors.toList()))
+                .image(meeting.getImage())
+                .title(meeting.getTitle())
+                .description(meeting.getDescription())
+                .headCount(meeting.getHeadCount())
+                .startDate(meeting.getStartDate())
+                .endDate(meeting.getEndDate())
+                .onOff(meeting.isOnOff())
+                .place(meeting.getPlace())
+                .week(meeting.getWeek().getDescription())
+                .days(meeting.getDays().stream()
+                        .map(Day::getDescription)
+                        .collect(Collectors.toList()))
+                .time(meeting.getTime())
+                .progressTime(meeting.getProgressTime())
+                .acceptType(meeting.getAcceptType().getDescription())
+                .hits(meeting.getHits())
+                .likes(meeting.getLikes())
+                .createdAt(meeting.getCreatedAt())
+                .build();
+    }
+
+    public MeetingListResponseDto meetingListResponseDtoBuilder(Meeting meeting){
+         return MeetingListResponseDto.builder()
+                .id(meeting.getId())
+                .category(meeting.getCategory().getDescription())
+                .type(meeting.getType().getDescription())
+                .jobs(meeting.getJob().stream()
+                        .map(Job::getValue)
+                        .collect(Collectors.toList()))
+                .positions(meeting.getPosition().stream().map(Position::getValue).collect(Collectors.toList()))
+                .sex(meeting.getSex().getValue())
+                .ageRange(meeting.getAgeRange().stream().map(Age::getDescription).collect(Collectors.toList()))
+                .image(meeting.getImage())
+                .title(meeting.getTitle())
+                .description(meeting.getDescription())
+                .headCount(meeting.getHeadCount())
+                .recruitedPersonnel(meeting.getRecruitedPersonnel())
+                .startDate(meeting.getStartDate())
+                .endDate(meeting.getEndDate())
+                .onOff(meeting.isOnOff())
+                .place(meeting.getPlace())
+                .week(meeting.getWeek().getDescription())
+                .days(meeting.getDays().stream().map(Day::getDescription).collect(Collectors.toList()))
+                .time(meeting.getTime())
+                .progressTime(meeting.getProgressTime())
+                .isClosing(meeting.isClosing())
+                .hits(meeting.getHits())
+                .likes(meeting.getLikes())
+                .createdAt(meeting.getCreatedAt())
+                .build();
     }
 }
