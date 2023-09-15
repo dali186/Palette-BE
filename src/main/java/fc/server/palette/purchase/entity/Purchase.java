@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.sql.Time;
@@ -18,6 +20,7 @@ import java.util.Date;
 @Builder
 @Getter
 @Entity
+@DynamicInsert
 public class Purchase extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,10 +52,12 @@ public class Purchase extends BaseEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @ColumnDefault("'HEAD_COUNT'")
     @Column(nullable = false, length = 30)
     private ClosingType closingType;
 
     @Column(nullable = false)
+    @ColumnDefault("0")
     private Boolean isClosing;
 
     @Column(nullable = false, length = 50)

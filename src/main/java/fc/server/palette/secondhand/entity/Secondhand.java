@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 import java.sql.Time;
@@ -43,6 +44,7 @@ public class Secondhand extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
+    @ColumnDefault("0")
     @Column(nullable = false)
     private Boolean isSoldOut;
 
@@ -58,6 +60,7 @@ public class Secondhand extends BaseEntity {
     @Column(nullable = false)
     private Integer hits;
 
+    @ColumnDefault("0")
     @Column(nullable = false)
     private Boolean isFree;
 }
