@@ -26,20 +26,20 @@ public class Purchase extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private String title;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 30)
     private Category category;
 
-    @Column(nullable = false, name = "end_date")
+    @Column(nullable = false)
     private Date endDate;
 
-    @Column(nullable = false, name = "end_time")
+    @Column(nullable = false)
     private Time endTime;
 
-    @Column(nullable = false, name = "head_count")
+    @Column(nullable = false)
     private Integer headCount;
 
     @Column(nullable = false)
@@ -49,19 +49,19 @@ public class Purchase extends BaseEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, name = "closing_type")
+    @Column(nullable = false, length = 30)
     private ClosingType closingType;
 
     @Column(nullable = false)
     private Boolean isClosing;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String bank;
 
-    @Column(nullable = false, name = "account_number")
+    @Column(nullable = false, length = 50)
     private String accountNumber;
 
-    @Column(nullable = false, name = "account_owner")
+    @Column(nullable = false, length = 50)
     private String accountOwner;
 
     @Column(nullable = false)
