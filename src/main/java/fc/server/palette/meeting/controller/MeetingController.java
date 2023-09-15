@@ -43,5 +43,11 @@ public class MeetingController {
         return ResponseEntity.ok(meetingDetailResponseDto);
     }
 
+    @PostMapping("/delete/{meetingId}")
+    public ResponseEntity<?> deleteMeeting(@PathVariable Long meetingId){
+        meetingService.delete(meetingId);
+        return ResponseEntity.ok("삭제완료");
+    }
+
 
 }
