@@ -8,10 +8,7 @@ import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.entity.type.Job;
 import fc.server.palette.member.entity.type.Position;
 import fc.server.palette.member.entity.type.Sex;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -24,6 +21,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Getter
+@Setter
 @Entity
 @Table(name = "meeting")
 public class Meeting extends BaseEntity {

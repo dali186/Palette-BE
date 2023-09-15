@@ -5,6 +5,7 @@ import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingMemberResponseDto;
+import fc.server.palette.meeting.entity.Bookmark;
 import fc.server.palette.meeting.entity.Media;
 import fc.server.palette.meeting.entity.Meeting;
 import fc.server.palette.meeting.entity.type.*;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 public class MeetingService {
     private final MeetingRepository meetingRepository;
     private final MemberRepository memberRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     @Transactional
     public List<MeetingListResponseDto> getMeetingList(Boolean isClose){
@@ -249,5 +251,21 @@ public class MeetingService {
                 .likes(meeting.getLikes())
                 .createdAt(meeting.getCreatedAt())
                 .build();
+    }
+
+    public void likesMeeting(Long meetingId, Long loginUser) {
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
+                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+
+        Member member = memberRepository.findById(loginUser).orElseThrow(
+                () -> new IllegalArgumentException("해당 멤버 아이디가 존재하지 않습니다."));
+        Bookmark bookmark = Bookmark.builder()
+                .member(member)
+                .meeting(meeting)
+                .build();
+        bookmarkRepository.save(bookmark);
+
+        int likes = meeting.getLikes() + 1;
+        meeting.setLikes(likes);
     }
 }

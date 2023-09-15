@@ -67,5 +67,12 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.getDetailMeeting(meetingId));
     }
 
+    @PostMapping("/like/{meetingId}")
+    public ResponseEntity<?> likesMeeting(@PathVariable Long meetingId){
+        meetingService.likesMeeting(meetingId, 1L);
+        return ResponseEntity.ok("좋아요를 눌렀습니다.");
+    }
+
+
 
 }
