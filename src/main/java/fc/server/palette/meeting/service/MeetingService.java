@@ -268,4 +268,19 @@ public class MeetingService {
         int likes = meeting.getLikes() + 1;
         meeting.setLikes(likes);
     }
+
+    public void dislikesMeeting(Long meetingId, Long loginUser) {
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
+                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+
+        Member member = memberRepository.findById(loginUser).orElseThrow(
+                () -> new IllegalArgumentException("해당 멤버 아이디가 존재하지 않습니다."));
+
+        Bookmark bookmark = bookmarkRepository.findByMemberAndMeeting(member, meeting);
+        if(bookmark != null){
+            bookmarkRepository.delete(bookmark);
+        }
+        int likes = meeting.getLikes() - 1;
+        meeting.setLikes(likes);
+    }
 }
