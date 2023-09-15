@@ -62,5 +62,10 @@ public class MeetingController {
         return ResponseEntity.ok("삭제완료");
     }
 
+    @GetMapping("/{meetingId}")
+    public ResponseEntity<?> detailMeeting(@PathVariable Long meetingId){
+        return ResponseEntity.ok(meetingService.getDetailMeeting(meetingId));
+    }
+
 
 }
