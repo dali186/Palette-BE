@@ -29,6 +29,7 @@ public class Purchase extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Category category;
 
@@ -47,6 +48,7 @@ public class Purchase extends BaseEntity {
     @Column(nullable = false)
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, name = "closing_type")
     private ClosingType closingType;
 

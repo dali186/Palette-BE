@@ -26,6 +26,7 @@ public class Secondhand {
     @Column(nullable = false)
     private String title;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Category category;
 
