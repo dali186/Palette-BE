@@ -79,6 +79,18 @@ public class MeetingController {
         return ResponseEntity.ok("좋아요를 취소했습니다.");
     }
 
+    @PostMapping("/close/{meetingId}")
+    public ResponseEntity<?> closeMeeting(@PathVariable Long meetingId){
+        meetingService.closeMeeting(meetingId);
+        return ResponseEntity.ok("모집 마감되었습니다.");
+    }
+
+    @PostMapping("/reopen/{meetingId}")
+    public ResponseEntity<?> reopenMeeting(@PathVariable Long meetingId){
+        meetingService.reopenMeeting(meetingId);
+        return ResponseEntity.ok("모집이 시작되었습니다.");
+    }
+
 
 
 }
