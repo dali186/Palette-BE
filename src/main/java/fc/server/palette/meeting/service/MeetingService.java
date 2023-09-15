@@ -283,4 +283,19 @@ public class MeetingService {
         int likes = meeting.getLikes() - 1;
         meeting.setLikes(likes);
     }
+
+    public void closeMeeting(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
+                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        if (meeting.isClosing()){
+            throw new IllegalArgumentException("이미 모집된 마감입니다.");
+        }
+        meeting.setClosing(true);
+    }
+
+    public void reopenMeeting(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
+                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        meeting.setClosing(false);
+    }
 }
