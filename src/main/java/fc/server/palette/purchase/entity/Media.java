@@ -13,7 +13,6 @@ import javax.persistence.*;
 @Builder
 @Getter
 @Entity(name = "PurchaseMedia")
-@Table(name="purchase_media")
 public class Media extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

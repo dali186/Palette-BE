@@ -14,7 +14,6 @@ import javax.persistence.*;
 @Builder
 @Getter
 @Entity(name = "PurchaseBookmark")
-@Table(name="purchase_bookmark")
 public class Bookmark extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
