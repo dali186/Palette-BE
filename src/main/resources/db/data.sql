@@ -21,15 +21,15 @@ INSERT INTO office_room (room_number, floor, wing, tenant_id, building_id) VALUE
 
 
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at, updated_at, room_id, building_id, tenant_id )
-VALUES('yohan@gmail.com', 'abc1234#', '김요한', '요한이', '01020003000', '안녕하세요', '20000214', '남자', '사원', '디자인', now(), now(), 1, 1, 1);
+VALUES('yohan@gmail.com', 'abc1234#', '김요한', '요한이', '01020003000', '안녕하세요', '20000214', 'MALE', 'EMPLOYEE', 'DESIGN', now(), now(), 1, 1, 1);
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at, updated_at, room_id, building_id, tenant_id )
-VALUES('watcha@naver.com', 'abc5678#', '김사원', '사원킴', '01011113117', '안녕하세요', '20000714', '여성', '대리', '경영 비즈니스', now(), now(), 2, 2 , 2);
+VALUES('watcha@naver.com', 'abc5678#', '김사원', '사원킴', '01011113117', '안녕하세요', '20000714', 'FEMALE', 'ASSISTANTMANAGER', 'BUSINESS', now(), now(), 2, 2 , 2);
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at, updated_at, room_id, building_id, tenant_id )
-VALUES('yumi@daum.net', 'def1234#', '이유미', '유미', '01021113123', '하이하이', '19970214', '여성', '과장', '인사 채용 노무', now(), now(), 4, 3, 7);
+VALUES('yumi@daum.net', 'def1234#', '이유미', '유미', '01021113123', '하이하이', '19970214', 'FEMALE', 'SENIORMANAGER', 'HR', now(), now(), 4, 3, 7);
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at, updated_at, room_id, building_id, tenant_id )
-VALUES('naza@daum.net', 'def5678#', '우철수', '철수', '01022376025', '법률쪽맡은사람입니다.', '19921225', '남성', '부장', '법률 특허', now(), now(), 3, 2, 5);
+VALUES('naza@daum.net', 'def5678#', '우철수', '철수', '01022376025', '법률쪽맡은사람입니다.', '19921225', 'MALE', 'GENERALMANAGER', 'LAW', now(), now(), 3, 2, 5);
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at, updated_at, room_id, building_id, tenant_id )
-VALUES('work99@gmail.com', 'ghi1234*', '도배만', '도베르만', '01033328888', '안녕하세요', '19930707', '남성', '대리', '연구 개발', now(), now(), 1, 1, 1 );
+VALUES('work99@gmail.com', 'ghi1234*', '도배만', '도베르만', '01033328888', '안녕하세요', '19930707', 'MALE', 'ASSISTANTMANAGER', 'RESEARCH', now(), now(), 1, 1, 1 );
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at, updated_at, room_id, building_id, tenant_id )
 VALUES('pakka9@gmail.com', 'ghi5678*', '한아름', NULL, NULL, NULL, NULL, NULL, NULL, NULL, now(), now(), 2, 2, 2 );
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at, updated_at, room_id, building_id, tenant_id )
