@@ -11,7 +11,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: root
     password:
-
   h2:
     console:
       enabled: true
@@ -31,8 +30,14 @@ spring:
       data-locations: classpath*:db/data.sql
       mode: always
       platform: h2
+jwt:
+  header: Authorization
+  secret: a2FyaW10b2thcmltdG9rYXJpbXRva2FyaW10b2thcmltdG9rYXJpbXRva2FyaW10b2thcmltdG9rYXJpbXRva2FyaW10b2thcmltdG9rYXJpbXRva2FyaW10b2thcmltdG9rYXJpbXRva2FyaW10b2thcmltdG9rYXJpbXRva2FyaW10b2thcmltdG9rYXJpbQ==
+  token-validity-in-seconds: 86400 # ttl (초)
 
 
   servlet:
     multipart:
       max-file-size: 5MB
+ # ttl (초)
+
