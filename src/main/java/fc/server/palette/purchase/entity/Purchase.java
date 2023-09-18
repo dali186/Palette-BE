@@ -37,6 +37,9 @@ public class Purchase extends BaseEntity {
     private Category category;
 
     @Column(nullable = false)
+    private String shopUrl;
+
+    @Column(nullable = false)
     private Date endDate;
 
     @Column(nullable = false)
