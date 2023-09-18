@@ -1,4 +1,4 @@
-package fc.server.palette.member.jwt;
+package fc.server.palette.member.auth.jwt;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;

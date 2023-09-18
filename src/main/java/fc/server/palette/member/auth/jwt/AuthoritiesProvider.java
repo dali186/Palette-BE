@@ -1,4 +1,4 @@
-package fc.server.palette.member.jwt;
+package fc.server.palette.member.auth.jwt;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

@@ -1,4 +1,4 @@
-package fc.server.palette.member.jwt;
+package fc.server.palette.member.auth.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.*;
@@ -16,7 +16,6 @@ import org.springframework.beans.factory.annotation.Value;
 
 import javax.annotation.PostConstruct;
 import java.security.Key;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
