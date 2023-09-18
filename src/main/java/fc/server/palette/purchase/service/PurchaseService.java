@@ -1,5 +1,6 @@
 package fc.server.palette.purchase.service;
 
+import fc.server.palette.purchase.dto.request.OfferProductDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.ProductDto;
 import fc.server.palette.purchase.entity.Purchase;
@@ -53,6 +54,23 @@ public class PurchaseService {
                 .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
                         .orElseThrow(()->new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
                 .hits(purchase.getHits())
+                .build();
+    }
+
+    @Transactional
+    public ProductDto createProduct(Purchase purchase){
+        Purchase savedPurchase = purchaseRepository.save(purchase);
+        return ProductDto.builder()
+                .id(savedPurchase.getId())
+                .member(MemberDto.of(savedPurchase.getMember()))
+                .title(savedPurchase.getTitle())
+                .category(savedPurchase.getCategory())
+                .endDate(savedPurchase.getEndDate())
+                .endTime(savedPurchase.getEndTime())
+                .price(savedPurchase.getPrice())
+                .thumbnailUrl(purchaseMediaRepository.findById(savedPurchase.getId())
+                        .orElseThrow(()->new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
+                .hits(savedPurchase.getHits())
                 .build();
     }
 }
