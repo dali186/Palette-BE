@@ -1,6 +1,5 @@
 package fc.server.palette.purchase.service;
 
-import fc.server.palette.purchase.dto.request.OfferProductDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.ProductDto;
 import fc.server.palette.purchase.entity.Purchase;
@@ -23,26 +22,25 @@ public class PurchaseService {
     public List<ProductDto> getAllProducts() {
         List<Purchase> purchases = purchaseRepository.findAll();
 
-        return purchases.stream().map(purchase ->
-                ProductDto.builder()
-                        .id(purchase.getId())
-                        .member(MemberDto.of(purchase.getMember()))
-                        .title(purchase.getTitle())
-                        .category(purchase.getCategory())
-                        .endDate(purchase.getEndDate())
-                        .endTime(purchase.getEndTime())
-                        .price(purchase.getPrice())
-                        .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
-                                .orElseThrow(()->new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl()) //todo url이 null일때 예외처리
-                        .hits(purchase.getHits())
-                        .build()
-        ).collect(Collectors.toList());
+        return purchases.stream()
+                .map(this::buildProduct)
+                .collect(Collectors.toList());
     }
 
     @Transactional
-    public ProductDto getProduct(Long id){
+    public ProductDto getProduct(Long id) {
         Purchase purchase = purchaseRepository.findById(id)
-                .orElseThrow(()-> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+        return buildProduct(purchase);
+    }
+
+    @Transactional
+    public ProductDto createProduct(Purchase purchase) {
+        Purchase savedPurchase = purchaseRepository.save(purchase);
+        return buildProduct(savedPurchase);
+    }
+
+    private ProductDto buildProduct(Purchase purchase) {
         return ProductDto.builder()
                 .id(purchase.getId())
                 .member(MemberDto.of(purchase.getMember()))
@@ -52,25 +50,8 @@ public class PurchaseService {
                 .endTime(purchase.getEndTime())
                 .price(purchase.getPrice())
                 .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
-                        .orElseThrow(()->new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
+                        .orElseThrow(() -> new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
                 .hits(purchase.getHits())
-                .build();
-    }
-
-    @Transactional
-    public ProductDto createProduct(Purchase purchase){
-        Purchase savedPurchase = purchaseRepository.save(purchase);
-        return ProductDto.builder()
-                .id(savedPurchase.getId())
-                .member(MemberDto.of(savedPurchase.getMember()))
-                .title(savedPurchase.getTitle())
-                .category(savedPurchase.getCategory())
-                .endDate(savedPurchase.getEndDate())
-                .endTime(savedPurchase.getEndTime())
-                .price(savedPurchase.getPrice())
-                .thumbnailUrl(purchaseMediaRepository.findById(savedPurchase.getId())
-                        .orElseThrow(()->new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
-                .hits(savedPurchase.getHits())
                 .build();
     }
 }
