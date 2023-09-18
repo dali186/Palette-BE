@@ -15,8 +15,9 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductDto {
+    //todo: 추가 데이터 필요하면 수정
     private Long id;
-    private Member member;
+    private MemberDto member;
     private String title;
     private Category category;
     private Date endDate;
