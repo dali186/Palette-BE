@@ -35,7 +35,7 @@ public class AuthController {
     public ResponseEntity<?> authorize(@Valid @RequestBody LoginDto loginDto) {
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(loginDto.getEmail());
-        // 패스워드검증부분
+
         isSamePwd(userDetails.getPassword(),loginDto.getPassword());
 
         UsernamePasswordAuthenticationToken  authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -61,10 +61,6 @@ public class AuthController {
         }
     }
 
-//    @GetMapping("/test")
-//    public void test(@AuthenticationPrincipal CustomUserDetails userDetails) {
-//        System.out.println(userDetails.getMember().getName());
-//    }
 
 
 
