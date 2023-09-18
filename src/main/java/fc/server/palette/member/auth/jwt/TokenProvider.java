@@ -1,16 +1,18 @@
 package fc.server.palette.member.auth.jwt;
 
+import fc.server.palette.member.auth.CustomUserDetailService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Value;
 
@@ -20,24 +22,20 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Component
 @Slf4j
 public class TokenProvider {
-
+    private final CustomUserDetailService customUserDetailService;
     private static final String AUTHORITIES_KEY = "auth";
 
-    private final String secret;
-    private final long tokenValidityInMilliseconds;
+    @Value("${jwt.secret}")
+    private String secret;
+    @Value("${jwt.token-validity-in-seconds}")
+    private long tokenValidityInMilliseconds;
 
     private Key key;
 
-    public TokenProvider(
-            @Value("${jwt.secret}") String secret,
-            @Value("${jwt.token-validity-in-seconds}") long tokenValidityInSeconds
-    ) {
-        this.secret = secret;
-        this.tokenValidityInMilliseconds = tokenValidityInSeconds;
-    }
 
     @PostConstruct
     public void setDecodedKey() {
@@ -53,6 +51,8 @@ public class TokenProvider {
 
         long now = (new Date()).getTime();
         Date validity = new Date(now + this.tokenValidityInMilliseconds);
+
+        log.info("Token expiration time: {}", validity);
 
         return Jwts.builder()
                 .setSubject(authentication.getName())
@@ -70,8 +70,8 @@ public class TokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
         Collection<GrantedAuthority> authorities = AuthoritiesProvider.getAuthorityCollection();
-        User principal = new User(claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+        UserDetails userDetails = customUserDetailService.loadUserByUsername(claims.getSubject());
+        return new UsernamePasswordAuthenticationToken(userDetails, token, authorities);
     }
 
     //토큰 검증 수행

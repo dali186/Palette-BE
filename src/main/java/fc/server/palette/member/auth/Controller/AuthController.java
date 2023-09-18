@@ -1,6 +1,7 @@
 package fc.server.palette.member.auth.Controller;
 
 import fc.server.palette.member.auth.CustomUserDetailService;
+import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.member.auth.dto.LoginDto;
 import fc.server.palette.member.auth.dto.TokenDto;
 import fc.server.palette.member.auth.jwt.AuthoritiesProvider;
@@ -12,12 +13,11 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -29,15 +29,15 @@ public class AuthController {
     private final TokenProvider tokenProvider;
     private final CustomUserDetailService customUserDetailService;
 
+    private final PasswordEncoder passwordEncoder;
+
     @PostMapping("/login")
     public ResponseEntity<?> authorize(@Valid @RequestBody LoginDto loginDto) {
 
         UserDetails userDetails = customUserDetailService.loadUserByUsername(loginDto.getEmail());
         // 패스워드검증부분
-        if(!customUserDetailService.isSamePwd(Long.valueOf(userDetails.getUsername()),
-        loginDto.getPassword())){
-            return new ResponseEntity<>("이메일 혹은 패스워드가 일치하지 않습니다.",HttpStatus.BAD_REQUEST);
-        }
+        isSamePwd(userDetails.getPassword(),loginDto.getPassword());
+
         UsernamePasswordAuthenticationToken  authenticationToken = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 "",
@@ -53,6 +53,19 @@ public class AuthController {
 
         return new ResponseEntity<>(new TokenDto(jwt), httpHeaders, HttpStatus.OK);
     }
+
+
+    private void isSamePwd(String password, String rawPassword) {
+        if (!passwordEncoder.matches(rawPassword, password)) {
+            throw new IllegalArgumentException("이메일 혹은 패스워드가 일치하지 않습니다.");
+        }
+    }
+
+//    @GetMapping("/test")
+//    public void test(@AuthenticationPrincipal CustomUserDetails userDetails) {
+//        System.out.println(userDetails.getMember().getName());
+//    }
+
 
 
 }
