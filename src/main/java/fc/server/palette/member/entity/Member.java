@@ -55,7 +55,7 @@ public class Member extends BaseEntity {
     private Sex sex;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "room_id")
+    @JoinColumn(name = "office_room_id")
     private Room room;
 
     @ManyToOne(fetch = FetchType.LAZY)
