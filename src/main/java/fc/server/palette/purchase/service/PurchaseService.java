@@ -1,5 +1,6 @@
 package fc.server.palette.purchase.service;
 
+import fc.server.palette.purchase.dto.request.EditProductDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.ProductDto;
 import fc.server.palette.purchase.entity.Bookmark;
@@ -10,6 +11,7 @@ import fc.server.palette.purchase.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 import java.util.Optional;
@@ -73,5 +75,17 @@ public class PurchaseService {
 
     public void deleteProduct(Long productId) {
         purchaseRepository.deleteById(productId);
+    }
+
+    @Transactional
+    public ProductDto editProduct(Long productId, EditProductDto editProductDto){
+        //todo 멤버검증
+        Purchase purchase = purchaseRepository.findById(productId)
+                .orElseThrow(()->new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+        purchase.update(editProductDto);
+        Purchase updatedPurchase = purchaseRepository.findById(productId)
+                .orElseThrow(()->new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+        return buildProduct(updatedPurchase);
+
     }
 }
