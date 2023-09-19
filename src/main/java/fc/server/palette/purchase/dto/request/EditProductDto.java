@@ -16,7 +16,7 @@ public class EditProductDto {
     private Date endDate;
     private Time endTime;
     private Integer headCount;
-    private Integer Price;
+    private Integer price;
     //todo 이미지 필드 추가
     private String description;
     private ClosingType closingType;
