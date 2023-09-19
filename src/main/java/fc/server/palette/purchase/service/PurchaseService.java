@@ -12,10 +12,8 @@ import fc.server.palette.purchase.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -98,5 +96,12 @@ public class PurchaseService {
         Purchase updatedPurchase = purchaseRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         return buildProduct(updatedPurchase);
+    }
+
+    @Transactional
+    public Long getAuthorId(Long productId){
+        Purchase purchase = purchaseRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+        return purchase.getMember().getId();
     }
 }
