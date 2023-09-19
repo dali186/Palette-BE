@@ -1,5 +1,6 @@
 package fc.server.palette.purchase.dto.request;
 
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.entity.type.Category;
 import fc.server.palette.purchase.entity.type.ClosingType;
@@ -28,8 +29,9 @@ public class OfferProductDto {
     private String accountNumber;
     private String accountOwner;
 
-    public Purchase toEntity(){
+    public Purchase toEntity(Member member) {
         return Purchase.builder()
+                .member(member)
                 .title(this.title)
                 .category(this.category)
                 .shopUrl(this.shopUrl)
