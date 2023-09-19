@@ -29,8 +29,15 @@ public class PurchaseController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ProductDto> offerProduct(@RequestBody OfferProductDto offerProductDto){
+    public ResponseEntity<ProductDto> offerProduct(@RequestBody OfferProductDto offerProductDto) {
         ProductDto product = purchaseService.createProduct(offerProductDto.toEntity());
         return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    @PostMapping("/{productId}/bookmark")
+    public ResponseEntity<?> addBookmark(@PathVariable Long productId) {
+        //todo pricipal넘기기
+        purchaseService.addBookmark(productId);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }
