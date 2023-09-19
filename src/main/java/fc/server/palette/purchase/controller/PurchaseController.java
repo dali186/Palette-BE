@@ -1,5 +1,6 @@
 package fc.server.palette.purchase.controller;
 
+import fc.server.palette.purchase.dto.request.EditProductDto;
 import fc.server.palette.purchase.dto.request.OfferProductDto;
 import fc.server.palette.purchase.dto.response.ProductDto;
 import fc.server.palette.purchase.service.PurchaseService;
@@ -45,5 +46,11 @@ public class PurchaseController {
     public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
         purchaseService.deleteProduct(productId);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @PatchMapping("/{productId}")
+    public ResponseEntity<ProductDto> editProduct(@PathVariable Long productId, @RequestBody EditProductDto editProductDto){
+        ProductDto product = purchaseService.editProduct(productId, editProductDto);
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
 }
