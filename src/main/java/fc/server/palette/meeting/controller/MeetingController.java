@@ -1,5 +1,6 @@
 package fc.server.palette.meeting.controller;
 
+import fc.server.palette.meeting.dto.request.ApplicationRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
@@ -107,5 +108,15 @@ public class MeetingController {
         }
     }
 
+    @GetMapping("/{meetingId}/member")
+    public ResponseEntity<?> participateMember(@PathVariable Long meetingId){
+        return ResponseEntity.ok(meetingService.participateMemberList(meetingId));
+    }
+
+    @PostMapping("/participate/{meetingId}")
+    public ResponseEntity<?> participateMeeting(@PathVariable Long meetingId, @RequestBody ApplicationRequestDto applicationRequestDto){
+        meetingService.participateMeeting(meetingId, 1L, applicationRequestDto);
+        return ResponseEntity.ok("모임 신청이 완료되었습니다");
+    }
 
 }

@@ -1,10 +1,12 @@
 package fc.server.palette.meeting.service;
 
+import fc.server.palette.meeting.dto.request.ApplicationRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingMemberResponseDto;
+import fc.server.palette.meeting.entity.Application;
 import fc.server.palette.meeting.entity.Bookmark;
 import fc.server.palette.meeting.entity.Media;
 import fc.server.palette.meeting.entity.Meeting;
@@ -32,6 +34,7 @@ public class MeetingService {
     private final MemberRepository memberRepository;
     private final BookmarkRepository bookmarkRepository;
     private final MediaRepository mediaRepository;
+    private final ApplicationRepository applicationRepository;
     private final MeetingMediaService meetingMediaService;
 
     public List<MeetingListResponseDto> getMeetingList(Boolean isClose){
@@ -400,4 +403,32 @@ public class MeetingService {
                 && meeting.getSex().equals(loginMember.getSex()));
     }
 
+    public List<MeetingMemberResponseDto> participateMemberList(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.APPROVAL);
+
+        List<MeetingMemberResponseDto> approvedMembers = applications.stream()
+                .map(application -> MeetingMemberResponseDto.builder()
+                        .nickname(application.getMember().getNickname())
+                        .bio(application.getMember().getBio())
+                        .image(application.getMember().getImage())
+                        .build())
+                .collect(Collectors.toList());
+        return approvedMembers;
+    }
+
+    public void participateMeeting(Long meetingId, Long loginMemberId, ApplicationRequestDto applicationRequestDto) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        Member loginMember = memberRepository.findById(loginMemberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다."));
+
+        Application application = Application.builder()
+                .meeting(meeting)
+                .member(loginMember)
+                .pr(applicationRequestDto.getPr())
+                .build();
+        applicationRepository.save(application);
+    }
 }
