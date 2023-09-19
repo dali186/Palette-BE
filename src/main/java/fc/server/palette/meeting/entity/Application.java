@@ -30,7 +30,7 @@ public class Application extends BaseEntity {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Member member;
 
-    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
     @Builder.Default
     private Status status = Status.WAITING;
 
