@@ -71,4 +71,7 @@ public class PurchaseService {
         purchaseBookmarkRepository.save(bookmark);
     }
 
+    public void deleteProduct(Long productId) {
+        purchaseRepository.deleteById(productId);
+    }
 }
