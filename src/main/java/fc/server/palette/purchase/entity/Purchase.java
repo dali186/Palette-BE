@@ -57,7 +57,7 @@ public class Purchase extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'HEAD_COUNT'")
-    @Column(nullable = false, length = 30)
+    @Column(length = 30)
     private ClosingType closingType;
 
     @Column(nullable = false)
@@ -74,7 +74,21 @@ public class Purchase extends BaseEntity {
     private String accountOwner;
 
     @Column(nullable = false)
+    @ColumnDefault("0")
     private Integer hits;
+
+    // db에 저장된 기본값이 적용되지 않고 필드에 null로 저장되는데 따른 조치
+    public ClosingType getClosingType() {
+        return closingType == null ? ClosingType.HEAD_COUNT : closingType;
+    }
+
+    public Boolean getIsClosing() {
+        return isClosing != null && isClosing;
+    }
+
+    public Integer getHits() {
+        return hits == null ? 0 : hits;
+    }
 
     public void updateOffer(EditProductDto editProductDto) {
         this.shopUrl = editProductDto.getShopUrl();
