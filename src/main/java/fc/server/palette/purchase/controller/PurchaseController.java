@@ -40,4 +40,10 @@ public class PurchaseController {
         purchaseService.addBookmark(productId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @DeleteMapping("/{productId}")
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
+        purchaseService.deleteProduct(productId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
