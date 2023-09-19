@@ -76,7 +76,7 @@ public class Purchase extends BaseEntity {
     @Column(nullable = false)
     private Integer hits;
 
-    public void update(EditProductDto editProductDto) {
+    public void updateOffer(EditProductDto editProductDto) {
         this.shopUrl = editProductDto.getShopUrl();
         this.endDate = editProductDto.getEndDate();
         this.endTime = editProductDto.getEndTime();
@@ -87,5 +87,9 @@ public class Purchase extends BaseEntity {
         this.bank = editProductDto.getBank();
         this.accountNumber = editProductDto.getAccountNumber();
         this.accountOwner = editProductDto.getAccountOwner();
+    }
+
+    public void closeOffer() {
+        this.isClosing = true;
     }
 }
