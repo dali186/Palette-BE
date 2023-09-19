@@ -23,8 +23,7 @@ public class PurchaseController {
     private final PurchaseService purchaseService;
 
     @GetMapping("")
-    public ResponseEntity<List<ProductDto>> getAllProducts(Principal principal) {
-        log.info("{}", principal);
+    public ResponseEntity<List<ProductDto>> getAllProducts() {
         List<ProductDto> products = purchaseService.getAllProducts();
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
