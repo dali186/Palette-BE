@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
 @RestController
@@ -37,7 +36,6 @@ public class PurchaseController {
     @PostMapping("")
     public ResponseEntity<ProductDto> offerProduct(@RequestBody OfferProductDto offerProductDto,
                                                    @AuthenticationPrincipal CustomUserDetails userDetails) {
-
         ProductDto product = purchaseService.createProduct(offerProductDto.toEntity(userDetails.getMember()));
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
@@ -76,7 +74,7 @@ public class PurchaseController {
 
         private void validateAuthority (Long memberId, Long authorId){
             if (!memberId.equals(authorId)) {
-                throw new IllegalArgumentException("삭제 권한이 없습니다.");
+                throw new IllegalArgumentException("권한이 없습니다.");
             }
         }
     }
