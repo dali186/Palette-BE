@@ -97,5 +97,15 @@ public class MeetingController {
         return ResponseEntity.ok(meetingService.recommendMeeting(meetingId));
     }
 
+    @PostMapping("/participate/check/{meetingId}")
+    public ResponseEntity<?> checkParticipate(@PathVariable Long meetingId){
+        if(!meetingService.checkParticipateMeeting(meetingId, 1L)){
+            return ResponseEntity.ok("가입요건이 맞지 않아요");
+        }
+        else {
+            return ResponseEntity.ok("가입요건이 충족되었습니다.");
+        }
+    }
+
 
 }

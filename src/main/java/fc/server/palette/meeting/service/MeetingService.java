@@ -387,6 +387,17 @@ public class MeetingService {
         return recommededMeeting.stream()
                 .map(this::meetingListResponseDtoBuilder)
                 .collect(Collectors.toList());
-
     }
+
+    public boolean checkParticipateMeeting(Long meetingId, Long loginMemberId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        Member loginMember = memberRepository.findById(loginMemberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다."));
+
+        return meeting.getPosition().stream()
+                .anyMatch(position -> loginMember.getPosition().equals(position)
+                && meeting.getSex().equals(loginMember.getSex()));
+    }
+
 }
