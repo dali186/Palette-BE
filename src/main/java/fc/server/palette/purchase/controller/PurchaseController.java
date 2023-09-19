@@ -68,14 +68,16 @@ public class PurchaseController {
     }
 
     @PostMapping("/{productId}/closing")
-    public ResponseEntity<ProductDto> closeOffer(@PathVariable Long productId) {
-        ProductDto product = purchaseService.closeOffer(productId);
-        return new ResponseEntity<>(product, HttpStatus.OK);
-    }
+    public ResponseEntity<ProductDto> closeOffer(@PathVariable Long productId,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+            validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(productId));
+            ProductDto product = purchaseService.closeOffer(productId);
+            return new ResponseEntity<>(product, HttpStatus.OK);
+        }
 
-    private void validateAuthority(Long memberId, Long authorId) {
-        if (!memberId.equals(authorId)) {
-            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        private void validateAuthority (Long memberId, Long authorId){
+            if (!memberId.equals(authorId)) {
+                throw new IllegalArgumentException("삭제 권한이 없습니다.");
+            }
         }
     }
-}
