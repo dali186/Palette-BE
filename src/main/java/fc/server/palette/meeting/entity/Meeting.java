@@ -21,7 +21,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @Getter
-@Setter
 @Entity
 @Table(name = "meeting")
 public class Meeting extends BaseEntity {
@@ -64,7 +63,7 @@ public class Meeting extends BaseEntity {
     private List<Age> ageRange = new ArrayList<>();
 
     @Builder.Default
-    @Transient
+    @OneToMany(mappedBy = "meeting")
     private List<Media> image = new ArrayList<>();
 
     @Column(nullable = false, length = 50)
@@ -76,8 +75,9 @@ public class Meeting extends BaseEntity {
     @Column(name = "head_count", nullable = false)
     private int headCount;
 
+    @Builder.Default
     @Column(name = "recruited_personnel")
-    private int recruitedPersonnel;
+    private int recruitedPersonnel = 0;
 
     @Column(name = "start_date", nullable = false)
     private Date startDate;
@@ -108,8 +108,9 @@ public class Meeting extends BaseEntity {
     @Column(name = "accept_type", nullable = false)
     private AcceptType acceptType;
 
+    @Builder.Default
     @Column(name = "is_closing", nullable = false)
-    private boolean isClosing;
+    private boolean isClosing = false;
 
     @Builder.Default
     @Column(nullable = false)
@@ -134,4 +135,22 @@ public class Meeting extends BaseEntity {
         this.acceptType = AcceptType.fromValue(meetingUpdateRequestDto.getAcceptType());
     }
 
+    public void setHits(){
+        this.hits++;
+    }
+    public void likes(){
+        this.likes++;
+    }
+
+    public void dislike(){
+        this.likes--;
+    }
+
+    public void clsed(){
+        this.isClosing = true;
+    }
+
+    public void reopen(){
+        this.isClosing = false;
+    }
 }

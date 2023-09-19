@@ -1,16 +1,13 @@
 package fc.server.palette.meeting.dto.response;
 
-import fc.server.palette.meeting.entity.Media;
-import fc.server.palette.meeting.entity.type.AcceptType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-
+import lombok.Getter;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
-@Data
+@Getter
 @Builder
 @AllArgsConstructor
 public class MeetingDetailResponseDto {
@@ -22,7 +19,7 @@ public class MeetingDetailResponseDto {
     private List<String> positions;
     private String sex;
     private List<String> ageRange;
-    private List<Media> image;
+    private List<String> image;
     private String title;
     private String description;
     private int headCount;

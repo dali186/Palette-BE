@@ -7,9 +7,8 @@ import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 @RestController
@@ -40,11 +39,13 @@ public class MeetingController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<?> createMeeting(@RequestBody MeetingCreateRequestDto meetingCreateRequestDto){
-        MeetingDetailResponseDto meetingDetailResponseDto = meetingService.createMeeting(meetingCreateRequestDto, 1L);
+    public ResponseEntity<?> createMeeting(
+            @RequestPart(value = "dto") MeetingCreateRequestDto meetingCreateRequestDto,
+            @RequestPart(value = "file", required = false)List<MultipartFile> images
+    ){
+        MeetingDetailResponseDto meetingDetailResponseDto = meetingService.createMeeting(meetingCreateRequestDto, 1L, images);
         return ResponseEntity.ok(meetingDetailResponseDto);
     }
-
 
     @PostMapping("/update/{meetingId}")
     public ResponseEntity<?> updateMeeting(
@@ -91,6 +92,10 @@ public class MeetingController {
         return ResponseEntity.ok("모집이 시작되었습니다.");
     }
 
+    @GetMapping("/recommend/{meetingId}")
+    public ResponseEntity<?> recommendMeeting(@PathVariable Long meetingId){
+        return ResponseEntity.ok(meetingService.recommendMeeting(meetingId));
+    }
 
 
 }
