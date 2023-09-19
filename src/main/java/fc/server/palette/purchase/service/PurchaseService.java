@@ -62,6 +62,7 @@ public class PurchaseService {
     }
 
     //todo principal사용
+    @Transactional
     public void addBookmark(Long productId) {
         Purchase purchase = purchaseRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
@@ -73,6 +74,7 @@ public class PurchaseService {
         purchaseBookmarkRepository.save(bookmark);
     }
 
+    @Transactional
     public void deleteProduct(Long productId) {
         purchaseRepository.deleteById(productId);
     }
