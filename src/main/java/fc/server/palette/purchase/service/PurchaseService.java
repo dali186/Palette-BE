@@ -2,7 +2,9 @@ package fc.server.palette.purchase.service;
 
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.ProductDto;
+import fc.server.palette.purchase.entity.Bookmark;
 import fc.server.palette.purchase.entity.Purchase;
+import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
 import fc.server.palette.purchase.repository.PurchaseMediaRepository;
 import fc.server.palette.purchase.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -17,6 +20,7 @@ import java.util.stream.Collectors;
 public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final PurchaseMediaRepository purchaseMediaRepository;
+    private final PurchaseBookmarkRepository purchaseBookmarkRepository;
 
     @Transactional
     public List<ProductDto> getAllProducts() {
@@ -28,8 +32,8 @@ public class PurchaseService {
     }
 
     @Transactional
-    public ProductDto getProduct(Long id) {
-        Purchase purchase = purchaseRepository.findById(id)
+    public ProductDto getProduct(Long productId) {
+        Purchase purchase = purchaseRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         return buildProduct(purchase);
     }
@@ -54,4 +58,17 @@ public class PurchaseService {
                 .hits(purchase.getHits())
                 .build();
     }
+
+    //todo principal사용
+    public void addBookmark(Long productId) {
+        Purchase purchase = purchaseRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+
+        Bookmark bookmark = Bookmark.builder()
+                .member()
+                .purchase(purchase)
+                .build();
+        purchaseBookmarkRepository.save(bookmark);
+    }
+
 }
