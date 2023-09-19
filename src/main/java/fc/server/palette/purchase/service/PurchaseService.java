@@ -80,14 +80,23 @@ public class PurchaseService {
     }
 
     @Transactional
-    public ProductDto editProduct(Long productId, EditProductDto editProductDto){
+    public ProductDto editProduct(Long productId, EditProductDto editProductDto) {
         //todo 멤버검증
         Purchase purchase = purchaseRepository.findById(productId)
-                .orElseThrow(()->new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
-        purchase.update(editProductDto);
+                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+        purchase.updateOffer(editProductDto);
         Purchase updatedPurchase = purchaseRepository.findById(productId)
-                .orElseThrow(()->new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         return buildProduct(updatedPurchase);
+    }
 
+    @Transactional
+    public ProductDto closeOffer(Long productId){
+        Purchase purchase = purchaseRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+        purchase.closeOffer();
+        Purchase updatedPurchase = purchaseRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+        return buildProduct(updatedPurchase);
     }
 }
