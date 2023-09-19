@@ -60,7 +60,9 @@ public class PurchaseController {
 
     @PatchMapping("/{productId}")
     public ResponseEntity<ProductDto> editProduct(@PathVariable Long productId,
-                                                  @RequestBody EditProductDto editProductDto) {
+                                                  @RequestBody EditProductDto editProductDto,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(productId));
         ProductDto product = purchaseService.editProduct(productId, editProductDto);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
