@@ -45,9 +45,9 @@ public class PurchaseController {
     }
 
     @PostMapping("/{productId}/bookmark")
-    public ResponseEntity<?> addBookmark(@PathVariable Long productId) {
-        //todo pricipal넘기기
-        purchaseService.addBookmark(productId);
+    public ResponseEntity<?> addBookmark(@PathVariable Long productId,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        purchaseService.addBookmark(productId, userDetails.getMember());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

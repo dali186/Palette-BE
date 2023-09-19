@@ -1,5 +1,6 @@
 package fc.server.palette.purchase.service;
 
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.dto.request.EditProductDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.ProductDto;
@@ -61,14 +62,13 @@ public class PurchaseService {
                 .build();
     }
 
-    //todo principal사용
     @Transactional
-    public void addBookmark(Long productId) {
+    public void addBookmark(Long productId, Member member) {
         Purchase purchase = purchaseRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
 
         Bookmark bookmark = Bookmark.builder()
-                .member()
+                .member(member)
                 .purchase(purchase)
                 .build();
         purchaseBookmarkRepository.save(bookmark);
