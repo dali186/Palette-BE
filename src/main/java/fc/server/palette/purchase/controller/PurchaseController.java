@@ -53,4 +53,9 @@ public class PurchaseController {
         ProductDto product = purchaseService.editProduct(productId, editProductDto);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
+
+    @PostMapping("/{productId}/closing")
+    public ResponseEntity<ProductDto> closeOffer(@PathVariable Long productId){
+        purchaseService.closeOffer(productId);
+    }
 }
