@@ -1,7 +1,6 @@
 package fc.server.palette.purchase.controller;
 
 import fc.server.palette.member.auth.CustomUserDetails;
-import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.dto.request.EditProductDto;
 import fc.server.palette.purchase.dto.request.OfferProductDto;
 import fc.server.palette.purchase.dto.response.ProductDto;
@@ -52,7 +51,9 @@ public class PurchaseController {
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productId,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(productId));
         purchaseService.deleteProduct(productId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -68,5 +69,11 @@ public class PurchaseController {
     public ResponseEntity<ProductDto> closeOffer(@PathVariable Long productId) {
         ProductDto product = purchaseService.closeOffer(productId);
         return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    private void validateAuthority(Long memberId, Long authorId) {
+        if (!memberId.equals(authorId)) {
+            throw new IllegalArgumentException("삭제 권한이 없습니다.");
+        }
     }
 }
