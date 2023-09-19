@@ -2,6 +2,7 @@ package fc.server.palette.purchase.entity;
 
 import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.member.entity.Member;
+import fc.server.palette.purchase.dto.request.EditProductDto;
 import fc.server.palette.purchase.entity.type.Category;
 import fc.server.palette.purchase.entity.type.ClosingType;
 import lombok.AllArgsConstructor;
@@ -74,4 +75,17 @@ public class Purchase extends BaseEntity {
 
     @Column(nullable = false)
     private Integer hits;
+
+    public void update(EditProductDto editProductDto) {
+        this.shopUrl = editProductDto.getShopUrl();
+        this.endDate = editProductDto.getEndDate();
+        this.endTime = editProductDto.getEndTime();
+        this.headCount = editProductDto.getHeadCount();
+        this.price = editProductDto.getPrice();
+        this.description = editProductDto.getDescription();
+        this.closingType = editProductDto.getClosingType();
+        this.bank = editProductDto.getBank();
+        this.accountNumber = editProductDto.getAccountNumber();
+        this.accountOwner = editProductDto.getAccountOwner();
+    }
 }
