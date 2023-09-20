@@ -51,12 +51,12 @@ public class PurchaseService {
                 .member(MemberDto.of(purchase.getMember()))
                 .title(purchase.getTitle())
                 .category(purchase.getCategory())
+                .startDate(purchase.getStartDate())
                 .endDate(purchase.getEndDate())
-                .endTime(purchase.getEndTime())
                 .price(purchase.getPrice())
-                //todo: findById x -> findByPurchaseId o
-                .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
-                        .orElseThrow(() -> new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
+                //todo: findById x -> findByPurchaseId o + 이미지 로직 처리 시 구현
+//                .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
+//                        .orElseThrow(() -> new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
                 .hits(purchase.getHits())
                 .build();
     }
