@@ -139,4 +139,9 @@ public class MeetingController {
         return ResponseEntity.ok("모임 신청이 완료되었습니다");
     }
 
+    @GetMapping("/{meetingId}/participate/member")
+    public ResponseEntity<?> waitingParticipateMemberList(@PathVariable Long meetingId){
+        return ResponseEntity.ok(meetingService.waitingParticipateMemberList(meetingId));
+    }
+
 }

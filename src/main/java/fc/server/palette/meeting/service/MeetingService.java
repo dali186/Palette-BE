@@ -9,6 +9,7 @@ import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingMemberResponseDto;
+import fc.server.palette.meeting.dto.response.WaitingParticipateMemberResponseDto;
 import fc.server.palette.meeting.entity.Application;
 import fc.server.palette.meeting.entity.Bookmark;
 import fc.server.palette.meeting.entity.Media;
@@ -434,6 +435,24 @@ public class MeetingService {
                 .member(member)
                 .pr(applicationRequestDto.getPr())
                 .build();
+        System.out.println(application);
         applicationRepository.save(application);
+    }
+
+    public List<WaitingParticipateMemberResponseDto> waitingParticipateMemberList(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.WAITING);
+
+        List<WaitingParticipateMemberResponseDto> waitingMember = applications.stream()
+                .map(application -> WaitingParticipateMemberResponseDto.builder()
+                        .id(application.getId())
+                        .nickname(application.getMember().getNickname())
+                        .bio(application.getMember().getBio())
+                        .pr(application.getPr())
+                        .image(application.getMember().getImage())
+                        .build())
+                .collect(Collectors.toList());
+        return waitingMember;
     }
 }
