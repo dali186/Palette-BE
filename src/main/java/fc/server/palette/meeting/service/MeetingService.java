@@ -1,5 +1,7 @@
 package fc.server.palette.meeting.service;
 
+import fc.server.palette._common.exception.Exception400;
+import fc.server.palette._common.exception.Exception403;
 import fc.server.palette.meeting.dto.request.ApplicationRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
@@ -11,11 +13,11 @@ import fc.server.palette.meeting.entity.Bookmark;
 import fc.server.palette.meeting.entity.Media;
 import fc.server.palette.meeting.entity.Meeting;
 import fc.server.palette.meeting.entity.type.*;
-import fc.server.palette.member.MemberRepository;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.entity.type.Job;
 import fc.server.palette.member.entity.type.Position;
 import fc.server.palette.member.entity.type.Sex;
+import fc.server.palette.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -107,9 +109,7 @@ public class MeetingService {
         return meetingListResponseDtoList;
     }
 
-    public MeetingDetailResponseDto createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Long loginUserId, List<MultipartFile> imges) {
-        Member member = memberRepository.findById(loginUserId)
-                .orElseThrow(()-> new RuntimeException("사용자를 찾을수없습니다."));
+    public MeetingDetailResponseDto createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Member member, List<MultipartFile> imges) {
 
         List<Media> mediaList = new ArrayList<>();
         List<String> urlList = new ArrayList<>();
@@ -205,13 +205,16 @@ public class MeetingService {
 
     public void delete(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new RuntimeException("찾을 수 없습니다"));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
         meetingRepository.deleteById(meetingId);
     }
 
-    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
+    public void updateMeeting(Long loginMemberId, Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+        if (meeting.getMember().getId() != loginMemberId){
+            throw new Exception403("업데이트 권한이 없습니다.");
+        }
         meeting.update(meetingUpdateRequestDto);
     }
 
@@ -301,12 +304,9 @@ public class MeetingService {
                 .build();
     }
 
-    public void likesMeeting(Long meetingId, Long loginUser) {
+    public void likesMeeting(Long meetingId, Member member) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-
-        Member member = memberRepository.findById(loginUser)
-                .orElseThrow(() -> new IllegalArgumentException("해당 멤버 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
         Bookmark bookmark = Bookmark.builder()
                 .member(member)
                 .meeting(meeting)
@@ -315,12 +315,9 @@ public class MeetingService {
         meeting.likes();
     }
 
-    public void dislikesMeeting(Long meetingId, Long loginUser) {
+    public void dislikesMeeting(Long meetingId, Member member) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-
-        Member member = memberRepository.findById(loginUser)
-                .orElseThrow(() -> new IllegalArgumentException("해당 멤버 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
 
         Bookmark bookmark = bookmarkRepository.findByMemberAndMeeting(member, meeting);
         if(bookmark != null){
@@ -331,7 +328,7 @@ public class MeetingService {
 
     public void closeMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
         if (meeting.isClosing()){
             throw new IllegalArgumentException("이미 모집된 마감입니다.");
         }
@@ -340,24 +337,26 @@ public class MeetingService {
 
     public void reopenMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
         meeting.reopen();
     }
 
-    public List<MeetingListResponseDto> recommendMeeting(Long meetingId) {
+    public List<MeetingListResponseDto> recommendMeeting(Long loginMemberId, Long meetingId) {
         Meeting baseMeeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
         List<Meeting> recommededMeeting = new ArrayList<>();
 
         if(recommededMeeting.size() < 2){
             List<Meeting> sameOnOffMeeting = meetingRepository.findByOnOffAndIsClosingFalse(baseMeeting.isOnOff());
             sameOnOffMeeting.remove(baseMeeting);
+            sameOnOffMeeting.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(sameOnOffMeeting.subList(0, Math.min(2, sameOnOffMeeting.size())));
         }
 
         if (recommededMeeting.size() < 2){
             List<Meeting> sameTypeMeeting = meetingRepository.findByTypeAndIsClosingFalse(baseMeeting.getType());
             sameTypeMeeting.remove(baseMeeting);
+            sameTypeMeeting.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(sameTypeMeeting.subList(0, Math.min(2 - recommededMeeting.size(), sameTypeMeeting.size())));
         }
 
@@ -365,6 +364,7 @@ public class MeetingService {
             List<Job> jobs = baseMeeting.getJob();
             List<Meeting> sameJobsMeeting = meetingRepository.findByJobInAndIsClosingFalse(jobs);
             sameJobsMeeting.remove(baseMeeting);
+            sameJobsMeeting.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(sameJobsMeeting.subList(0, Math.min(2 - recommededMeeting.size(), sameJobsMeeting.size())));
         }
 
@@ -372,6 +372,7 @@ public class MeetingService {
             List<Position> positions = baseMeeting.getPosition();
             List<Meeting> samePositionsMeetings = meetingRepository.findByPositionInAndIsClosingFalse(positions);
             samePositionsMeetings.remove(baseMeeting);
+            samePositionsMeetings.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(samePositionsMeetings.subList(0, Math.min(2 - recommededMeeting.size(), samePositionsMeetings.size())));
         }
 
@@ -379,11 +380,14 @@ public class MeetingService {
             Sex sex = baseMeeting.getSex();
             List<Meeting> sameSexMeetings = meetingRepository.findBySexAndIsClosingFalse(sex);
             sameSexMeetings.remove(baseMeeting);
+            sameSexMeetings.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(sameSexMeetings.subList(0, Math.min(2 - recommededMeeting.size(), sameSexMeetings.size())));
         }
 
         if (recommededMeeting.size() < 2) {
             List<Meeting> mostLikedMeetings = meetingRepository.findTop2ByIsClosingFalseOrderByLikesDesc();
+            mostLikedMeetings.remove(baseMeeting);
+            mostLikedMeetings.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(mostLikedMeetings);
         }
 
@@ -392,20 +396,18 @@ public class MeetingService {
                 .collect(Collectors.toList());
     }
 
-    public boolean checkParticipateMeeting(Long meetingId, Long loginMemberId) {
+    public boolean checkParticipateMeeting(Long meetingId, Member member) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-        Member loginMember = memberRepository.findById(loginMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
 
         return meeting.getPosition().stream()
-                .anyMatch(position -> loginMember.getPosition().equals(position)
-                && meeting.getSex().equals(loginMember.getSex()));
+                .anyMatch(position -> member.getPosition().equals(position)
+                && meeting.getSex().equals(member.getSex()));
     }
 
     public List<MeetingMemberResponseDto> participateMemberList(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
         List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.APPROVAL);
 
         List<MeetingMemberResponseDto> approvedMembers = applications.stream()
@@ -418,15 +420,13 @@ public class MeetingService {
         return approvedMembers;
     }
 
-    public void participateMeeting(Long meetingId, Long loginMemberId, ApplicationRequestDto applicationRequestDto) {
+    public void participateMeeting(Long meetingId, Member member, ApplicationRequestDto applicationRequestDto) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-        Member loginMember = memberRepository.findById(loginMemberId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 멤버를 찾을 수 없습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
 
         Application application = Application.builder()
                 .meeting(meeting)
-                .member(loginMember)
+                .member(member)
                 .pr(applicationRequestDto.getPr())
                 .build();
         applicationRepository.save(application);
