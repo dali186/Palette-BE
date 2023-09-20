@@ -7,6 +7,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 
@@ -24,10 +25,12 @@ public class ChatController {
         template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
     }
 
-    //    @MessageMapping("/chat.addUser")
-    //    @SendTo("/topic/public")
-    //    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-    //
-    //        return chatMessage;
-    //    }
+    @MessageMapping("/chat/enter")
+    @SendTo("/sub/public")
+    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
+        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
+
+        return chatMessage;
+    }
 }
