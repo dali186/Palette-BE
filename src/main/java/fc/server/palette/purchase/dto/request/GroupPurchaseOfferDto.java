@@ -14,7 +14,7 @@ import java.util.Date;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class OfferProductDto {
+public class GroupPurchaseOfferDto {
     private String title;
     private Category category;
     private String shopUrl;

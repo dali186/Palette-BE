@@ -1,9 +1,9 @@
 package fc.server.palette.purchase.controller;
 
 import fc.server.palette.member.auth.CustomUserDetails;
-import fc.server.palette.purchase.dto.request.EditProductDto;
-import fc.server.palette.purchase.dto.request.OfferProductDto;
-import fc.server.palette.purchase.dto.response.ProductDto;
+import fc.server.palette.purchase.dto.request.EditOfferDto;
+import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
+import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.service.PurchaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,54 +22,54 @@ public class PurchaseController {
     private final PurchaseService purchaseService;
 
     @GetMapping("")
-    public ResponseEntity<List<ProductDto>> getAllProducts() {
-        List<ProductDto> products = purchaseService.getAllProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+    public ResponseEntity<List<OfferDto>> getAllOffers() {
+        List<OfferDto> offers = purchaseService.getAllOffers();
+        return new ResponseEntity<>(offers, HttpStatus.OK);
     }
 
-    @GetMapping("/{productId}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable Long productId) {
-        ProductDto product = purchaseService.getProduct(productId);
-        return new ResponseEntity<>(product, HttpStatus.OK);
+    @GetMapping("/{offerId}")
+    public ResponseEntity<OfferDto> getOffer(@PathVariable Long offerId) {
+        OfferDto offer = purchaseService.getOffer(offerId);
+        return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
     @PostMapping("")
-    public ResponseEntity<ProductDto> offerProduct(@RequestBody OfferProductDto offerProductDto,
-                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
-        ProductDto product = purchaseService.createProduct(offerProductDto.toEntity(userDetails.getMember()));
-        return new ResponseEntity<>(product, HttpStatus.OK);
+    public ResponseEntity<OfferDto> createOffer(@RequestBody GroupPurchaseOfferDto groupPurchaseOfferDto,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+        OfferDto offer = purchaseService.createOffer(groupPurchaseOfferDto.toEntity(userDetails.getMember()));
+        return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
-    @PostMapping("/{productId}/bookmark")
-    public ResponseEntity<?> addBookmark(@PathVariable Long productId,
+    @PostMapping("/{offerId}/bookmark")
+    public ResponseEntity<?> addBookmark(@PathVariable Long offerId,
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
-        purchaseService.addBookmark(productId, userDetails.getMember());
+        purchaseService.addBookmark(offerId, userDetails.getMember());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @DeleteMapping("/{productId}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long productId,
-                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
-        validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(productId));
-        purchaseService.deleteProduct(productId);
+    @DeleteMapping("/{offerId}")
+    public ResponseEntity<?> deleteOffer(@PathVariable Long offerId,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails) {
+        validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
+        purchaseService.deleteOffer(offerId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PatchMapping("/{productId}")
-    public ResponseEntity<ProductDto> editProduct(@PathVariable Long productId,
-                                                  @RequestBody EditProductDto editProductDto,
-                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
-        validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(productId));
-        ProductDto product = purchaseService.editProduct(productId, editProductDto);
-        return new ResponseEntity<>(product, HttpStatus.OK);
+    @PatchMapping("/{offerId}")
+    public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
+                                              @RequestBody EditOfferDto editOfferDto,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
+        OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
+        return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
-    @PostMapping("/{productId}/closing")
-    public ResponseEntity<ProductDto> closeOffer(@PathVariable Long productId,
-                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
-            validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(productId));
-            ProductDto product = purchaseService.closeOffer(productId);
-            return new ResponseEntity<>(product, HttpStatus.OK);
+    @PostMapping("/{offerId}/closing")
+    public ResponseEntity<OfferDto> closeOffer(@PathVariable Long offerId,
+                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
+            validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
+            OfferDto offer = purchaseService.closeOffer(offerId);
+            return new ResponseEntity<>(offer, HttpStatus.OK);
         }
 
         private void validateAuthority (Long memberId, Long authorId){

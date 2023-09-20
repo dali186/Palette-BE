@@ -11,7 +11,7 @@ import java.util.Date;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EditProductDto {
+public class EditOfferDto {
     private String shopUrl;
     private Date endDate;
     private Time endTime;

@@ -1,9 +1,9 @@
 package fc.server.palette.purchase.service;
 
 import fc.server.palette.member.entity.Member;
-import fc.server.palette.purchase.dto.request.EditProductDto;
+import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
-import fc.server.palette.purchase.dto.response.ProductDto;
+import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.entity.Bookmark;
 import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
@@ -24,29 +24,29 @@ public class PurchaseService {
     private final PurchaseBookmarkRepository purchaseBookmarkRepository;
 
     @Transactional
-    public List<ProductDto> getAllProducts() {
+    public List<OfferDto> getAllOffers() {
         List<Purchase> purchases = purchaseRepository.findAll();
 
         return purchases.stream()
-                .map(this::buildProduct)
+                .map(this::buildOffer)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public ProductDto getProduct(Long productId) {
-        Purchase purchase = purchaseRepository.findById(productId)
+    public OfferDto getOffer(Long offerId) {
+        Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
-        return buildProduct(purchase);
+        return buildOffer(purchase);
     }
 
     @Transactional
-    public ProductDto createProduct(Purchase purchase) {
+    public OfferDto createOffer(Purchase purchase) {
         Purchase savedPurchase = purchaseRepository.save(purchase);
-        return buildProduct(savedPurchase);
+        return buildOffer(savedPurchase);
     }
 
-    private ProductDto buildProduct(Purchase purchase) {
-        return ProductDto.builder()
+    private OfferDto buildOffer(Purchase purchase) {
+        return OfferDto.builder()
                 .id(purchase.getId())
                 .member(MemberDto.of(purchase.getMember()))
                 .title(purchase.getTitle())
@@ -54,6 +54,7 @@ public class PurchaseService {
                 .endDate(purchase.getEndDate())
                 .endTime(purchase.getEndTime())
                 .price(purchase.getPrice())
+                //todo: findById x -> findByPurchaseId o
                 .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
                         .orElseThrow(() -> new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
                 .hits(purchase.getHits())
@@ -61,8 +62,8 @@ public class PurchaseService {
     }
 
     @Transactional
-    public void addBookmark(Long productId, Member member) {
-        Purchase purchase = purchaseRepository.findById(productId)
+    public void addBookmark(Long offerId, Member member) {
+        Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
 
         Bookmark bookmark = Bookmark.builder()
@@ -73,34 +74,33 @@ public class PurchaseService {
     }
 
     @Transactional
-    public void deleteProduct(Long productId) {
-        purchaseRepository.deleteById(productId);
+    public void deleteOffer(Long offerId) {
+        purchaseRepository.deleteById(offerId);
     }
 
     @Transactional
-    public ProductDto editProduct(Long productId, EditProductDto editProductDto) {
-        //todo 멤버검증
-        Purchase purchase = purchaseRepository.findById(productId)
+    public OfferDto editOffer(Long offerId, EditOfferDto editOfferDto) {
+        Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
-        purchase.updateOffer(editProductDto);
-        Purchase updatedPurchase = purchaseRepository.findById(productId)
+        purchase.updateOffer(editOfferDto);
+        Purchase updatedPurchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
-        return buildProduct(updatedPurchase);
+        return buildOffer(updatedPurchase);
     }
 
     @Transactional
-    public ProductDto closeOffer(Long productId){
-        Purchase purchase = purchaseRepository.findById(productId)
+    public OfferDto closeOffer(Long offerId){
+        Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         purchase.closeOffer();
-        Purchase updatedPurchase = purchaseRepository.findById(productId)
+        Purchase updatedPurchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
-        return buildProduct(updatedPurchase);
+        return buildOffer(updatedPurchase);
     }
 
     @Transactional
-    public Long getAuthorId(Long productId){
-        Purchase purchase = purchaseRepository.findById(productId)
+    public Long getAuthorId(Long offerId){
+        Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         return purchase.getMember().getId();
     }

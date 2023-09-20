@@ -2,7 +2,7 @@ package fc.server.palette.purchase.entity;
 
 import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.member.entity.Member;
-import fc.server.palette.purchase.dto.request.EditProductDto;
+import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.entity.type.Category;
 import fc.server.palette.purchase.entity.type.ClosingType;
 import lombok.AllArgsConstructor;
@@ -90,17 +90,17 @@ public class Purchase extends BaseEntity {
         return hits == null ? 0 : hits;
     }
 
-    public void updateOffer(EditProductDto editProductDto) {
-        this.shopUrl = editProductDto.getShopUrl();
-        this.endDate = editProductDto.getEndDate();
-        this.endTime = editProductDto.getEndTime();
-        this.headCount = editProductDto.getHeadCount();
-        this.price = editProductDto.getPrice();
-        this.description = editProductDto.getDescription();
-        this.closingType = editProductDto.getClosingType();
-        this.bank = editProductDto.getBank();
-        this.accountNumber = editProductDto.getAccountNumber();
-        this.accountOwner = editProductDto.getAccountOwner();
+    public void updateOffer(EditOfferDto editOfferDto) {
+        this.shopUrl = editOfferDto.getShopUrl();
+        this.endDate = editOfferDto.getEndDate();
+        this.endTime = editOfferDto.getEndTime();
+        this.headCount = editOfferDto.getHeadCount();
+        this.price = editOfferDto.getPrice();
+        this.description = editOfferDto.getDescription();
+        this.closingType = editOfferDto.getClosingType();
+        this.bank = editOfferDto.getBank();
+        this.accountNumber = editOfferDto.getAccountNumber();
+        this.accountOwner = editOfferDto.getAccountOwner();
     }
 
     public void closeOffer() {

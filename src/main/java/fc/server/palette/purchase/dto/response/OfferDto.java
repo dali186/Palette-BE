@@ -1,6 +1,5 @@
 package fc.server.palette.purchase.dto.response;
 
-import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.entity.type.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,7 +13,7 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDto {
+public class OfferDto {
     //todo: 추가 데이터 필요하면 수정
     private Long id;
     private MemberDto member;
