@@ -60,6 +60,12 @@ public class PurchaseService {
                 .hits(purchase.getHits())
                 .build();
     }
+    private String getThumbnailUrl(Long purchaseId){
+        return purchaseMediaRepository
+                .findAllByPurchase_id(purchaseId)
+                .get(0)
+                .getUrl();
+    }
 
     @Transactional
     public void addBookmark(Long offerId, Member member) {
