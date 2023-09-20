@@ -17,13 +17,13 @@ import java.util.Date;
 public class GroupPurchaseOfferDto {
     private String title;
     private Category category;
-    private String shopUrl;
+    private Date startDate;
     private Date endDate;
-    private Time endTime;
     private Integer headCount;
-    private Integer price;
-    //todo 이미지 필드 추가
     private String description;
+    private Integer price;
+    private String shopUrl;
+    //todo 이미지 필드 추가
     private ClosingType closingType;
     private String bank;
     private String accountNumber;
@@ -35,8 +35,8 @@ public class GroupPurchaseOfferDto {
                 .title(this.title)
                 .category(this.category)
                 .shopUrl(this.shopUrl)
+                .startDate(this.startDate)
                 .endDate(this.endDate)
-                .endTime(this.endTime)
                 .headCount(this.headCount)
                 .price(this.price)
                 .description(this.description)
