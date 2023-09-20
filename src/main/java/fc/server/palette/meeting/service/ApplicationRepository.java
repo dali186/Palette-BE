@@ -1,0 +1,12 @@
+package fc.server.palette.meeting.service;
+
+import fc.server.palette.meeting.entity.Application;
+import fc.server.palette.meeting.entity.Meeting;
+import fc.server.palette.meeting.entity.type.Status;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
+
+public interface ApplicationRepository extends JpaRepository<Application, Long> {
+    List<Application> findByMeetingAndStatus(Meeting meeting, Status status);
+}
