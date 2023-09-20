@@ -14,7 +14,7 @@ public class OfferListDto {
     private Long id;
     private String title;
     private Category category;
-    private Integer Price;
+    private Integer price;
     private String thumbnailUrl;
     //todo
     private Integer bookmarkCount;
