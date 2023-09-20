@@ -1,4 +1,4 @@
-package fc.server.palette.meeting.service;
+package fc.server.palette.meeting.repository;
 
 import fc.server.palette.meeting.entity.Bookmark;
 import fc.server.palette.meeting.entity.Meeting;

@@ -1,4 +1,4 @@
-package fc.server.palette.meeting.service;
+package fc.server.palette.meeting.repository;
 
 import fc.server.palette.meeting.entity.Application;
 import fc.server.palette.meeting.entity.Meeting;
