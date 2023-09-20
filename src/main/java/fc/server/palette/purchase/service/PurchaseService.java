@@ -4,6 +4,7 @@ import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
+import fc.server.palette.purchase.dto.response.OfferListDto;
 import fc.server.palette.purchase.entity.Bookmark;
 import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
@@ -60,11 +61,16 @@ public class PurchaseService {
                 .hits(purchase.getHits())
                 .build();
     }
+
     private String getThumbnailUrl(Long purchaseId){
         return purchaseMediaRepository
                 .findAllByPurchase_id(purchaseId)
                 .get(0)
                 .getUrl();
+    }
+
+    private Integer getBookmarkCount(Long purchaseId){
+        return purchaseBookmarkRepository.findAllByPurchase_id(purchaseId).size();
     }
 
     @Transactional
