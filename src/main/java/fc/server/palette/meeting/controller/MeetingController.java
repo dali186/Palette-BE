@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -142,6 +144,22 @@ public class MeetingController {
     @GetMapping("/{meetingId}/participate/member")
     public ResponseEntity<?> waitingParticipateMemberList(@PathVariable Long meetingId){
         return ResponseEntity.ok(meetingService.waitingParticipateMemberList(meetingId));
+    }
+
+    @PostMapping("/participate/refuse")
+    public ResponseEntity<?> refusedParticipateMember(
+            @RequestBody List<Long> participateIdList
+    ){
+        meetingService.refusedParticipateMember(participateIdList);
+        return ResponseEntity.ok("거절하였습니다.");
+    }
+
+    @PostMapping("/participate/confirm")
+    public ResponseEntity<?> confirmParticipateMember(
+            @RequestBody List<Long> participateIdList
+    ){
+        meetingService.approveParticipateMember(participateIdList);
+        return ResponseEntity.ok("승인하였습니다.");
     }
 
 }

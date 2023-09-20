@@ -338,7 +338,7 @@ public class MeetingService {
         if (meeting.isClosing()) {
             throw new Exception400(meetingId.toString(), ExceptionMessage.AlREADY_CLOSING);
         }
-        meeting.clsed();
+        meeting.closed();
     }
 
     public void reopenMeeting(Long meetingId) {
@@ -435,7 +435,6 @@ public class MeetingService {
                 .member(member)
                 .pr(applicationRequestDto.getPr())
                 .build();
-        System.out.println(application);
         applicationRepository.save(application);
     }
 
@@ -454,5 +453,25 @@ public class MeetingService {
                         .build())
                 .collect(Collectors.toList());
         return waitingMember;
+    }
+
+    public void refusedParticipateMember(List<Long> participateIdList) {
+        for(Long id: participateIdList){
+            Application application = applicationRepository.findById(id)
+                    .orElseThrow(() -> new Exception400(id.toString(), ExceptionMessage.NO_APPLICATION_ID));
+            application.participateRefused();
+        }
+    }
+
+    public void approveParticipateMember(List<Long> participateIdList){
+        for(Long id: participateIdList){
+            Application application = applicationRepository.findById(id)
+                    .orElseThrow(() -> new Exception400(id.toString(), ExceptionMessage.NO_APPLICATION_ID));
+            if ((application.getMeeting().getHeadCount() - application.getMeeting().getRecruitedPersonnel()) < participateIdList.size()) {
+                throw new Exception400(application.getMeeting().getTitle(), ExceptionMessage.OVER_CAPACITY);
+            }
+            application.participateApprove();
+            application.getMeeting().setRecruitedPersonnel();
+        }
     }
 }

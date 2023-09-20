@@ -36,4 +36,12 @@ public class Application extends BaseEntity {
 
     @Column(length = 255)
     private String pr;
+
+    public void participateRefused(){
+        this.status = Status.REFUSE;
+    }
+
+    public void participateApprove(){
+        this.status = Status.APPROVAL;
+    }
 }
