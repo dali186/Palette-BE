@@ -2,6 +2,7 @@ package fc.server.palette.meeting.service;
 
 import fc.server.palette._common.exception.Exception400;
 import fc.server.palette._common.exception.Exception403;
+import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.meeting.dto.request.ApplicationRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
@@ -46,7 +47,7 @@ public class MeetingService {
     public List<MeetingListResponseDto> getMeetingList(Boolean isClose){
         List<Meeting> meetings = meetingRepository.findAll();
         List<MeetingListResponseDto> meetingResponseDtoList = new ArrayList<>();
-        if(isClose) {
+        if (isClose) {
             for (Meeting meeting : meetings) {
                 if (!meeting.isClosing()) {
                     MeetingListResponseDto meetingResponseDto = meetingListResponseDtoBuilder(meeting);
@@ -69,11 +70,11 @@ public class MeetingService {
         List<Meeting> meetings = meetingRepository.findAll();
         List<MeetingListResponseDto> meetingListResponseDtoList = new ArrayList<>();
 
-        if(isClose){
+        if (isClose) {
             meetings = meetings.stream().filter(meeting -> !meeting.isClosing()).collect(Collectors.toList());
         }
 
-        if(!onOff.isEmpty()){
+        if (!onOff.isEmpty()) {
             boolean isOnline = "온라인".equalsIgnoreCase(onOff);
             meetings = meetings.stream()
                     .filter(meeting -> meeting.isOnOff() == isOnline)
@@ -118,7 +119,7 @@ public class MeetingService {
         List<Media> mediaList = new ArrayList<>();
         List<String> urlList = new ArrayList<>();
 
-        if (imges != null){
+        if (imges != null) {
             for(MultipartFile image : imges){
                 String imageUrl = meetingMediaService.uploadImage(image);
                 urlList.add(imageUrl);
@@ -209,22 +210,22 @@ public class MeetingService {
 
     public void delete(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
         meetingRepository.deleteById(meetingId);
     }
 
     public void updateMeeting(Long loginMemberId, Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
-        if (meeting.getMember().getId() != loginMemberId){
-            throw new Exception403("업데이트 권한이 없습니다.");
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        if (meeting.getMember().getId() != loginMemberId) {
+            throw new Exception403(ExceptionMessage.ACCESS_DENIED);
         }
         meeting.update(meetingUpdateRequestDto);
     }
 
     public MeetingDetailResponseDto getDetailMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
         meeting.setHits(); //조회수 증가
         MeetingMemberResponseDto responseMember = MeetingMemberResponseDto.builder()
                 .nickname(meeting.getMember().getNickname())
@@ -310,7 +311,7 @@ public class MeetingService {
 
     public void likesMeeting(Long meetingId, Member member) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
         Bookmark bookmark = Bookmark.builder()
                 .member(member)
                 .meeting(meeting)
@@ -321,10 +322,10 @@ public class MeetingService {
 
     public void dislikesMeeting(Long meetingId, Member member) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
 
         Bookmark bookmark = bookmarkRepository.findByMemberAndMeeting(member, meeting);
-        if(bookmark != null){
+        if (bookmark != null) {
             bookmarkRepository.delete(bookmark);
         }
         meeting.dislike();
@@ -332,39 +333,39 @@ public class MeetingService {
 
     public void closeMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
-        if (meeting.isClosing()){
-            throw new IllegalArgumentException("이미 모집된 마감입니다.");
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        if (meeting.isClosing()) {
+            throw new Exception400(meetingId.toString(), ExceptionMessage.AlREADY_CLOSING);
         }
         meeting.clsed();
     }
 
     public void reopenMeeting(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
         meeting.reopen();
     }
 
     public List<MeetingListResponseDto> recommendMeeting(Long loginMemberId, Long meetingId) {
         Meeting baseMeeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
         List<Meeting> recommededMeeting = new ArrayList<>();
 
-        if(recommededMeeting.size() < 2){
+        if (recommededMeeting.size() < 2) {
             List<Meeting> sameOnOffMeeting = meetingRepository.findByOnOffAndIsClosingFalse(baseMeeting.isOnOff());
             sameOnOffMeeting.remove(baseMeeting);
             sameOnOffMeeting.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(sameOnOffMeeting.subList(0, Math.min(2, sameOnOffMeeting.size())));
         }
 
-        if (recommededMeeting.size() < 2){
+        if (recommededMeeting.size() < 2) {
             List<Meeting> sameTypeMeeting = meetingRepository.findByTypeAndIsClosingFalse(baseMeeting.getType());
             sameTypeMeeting.remove(baseMeeting);
             sameTypeMeeting.removeIf(meeting -> meeting.getMember().getId().equals(loginMemberId));
             recommededMeeting.addAll(sameTypeMeeting.subList(0, Math.min(2 - recommededMeeting.size(), sameTypeMeeting.size())));
         }
 
-        if (recommededMeeting.size() < 2){
+        if (recommededMeeting.size() < 2) {
             List<Job> jobs = baseMeeting.getJob();
             List<Meeting> sameJobsMeeting = meetingRepository.findByJobInAndIsClosingFalse(jobs);
             sameJobsMeeting.remove(baseMeeting);
@@ -402,7 +403,7 @@ public class MeetingService {
 
     public boolean checkParticipateMeeting(Long meetingId, Member member) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
 
         return meeting.getPosition().stream()
                 .anyMatch(position -> member.getPosition().equals(position)
@@ -411,7 +412,7 @@ public class MeetingService {
 
     public List<MeetingMemberResponseDto> participateMemberList(Long meetingId) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
         List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.APPROVAL);
 
         List<MeetingMemberResponseDto> approvedMembers = applications.stream()
@@ -426,7 +427,7 @@ public class MeetingService {
 
     public void participateMeeting(Long meetingId, Member member, ApplicationRequestDto applicationRequestDto) {
         Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), "해당 아이디가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
 
         Application application = Application.builder()
                 .meeting(meeting)
