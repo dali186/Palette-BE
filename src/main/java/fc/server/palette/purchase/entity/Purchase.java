@@ -13,7 +13,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
-import java.sql.Time;
 import java.util.Date;
 
 @NoArgsConstructor
@@ -41,10 +40,10 @@ public class Purchase extends BaseEntity {
     private String shopUrl;
 
     @Column(nullable = false)
-    private Date endDate;
+    private Date startDate;
 
     @Column(nullable = false)
-    private Time endTime;
+    private Date endDate;
 
     @Column(nullable = false)
     private Integer headCount;
@@ -92,8 +91,8 @@ public class Purchase extends BaseEntity {
 
     public void updateOffer(EditOfferDto editOfferDto) {
         this.shopUrl = editOfferDto.getShopUrl();
+        this.startDate = editOfferDto.getStartDate();
         this.endDate = editOfferDto.getEndDate();
-        this.endTime = editOfferDto.getEndTime();
         this.headCount = editOfferDto.getHeadCount();
         this.price = editOfferDto.getPrice();
         this.description = editOfferDto.getDescription();
