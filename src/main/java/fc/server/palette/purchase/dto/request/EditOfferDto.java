@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Time;
 import java.util.Date;
 
 @Getter
@@ -13,8 +12,8 @@ import java.util.Date;
 @NoArgsConstructor
 public class EditOfferDto {
     private String shopUrl;
+    private Date startDate;
     private Date endDate;
-    private Time endTime;
     private Integer headCount;
     private Integer price;
     //todo 이미지 필드 추가
