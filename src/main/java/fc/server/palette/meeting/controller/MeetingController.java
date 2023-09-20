@@ -6,8 +6,10 @@ import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
 import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.service.MeetingService;
+import fc.server.palette.member.auth.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
@@ -41,19 +43,21 @@ public class MeetingController {
 
     @PostMapping("/create")
     public ResponseEntity<?> createMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart(value = "dto") MeetingCreateRequestDto meetingCreateRequestDto,
             @RequestPart(value = "file", required = false)List<MultipartFile> images
     ){
-        MeetingDetailResponseDto meetingDetailResponseDto = meetingService.createMeeting(meetingCreateRequestDto, 1L, images);
+        MeetingDetailResponseDto meetingDetailResponseDto = meetingService.createMeeting(meetingCreateRequestDto, userDetails.getMember(), images);
         return ResponseEntity.ok(meetingDetailResponseDto);
     }
 
     @PostMapping("/update/{meetingId}")
     public ResponseEntity<?> updateMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long meetingId,
             @RequestBody MeetingUpdateRequestDto meetingUpdateRequestDto
     ){
-        meetingService.updateMeeting(meetingId, meetingUpdateRequestDto);
+        meetingService.updateMeeting(userDetails.getMember().getId(), meetingId, meetingUpdateRequestDto);
         return ResponseEntity.ok("업데이트 완료");
 
     }
@@ -70,14 +74,20 @@ public class MeetingController {
     }
 
     @PostMapping("/like/{meetingId}")
-    public ResponseEntity<?> likesMeeting(@PathVariable Long meetingId){
-        meetingService.likesMeeting(meetingId, 1L);
+    public ResponseEntity<?> likesMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        meetingService.likesMeeting(meetingId, userDetails.getMember());
         return ResponseEntity.ok("좋아요를 눌렀습니다.");
     }
 
     @PostMapping("/like/cancel/{meetingId}")
-    public ResponseEntity<?> dislikesMeeting(@PathVariable Long meetingId){
-        meetingService.dislikesMeeting(meetingId, 1L);
+    public ResponseEntity<?> dislikesMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        meetingService.dislikesMeeting(meetingId, userDetails.getMember());
         return ResponseEntity.ok("좋아요를 취소했습니다.");
     }
 
@@ -94,13 +104,19 @@ public class MeetingController {
     }
 
     @GetMapping("/recommend/{meetingId}")
-    public ResponseEntity<?> recommendMeeting(@PathVariable Long meetingId){
-        return ResponseEntity.ok(meetingService.recommendMeeting(meetingId));
+    public ResponseEntity<?> recommendMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        return ResponseEntity.ok(meetingService.recommendMeeting(userDetails.getMember().getId(), meetingId));
     }
 
     @PostMapping("/participate/check/{meetingId}")
-    public ResponseEntity<?> checkParticipate(@PathVariable Long meetingId){
-        if(!meetingService.checkParticipateMeeting(meetingId, 1L)){
+    public ResponseEntity<?> checkParticipate(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        if(!meetingService.checkParticipateMeeting(meetingId, userDetails.getMember())){
             return ResponseEntity.ok("가입요건이 맞지 않아요");
         }
         else {
@@ -114,8 +130,12 @@ public class MeetingController {
     }
 
     @PostMapping("/participate/{meetingId}")
-    public ResponseEntity<?> participateMeeting(@PathVariable Long meetingId, @RequestBody ApplicationRequestDto applicationRequestDto){
-        meetingService.participateMeeting(meetingId, 1L, applicationRequestDto);
+    public ResponseEntity<?> participateMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId,
+            @RequestBody ApplicationRequestDto applicationRequestDto
+    ){
+        meetingService.participateMeeting(meetingId, userDetails.getMember(), applicationRequestDto);
         return ResponseEntity.ok("모임 신청이 완료되었습니다");
     }
 
