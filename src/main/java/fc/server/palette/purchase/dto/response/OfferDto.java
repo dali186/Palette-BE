@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.sql.Time;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Getter
@@ -14,14 +14,22 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OfferDto {
-    //todo: 추가 데이터 필요하면 수정
     private Long id;
     private MemberDto member;
     private String title;
     private Category category;
+    private String description;
+    private String shopUrl;
+    private Integer headCount;
+    //todo
+    private Integer bookmarkCount;
+    //todo
+    private Integer currentParticipants;
+    //todo image처리
+    private Date startDate;
     private Date endDate;
-    private Time endTime;
     private Integer price;
-    private String thumbnailUrl;
+    private Boolean isClosing;
     private Integer hits;
+    private LocalDateTime created_at;
 }
