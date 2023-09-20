@@ -25,11 +25,11 @@ public class PurchaseService {
     private final PurchaseBookmarkRepository purchaseBookmarkRepository;
 
     @Transactional
-    public List<OfferDto> getAllOffers() {
+    public List<OfferListDto> getAllOffers() {
         List<Purchase> purchases = purchaseRepository.findAll();
 
         return purchases.stream()
-                .map(this::buildOffer)
+                .map(this::buildOfferList)
                 .collect(Collectors.toList());
     }
 
@@ -58,6 +58,18 @@ public class PurchaseService {
                 //todo: findById x -> findByPurchaseId o + 이미지 로직 처리 시 구현
 //                .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
 //                        .orElseThrow(() -> new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
+                .hits(purchase.getHits())
+                .build();
+    }
+
+    private OfferListDto buildOfferList(Purchase purchase){
+        return OfferListDto.builder()
+                .id(purchase.getId())
+                .title(purchase.getTitle())
+                .category(purchase.getCategory())
+                .price(purchase.getPrice())
+                .thumbnailUrl(getThumbnailUrl(purchase.getId()))
+                .bookmarkCount(getBookmarkCount(purchase.getId()))
                 .hits(purchase.getHits())
                 .build();
     }
