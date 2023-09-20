@@ -4,6 +4,7 @@ import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
+import fc.server.palette.purchase.dto.response.OfferListDto;
 import fc.server.palette.purchase.service.PurchaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,8 +23,8 @@ public class PurchaseController {
     private final PurchaseService purchaseService;
 
     @GetMapping("")
-    public ResponseEntity<List<OfferDto>> getAllOffers() {
-        List<OfferDto> offers = purchaseService.getAllOffers();
+    public ResponseEntity<List<OfferListDto>> getAllOffers() {
+        List<OfferListDto> offers = purchaseService.getAllOffers();
         return new ResponseEntity<>(offers, HttpStatus.OK);
     }
 
