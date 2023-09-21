@@ -146,11 +146,15 @@ public class Meeting extends BaseEntity {
         this.likes--;
     }
 
-    public void clsed(){
+    public void closed(){
         this.isClosing = true;
     }
 
     public void reopen(){
         this.isClosing = false;
+    }
+
+    public void setRecruitedPersonnel() {
+        this.recruitedPersonnel++;
     }
 }
