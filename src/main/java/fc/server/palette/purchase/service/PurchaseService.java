@@ -7,10 +7,13 @@ import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.dto.response.OfferListDto;
 import fc.server.palette.purchase.entity.Bookmark;
 import fc.server.palette.purchase.entity.Purchase;
+import fc.server.palette.purchase.entity.PurchaseParticipant;
 import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
 import fc.server.palette.purchase.repository.PurchaseMediaRepository;
+import fc.server.palette.purchase.repository.PurchaseParticipantRepository;
 import fc.server.palette.purchase.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +26,7 @@ public class PurchaseService {
     private final PurchaseRepository purchaseRepository;
     private final PurchaseMediaRepository purchaseMediaRepository;
     private final PurchaseBookmarkRepository purchaseBookmarkRepository;
+    private final PurchaseParticipantRepository purchaseParticipantRepository;
 
     @Transactional
     public List<OfferListDto> getAllOffers() {
@@ -55,10 +59,15 @@ public class PurchaseService {
                 .startDate(purchase.getStartDate())
                 .endDate(purchase.getEndDate())
                 .price(purchase.getPrice())
-                //todo: findById x -> findByPurchaseId o + 이미지 로직 처리 시 구현
-//                .thumbnailUrl(purchaseMediaRepository.findById(purchase.getId())
-//                        .orElseThrow(() -> new IllegalArgumentException("이미지가 존재하지 않습니다.")).getUrl())
+                .description(purchase.getDescription())
+                .shopUrl(purchase.getShopUrl())
+                .headCount(purchase.getHeadCount())
+                .bookmarkCount(getBookmarkCount(purchase.getId()))
+                //todo 이미지 구현
+                .currentParticipantCount(getCurrentParticipants(purchase.getId()))
+                .isClosing(purchase.getIsClosing())
                 .hits(purchase.getHits())
+                .created_at(purchase.getCreatedAt())
                 .build();
     }
 
@@ -83,6 +92,11 @@ public class PurchaseService {
 
     private Integer getBookmarkCount(Long purchaseId){
         return purchaseBookmarkRepository.findAllByPurchase_id(purchaseId).size();
+    }
+
+    private Integer getCurrentParticipants(Long purchaseId){
+        List<PurchaseParticipant> allByPurchaseId = purchaseParticipantRepository.findAllByPurchaseId(purchaseId);
+        return allByPurchaseId.size();
     }
 
     @Transactional

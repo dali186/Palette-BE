@@ -22,7 +22,6 @@ public class OfferDto {
     private String shopUrl;
     private Integer headCount;
     private Integer bookmarkCount;
-    //todo
     private Integer currentParticipantCount;
     //todo image처리
     private Date startDate;
