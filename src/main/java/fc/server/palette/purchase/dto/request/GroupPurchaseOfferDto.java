@@ -1,6 +1,7 @@
 package fc.server.palette.purchase.dto.request;
 
 import fc.server.palette.member.entity.Member;
+import fc.server.palette.purchase.entity.Media;
 import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.entity.type.Category;
 import fc.server.palette.purchase.entity.type.ClosingType;
@@ -9,6 +10,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -22,7 +24,7 @@ public class GroupPurchaseOfferDto {
     private String description;
     private Integer price;
     private String shopUrl;
-    //todo 이미지 필드 추가
+    private List<String> images;
     private ClosingType closingType;
     private String bank;
     private String accountNumber;
