@@ -62,7 +62,7 @@ public class PurchaseService {
                 .shopUrl(purchase.getShopUrl())
                 .headCount(purchase.getHeadCount())
                 .bookmarkCount(getBookmarkCount(purchase.getId()))
-                //todo 이미지 구현
+                .image(getImagesUrl(purchase.getId()))
                 .currentParticipantCount(getCurrentParticipants(purchase.getId()))
                 .isClosing(purchase.getIsClosing())
                 .hits(purchase.getHits())
