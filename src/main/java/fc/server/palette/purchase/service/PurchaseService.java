@@ -28,7 +28,6 @@ public class PurchaseService {
     private final PurchaseBookmarkRepository purchaseBookmarkRepository;
     private final PurchaseParticipantRepository purchaseParticipantRepository;
 
-    @Transactional
     public List<OfferListDto> getAllOffers() {
         List<Purchase> purchases = purchaseRepository.findAll();
         return purchases.stream()
@@ -36,7 +35,6 @@ public class PurchaseService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional
     public OfferDto getOffer(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
@@ -143,7 +141,6 @@ public class PurchaseService {
         return buildOffer(updatedPurchase);
     }
 
-    @Transactional
     public Long getAuthorId(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
