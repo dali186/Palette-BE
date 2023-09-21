@@ -1,7 +1,6 @@
 package fc.server.palette.purchase.dto.request;
 
 import fc.server.palette.member.entity.Member;
-import fc.server.palette.purchase.entity.Media;
 import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.entity.type.Category;
 import fc.server.palette.purchase.entity.type.ClosingType;
