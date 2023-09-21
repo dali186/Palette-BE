@@ -17,7 +17,7 @@ public class EditOfferDto {
     private Date endDate;
     private Integer headCount;
     private Integer price;
-    private List<String> image;
+    private List<String> images;
     private String description;
     private ClosingType closingType;
     private String bank;
