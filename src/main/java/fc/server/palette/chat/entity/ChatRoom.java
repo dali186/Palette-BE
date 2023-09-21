@@ -20,7 +20,7 @@ public class ChatRoom {
     private String title;
     private String thumbnail;
     private Long host;
-    private String notice;
+    private List<String> notice;
     private Long contentId;
     private List<Long> memberList;
     private Map<Long, LocalDateTime> exitList;
