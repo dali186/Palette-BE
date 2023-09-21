@@ -6,6 +6,7 @@ import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.dto.response.OfferListDto;
 import fc.server.palette.purchase.entity.Bookmark;
+import fc.server.palette.purchase.entity.Media;
 import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.entity.PurchaseParticipant;
 import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
@@ -13,7 +14,6 @@ import fc.server.palette.purchase.repository.PurchaseMediaRepository;
 import fc.server.palette.purchase.repository.PurchaseParticipantRepository;
 import fc.server.palette.purchase.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +31,6 @@ public class PurchaseService {
     @Transactional
     public List<OfferListDto> getAllOffers() {
         List<Purchase> purchases = purchaseRepository.findAll();
-
         return purchases.stream()
                 .map(this::buildOfferList)
                 .collect(Collectors.toList());
@@ -71,7 +70,7 @@ public class PurchaseService {
                 .build();
     }
 
-    private OfferListDto buildOfferList(Purchase purchase){
+    private OfferListDto buildOfferList(Purchase purchase) {
         return OfferListDto.builder()
                 .id(purchase.getId())
                 .title(purchase.getTitle())
@@ -83,18 +82,25 @@ public class PurchaseService {
                 .build();
     }
 
-    private String getThumbnailUrl(Long purchaseId){
+    private String getThumbnailUrl(Long purchaseId) {
         return purchaseMediaRepository
                 .findAllByPurchase_id(purchaseId)
                 .get(0)
                 .getUrl();
     }
 
-    private Integer getBookmarkCount(Long purchaseId){
+    private List<String> getImagesUrl(Long purchaseId) {
+        return purchaseMediaRepository.findAllByPurchase_id(purchaseId)
+                .stream()
+                .map(Media::getUrl)
+                .collect(Collectors.toList());
+    }
+
+    private Integer getBookmarkCount(Long purchaseId) {
         return purchaseBookmarkRepository.findAllByPurchase_id(purchaseId).size();
     }
 
-    private Integer getCurrentParticipants(Long purchaseId){
+    private Integer getCurrentParticipants(Long purchaseId) {
         List<PurchaseParticipant> allByPurchaseId = purchaseParticipantRepository.findAllByPurchaseId(purchaseId);
         return allByPurchaseId.size();
     }
@@ -127,7 +133,7 @@ public class PurchaseService {
     }
 
     @Transactional
-    public OfferDto closeOffer(Long offerId){
+    public OfferDto closeOffer(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         purchase.closeOffer();
@@ -137,7 +143,7 @@ public class PurchaseService {
     }
 
     @Transactional
-    public Long getAuthorId(Long offerId){
+    public Long getAuthorId(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         return purchase.getMember().getId();
