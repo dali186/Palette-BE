@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Builder
@@ -23,7 +24,7 @@ public class OfferDto {
     private Integer headCount;
     private Integer bookmarkCount;
     private Integer currentParticipantCount;
-    //todo image처리
+    private List<String> image;
     private Date startDate;
     private Date endDate;
     private Integer price;

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @AllArgsConstructor
@@ -16,7 +17,7 @@ public class EditOfferDto {
     private Date endDate;
     private Integer headCount;
     private Integer price;
-    //todo 이미지 필드 추가
+    private List<String> image;
     private String description;
     private ClosingType closingType;
     private String bank;
