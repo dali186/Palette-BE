@@ -1,5 +1,6 @@
 package fc.server.palette.chat.dto.response;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@Builder
 public class ChatRoomListResponseDto {
     private String id;
     private String title;
