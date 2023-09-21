@@ -68,14 +68,14 @@ public class PurchaseController {
     @PostMapping("/{offerId}/closing")
     public ResponseEntity<OfferDto> closeOffer(@PathVariable Long offerId,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
-            validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
-            OfferDto offer = purchaseService.closeOffer(offerId);
-            return new ResponseEntity<>(offer, HttpStatus.OK);
-        }
+        validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
+        OfferDto offer = purchaseService.closeOffer(offerId);
+        return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
 
-        private void validateAuthority (Long memberId, Long authorId){
-            if (!memberId.equals(authorId)) {
-                throw new IllegalArgumentException("권한이 없습니다.");
-            }
+    private void validateAuthority(Long memberId, Long authorId) {
+        if (!memberId.equals(authorId)) {
+            throw new IllegalArgumentException("권한이 없습니다.");
         }
     }
+}

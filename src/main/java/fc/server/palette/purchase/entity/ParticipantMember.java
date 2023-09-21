@@ -22,6 +22,6 @@ public class ParticipantMember {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    @ManyToOne(fetch=FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     private PurchaseParticipant purchaseParticipant;
 }

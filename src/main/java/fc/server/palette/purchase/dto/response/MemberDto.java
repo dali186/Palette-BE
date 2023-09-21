@@ -14,7 +14,7 @@ public class MemberDto {
     private String bio;
     private String image;
 
-    public static MemberDto of(Member member){
+    public static MemberDto of(Member member) {
         return MemberDto.builder()
                 .id(member.getId())
                 .nickname(member.getNickname())
