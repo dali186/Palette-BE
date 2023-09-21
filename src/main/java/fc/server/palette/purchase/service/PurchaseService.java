@@ -44,8 +44,9 @@ public class PurchaseService {
     }
 
     @Transactional
-    public OfferDto createOffer(Purchase purchase) {
+    public OfferDto createOffer(Purchase purchase, List<Media> mediaList) {
         Purchase savedPurchase = purchaseRepository.save(purchase);
+        purchaseMediaRepository.saveAll(mediaList);
         return buildOffer(savedPurchase);
     }
 
