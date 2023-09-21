@@ -5,6 +5,8 @@ import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.dto.response.OfferListDto;
+import fc.server.palette.purchase.entity.Media;
+import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.service.PurchaseService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/groupPurchase")
@@ -37,8 +40,18 @@ public class PurchaseController {
     @PostMapping("")
     public ResponseEntity<OfferDto> createOffer(@RequestBody GroupPurchaseOfferDto groupPurchaseOfferDto,
                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
-        OfferDto offer = purchaseService.createOffer(groupPurchaseOfferDto.toEntity(userDetails.getMember()));
+        Purchase purchase = groupPurchaseOfferDto.toEntity(userDetails.getMember());
+        List<Media> mediaList = toMediaList(groupPurchaseOfferDto.getImages(), purchase);
+        OfferDto offer = purchaseService.createOffer(purchase, mediaList);
         return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
+
+    private List<Media> toMediaList(List<String> images, Purchase purchase) {
+        return images.stream().map(url -> Media.builder()
+                        .purchase(purchase)
+                        .url(url)
+                        .build())
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/{offerId}/bookmark")
