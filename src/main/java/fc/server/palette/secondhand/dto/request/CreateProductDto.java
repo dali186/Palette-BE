@@ -12,7 +12,7 @@ import java.sql.Time;
 @Getter
 @Builder
 @AllArgsConstructor
-public class ProductDto {
+public class CreateProductDto {
     private String title;
     private Category category;
     private Time transactionStartTime;
