@@ -1,5 +1,7 @@
 package fc.server.palette.secondhand.service;
 
+import fc.server.palette.purchase.dto.response.MemberDto;
+import fc.server.palette.secondhand.dto.ProductDto;
 import fc.server.palette.secondhand.dto.ProductListDto;
 import fc.server.palette.secondhand.entity.Media;
 import fc.server.palette.secondhand.entity.Secondhand;
@@ -49,6 +51,13 @@ public class SecondhandService {
         return secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
                 .get(0)
                 .getUrl();
+    }
+
+    private List<String> getImagesUrl(Long secondhandId) {
+        return secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
+                .stream()
+                .map(Media::getUrl)
+                .collect(Collectors.toList());
     }
 
     private Integer getBookmarkCount(Long secondhandId) {
