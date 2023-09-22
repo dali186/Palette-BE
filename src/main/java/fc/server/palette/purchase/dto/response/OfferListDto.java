@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @Builder
 @AllArgsConstructor
-@NoArgsConstructor
 public class OfferListDto {
     private Long id;
     private String title;

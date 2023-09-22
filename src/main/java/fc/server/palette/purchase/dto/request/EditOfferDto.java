@@ -10,7 +10,6 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class EditOfferDto {
     private String shopUrl;
     private Date startDate;

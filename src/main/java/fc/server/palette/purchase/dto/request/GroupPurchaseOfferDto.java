@@ -13,7 +13,6 @@ import java.util.List;
 
 @Getter
 @AllArgsConstructor
-@NoArgsConstructor
 public class GroupPurchaseOfferDto {
     private String title;
     private Category category;
