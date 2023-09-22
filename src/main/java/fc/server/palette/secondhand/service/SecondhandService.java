@@ -30,6 +30,13 @@ public class SecondhandService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public ProductDto getProduct(Long productId) {
+        Secondhand product = secondhandRespository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+        return buildProductDto(product);
+    }
+
     private ProductListDto buildProductList(Secondhand secondhand) {
         return ProductListDto.builder()
                 .id(secondhand.getId())
@@ -39,6 +46,25 @@ public class SecondhandService {
                 .thumbnailUrl(getThumbnailUrl(secondhand.getId()))
                 .bookmarkCount(getBookmarkCount(secondhand.getId()))
                 .hits(secondhand.getHits())
+                .build();
+    }
+
+    private ProductDto buildProductDto(Secondhand secondhand) {
+        return ProductDto.builder()
+                .id(secondhand.getId())
+                .member(MemberDto.of(secondhand.getMember()))
+                .bookmarkCount(getBookmarkCount(secondhand.getId()))
+                .images(getImagesUrl(secondhand.getId()))
+                .title(secondhand.getTitle())
+                .category(secondhand.getCategory())
+                .transactionStartTime(secondhand.getTransactionStartTime())
+                .transactionEndTime(secondhand.getTransactionEndTime())
+                .description(secondhand.getDescription())
+                .price(secondhand.getPrice())
+                .hits(secondhand.getHits())
+                .isSoldOut(secondhand.getIsSoldOut())
+                .isFree(secondhand.getIsFree())
+                .createdAt(secondhand.getCreatedAt())
                 .build();
     }
 
@@ -52,7 +78,7 @@ public class SecondhandService {
                 .get(0)
                 .getUrl();
     }
-
+    
     private List<String> getImagesUrl(Long secondhandId) {
         return secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
                 .stream()
