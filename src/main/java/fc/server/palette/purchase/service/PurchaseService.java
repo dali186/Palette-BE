@@ -128,9 +128,7 @@ public class PurchaseService {
         Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
         purchase.updateOffer(editOfferDto);
-        Purchase updatedPurchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
-        return buildOffer(updatedPurchase);
+        return buildOffer(purchase);
     }
 
     @Transactional
