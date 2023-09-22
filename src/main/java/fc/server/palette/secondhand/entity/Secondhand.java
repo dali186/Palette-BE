@@ -63,4 +63,8 @@ public class Secondhand extends BaseEntity {
     @ColumnDefault("0")
     @Column(nullable = false)
     private Boolean isFree;
+
+    public void closeTransaction() {
+        this.isSoldOut = true;
+    }
 }
