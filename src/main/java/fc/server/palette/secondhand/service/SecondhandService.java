@@ -51,8 +51,10 @@ public class SecondhandService {
     }
 
     @Transactional
-    public ProductDto createProduct(){
-
+    public ProductDto createProduct(Secondhand secondhand, List<Media> mediaList){
+        Secondhand savedProduct = secondhandRespository.save(secondhand);
+        secondhandMediaRepository.saveAll(mediaList);
+        return buildProductDto(savedProduct);
     }
 
     private ProductListDto buildProductList(Secondhand secondhand) {
