@@ -1,7 +1,7 @@
 package fc.server.palette.secondhand.controller;
 
-import fc.server.palette.secondhand.dto.ProductDto;
-import fc.server.palette.secondhand.dto.ProductListDto;
+import fc.server.palette.secondhand.dto.response.ProductDto;
+import fc.server.palette.secondhand.dto.response.ProductListDto;
 import fc.server.palette.secondhand.service.SecondhandService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

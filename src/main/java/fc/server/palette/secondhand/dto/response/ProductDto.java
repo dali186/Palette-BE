@@ -1,4 +1,4 @@
-package fc.server.palette.secondhand.dto;
+package fc.server.palette.secondhand.dto.response;
 
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.dto.response.MemberDto;

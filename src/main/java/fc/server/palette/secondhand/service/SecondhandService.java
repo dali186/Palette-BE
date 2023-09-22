@@ -1,8 +1,8 @@
 package fc.server.palette.secondhand.service;
 
 import fc.server.palette.purchase.dto.response.MemberDto;
-import fc.server.palette.secondhand.dto.ProductDto;
-import fc.server.palette.secondhand.dto.ProductListDto;
+import fc.server.palette.secondhand.dto.response.ProductDto;
+import fc.server.palette.secondhand.dto.response.ProductListDto;
 import fc.server.palette.secondhand.entity.Media;
 import fc.server.palette.secondhand.entity.Secondhand;
 import fc.server.palette.secondhand.repository.SecondhandBookmarkRepository;
@@ -48,6 +48,11 @@ public class SecondhandService {
                 .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
         product.closeTransaction();
         return buildProductDto(product);
+    }
+
+    @Transactional
+    public ProductDto createProduct(){
+
     }
 
     private ProductListDto buildProductList(Secondhand secondhand) {
