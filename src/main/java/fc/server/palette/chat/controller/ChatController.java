@@ -3,6 +3,7 @@ package fc.server.palette.chat.controller;
 import fc.server.palette.chat.dto.request.ChatRoomNoticeRequestDto;
 import fc.server.palette.chat.entity.ChatMessage;
 import fc.server.palette.chat.entity.ChatRoom;
+import fc.server.palette.chat.entity.type.ChatMessageType;
 import fc.server.palette.chat.entity.type.ChatRoomType;
 import fc.server.palette.chat.service.ChatRoomService;
 import fc.server.palette.chat.service.ChatService;
@@ -17,6 +18,8 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -39,6 +42,14 @@ public class ChatController {
         return ResponseEntity.ok(chatMessageService.setChatRoomListResponse(chatRoomService.findGroupChatRoomList(memberId), memberId));
     }
 
+//    //채팅방 관련 정보 조회
+//    @GetMapping("/room/detail")
+//    public ResponseEntity<?> roomDetails(@RequestParam("roomId") String roomId) {
+//        ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
+//        ChatRoomType type = chatRoom.getType();
+//
+//    }
+
     //공지 등록
     @PostMapping("/notice")
     public ResponseEntity<?> noticeSave(@RequestBody ChatRoomNoticeRequestDto request) {
@@ -59,14 +70,24 @@ public class ChatController {
     }
 
     //채팅방 나가기
+    //TODO userId가 아닌 nickname 받아서 수정
     @DeleteMapping("/exit")
     public ResponseEntity<?> memberRemove(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam("roomId") String roomId) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
-        chatRoom.getMemberList().remove(userDetails.getMember().getId());
-        chatRoom.getExitList().remove(userDetails.getMember().getId());
+        Long memberId = userDetails.getMember().getId();
+        chatRoom.getMemberList().remove(memberId);
+        chatRoom.getExitList().remove(memberId);
 
         if (chatRoom.getType().equals(ChatRoomType.MEETING) || chatRoom.getType().equals(ChatRoomType.PURCHASE)) {
-            //TODO 채팅방에 나갔습니다 메세지 발송
+            ChatMessage chatMessage = ChatMessage.builder()
+                    .sender(memberId)
+                    .type(ChatMessageType.SYSTEM)
+                    .content(memberId + "님이 나갔습니다.")
+                    .roomId(chatRoom.getId())
+                    .createdAt(LocalDateTime.now())
+                    .build();
+            chatMessageService.saveChat(chatMessage);
+            template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
         }
 
         chatRoomService.updateChatRoom(chatRoom);
