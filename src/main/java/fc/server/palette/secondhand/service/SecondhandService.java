@@ -37,6 +37,11 @@ public class SecondhandService {
         return buildProductDto(product);
     }
 
+    @Transactional
+    public void deleteProduct(Long productId) {
+        secondhandRespository.deleteById(productId);
+    }
+
     private ProductListDto buildProductList(Secondhand secondhand) {
         return ProductListDto.builder()
                 .id(secondhand.getId())
@@ -78,7 +83,7 @@ public class SecondhandService {
                 .get(0)
                 .getUrl();
     }
-    
+
     private List<String> getImagesUrl(Long secondhandId) {
         return secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
                 .stream()
