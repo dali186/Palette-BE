@@ -39,7 +39,7 @@ public class MemberController {
     }
 
 
-    // 팔로워목록
+
     @GetMapping("/mypage/followed/{followedId}")
     public ResponseEntity<List<FollowInfoDto>> getFollowed(@PathVariable Long followedId) {
         List<FollowInfoDto> followed = memberService.getFollowed(followedId);
@@ -47,7 +47,7 @@ public class MemberController {
     }
 
 
-    //팔로잉목록
+
     @GetMapping("/mypage/following/{followingId}")
     public ResponseEntity<List<FollowInfoDto>> getFollowing(@PathVariable Long followingId) {
         List<FollowInfoDto> following = memberService.getFollowings(followingId);
@@ -55,14 +55,14 @@ public class MemberController {
     }
 
 
-    //팔로우추가
+
     @PostMapping("/mypage/follow/{followedId}")
     public ResponseEntity<?> follow(@PathVariable Long followedId, @RequestBody FollowRequestDto Dto ){
         memberService.follow(followedId, Dto.getFollowingId());
         return ResponseEntity.ok("팔로우완료");
     }
 
-    //팔로우삭제
+
     @DeleteMapping("/mypage/follow/{followedId}/{followingId}")
     public ResponseEntity<?> unfollow(@PathVariable Long followedId, @PathVariable Long followingId) {
         memberService.unfollow(followedId, followingId);

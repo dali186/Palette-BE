@@ -51,7 +51,7 @@ public class MemberService {
             Optional<Building> buildingOptional = Optional.ofNullable(member.getBuilding());
             Optional<Room> roomOptional = Optional.ofNullable(member.getRoom());
 
-            // 팔로워 수와 팔로우 수 조회
+
             long followedCount = getFollowedCount(memberId);
             long followingCount = getFollowingCount(memberId);
 
@@ -65,8 +65,8 @@ public class MemberService {
                     .building(buildingOptional.map(Building::getName).orElse(null))
                     .wing(roomOptional.map(Room::getWing).orElse(null))
                     .roomNumber(roomOptional.map(Room::getRoomNumber).orElse(null))
-                    .followedCount(followedCount) // 팔로워 수 설정
-                    .followingCount(followingCount) // 팔로우 수 설정
+                    .followedCount(followedCount)
+                    .followingCount(followingCount)
                     .build();
         } else {
             return null;
@@ -77,18 +77,18 @@ public class MemberService {
 
 
 
-    // 팔로워 수 조회
+
     public long getFollowedCount(Long memberId) {
         return followRepository.countByFollowedId(memberId);
     }
 
-    // 팔로우 수 조회
+
     public long getFollowingCount(Long memberId) {
         return followRepository.countByFollowingId(memberId);
     }
 
 
-    //팔로우하는 메서드
+
     public void follow(Long followedId, Long followingId) {
         Optional<Follow> existingFollow = followRepository.findByFollowedIdAndFollowingId(followedId, followingId);
         if (existingFollow.isEmpty()) {
@@ -100,7 +100,7 @@ public class MemberService {
         }
     }
 
-    //언팔로우 메서드
+
     public void unfollow(Long followedId, Long followingId) {
         Optional<Follow> existingFollow = followRepository.findByFollowedIdAndFollowingId(followedId, followingId);
         existingFollow.ifPresent(follow ->  {
@@ -108,7 +108,7 @@ public class MemberService {
         });
     }
 
-    //팔로워 회원 목록 조회
+
     public List<FollowInfoDto> getFollowed(Long memberId) {
         List<Follow> followerList = followRepository.findByFollowedId(memberId);
         List<FollowInfoDto> followerInfoList = new ArrayList<>();
@@ -122,7 +122,7 @@ public class MemberService {
         return followerInfoList;
     }
 
-    // 팔로잉 리스트 조회 메서드
+
     public List<FollowInfoDto> getFollowings(Long memberId) {
         List<Follow> followingList = followRepository.findByFollowingId(memberId);
         List<FollowInfoDto> followingInfoList = new ArrayList<>();
