@@ -1,6 +1,5 @@
 package fc.server.palette.purchase.entity;
 
-import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,8 +12,9 @@ import javax.persistence.*;
 @AllArgsConstructor
 @Builder
 @Getter
-@Entity(name = "PurchaseBookmark")
-public class Bookmark extends BaseEntity {
+@Entity
+@Table(name = "group_purchase_participant_member")
+public class ParticipantMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,5 +23,5 @@ public class Bookmark extends BaseEntity {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Purchase purchase;
+    private PurchaseParticipant purchaseParticipant;
 }

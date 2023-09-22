@@ -1,5 +1,6 @@
 package fc.server.palette.secondhand.entity;
 
+import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.member.entity.Member;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,8 +14,7 @@ import javax.persistence.*;
 @Builder
 @Getter
 @Entity(name = "SecondhandBookmark")
-@Table(name="secoondhand_bookmark")
-public class Bookmark {
+public class Bookmark extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
