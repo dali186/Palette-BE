@@ -2,6 +2,7 @@ package fc.server.palette.secondhand.service;
 
 import fc.server.palette.secondhand.dto.ProductListDto;
 import fc.server.palette.secondhand.entity.Secondhand;
+import fc.server.palette.secondhand.repository.SecondhandBookmarkRepository;
 import fc.server.palette.secondhand.repository.SecondhandMediaRepository;
 import fc.server.palette.secondhand.repository.SecondhandRespository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public class SecondhandService {
     private final SecondhandRespository secondhandRespository;
     private final SecondhandMediaRepository secondhandMediaRepository;
+    private final SecondhandBookmarkRepository secondhandBookmarkRepository;
 
     @Transactional(readOnly = true)
     public List<ProductListDto> getAllProducts(){
@@ -32,7 +34,7 @@ public class SecondhandService {
                 .category(secondhand.getCategory())
                 .price(secondhand.getPrice())
                 .thumbnailUrl(getThumbnailUrl(secondhand.getId()))
-                .bookmarkCount()
+                .bookmarkCount(getBookmarkCount(secondhand.getId()))
                 .hits(secondhand.getHits())
                 .build();
     }
@@ -41,5 +43,9 @@ public class SecondhandService {
         return secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
                 .get(0)
                 .getUrl();
+    }
+
+    private Integer getBookmarkCount(Long secondhandId){
+        return secondhandBookmarkRepository.findAllBySecondhand_id(secondhandId).size();
     }
 }
