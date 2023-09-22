@@ -34,4 +34,9 @@ public class SecondhandController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @PostMapping("{productId}/closing")
+    public ResponseEntity<ProductDto> closeTransaction(@PathVariable Long productId) {
+        ProductDto product = secondhandService.closeTransaction(productId);
+        return new ResponseEntity<ProductDto>(product, HttpStatus.OK);
+    }
 }
