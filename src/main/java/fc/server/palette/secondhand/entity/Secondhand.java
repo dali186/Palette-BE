@@ -48,15 +48,6 @@ public class Secondhand extends BaseEntity {
     @Column(nullable = false)
     private Boolean isSoldOut;
 
-    @Column(nullable = false, length = 50)
-    private String bank;
-
-    @Column(nullable = false, length = 50)
-    private String accountNumber;
-
-    @Column(nullable = false, length = 50)
-    private String accountOwner;
-
     @Column(nullable = false)
     private Integer hits;
 
