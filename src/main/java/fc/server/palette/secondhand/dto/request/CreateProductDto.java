@@ -8,6 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.sql.Time;
+import java.util.List;
 
 @Getter
 @Builder
@@ -18,6 +19,7 @@ public class CreateProductDto {
     private Time transactionStartTime;
     private Time transactionEndTime;
     //todo 요일 필드
+    private List<String> images;
     private Boolean isFree;
     private String description;
     private Integer price;
