@@ -58,6 +58,18 @@ public class Secondhand extends BaseEntity {
     @Column(nullable = false)
     private Boolean isFree;
 
+    // db에 저장된 기본값이 적용되지 않고 필드에 null로 저장되는데 따른 조치
+    public Boolean getIsSoldOut() {
+        return isSoldOut != null && isSoldOut;
+    }
+    public Integer getHits() {
+        return hits == null ? 0 : hits;
+    }
+
+    public Boolean getIsFree() {
+        return isFree != null && isFree;
+    }
+
     public void closeTransaction() {
         this.isSoldOut = true;
     }
