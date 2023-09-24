@@ -2,6 +2,7 @@ package fc.server.palette.secondhand.controller;
 
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.secondhand.dto.request.CreateProductDto;
+import fc.server.palette.secondhand.dto.request.EditProductDto;
 import fc.server.palette.secondhand.dto.response.ProductDto;
 import fc.server.palette.secondhand.dto.response.ProductListDto;
 import fc.server.palette.secondhand.entity.Media;
@@ -28,19 +29,19 @@ public class SecondhandController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-    @GetMapping("{productId}")
+    @GetMapping("/{productId}")
     public ResponseEntity<ProductDto> getProduct(@PathVariable Long productId) {
         ProductDto product = secondhandService.getProduct(productId);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
-    @DeleteMapping("{productId}")
+    @DeleteMapping("/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
         secondhandService.deleteProduct(productId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("{productId}/closing")
+    @PostMapping("/{productId}/closing")
     public ResponseEntity<ProductDto> closeTransaction(@PathVariable Long productId) {
         ProductDto product = secondhandService.closeTransaction(productId);
         return new ResponseEntity<ProductDto>(product, HttpStatus.OK);
@@ -61,5 +62,13 @@ public class SecondhandController {
                         .url(url)
                         .build())
                 .collect(Collectors.toList());
+    }
+
+    @PatchMapping("/{productId}")
+    public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
+                                                  @RequestBody EditProductDto editProductDto,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
+        ProductDto product = secondhandService.editProduct(productId, editProductDto);
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
 }
