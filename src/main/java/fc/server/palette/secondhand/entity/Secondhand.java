@@ -3,6 +3,7 @@ package fc.server.palette.secondhand.entity;
 import fc.server.palette._common.auditing.BaseEntity;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.entity.type.Category;
+import fc.server.palette.secondhand.dto.request.EditProductDto;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import lombok.Builder;
@@ -72,5 +73,12 @@ public class Secondhand extends BaseEntity {
 
     public void closeTransaction() {
         this.isSoldOut = true;
+    }
+
+    public void updateProduct(EditProductDto editProductDto){
+        this.price = editProductDto.getPrice();
+        this.transactionStartTime = editProductDto.getTransactionStartTime();
+        this.transactionEndTime = editProductDto.getTransactionEndTime();
+        this.description = editProductDto.getDescription();
     }
 }
