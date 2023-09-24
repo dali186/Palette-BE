@@ -40,16 +40,14 @@ public class MemberService {
 
     }
 
-
     public MemberMyPageDto myPageInfo(Long memberId) {
-        Optional<Member> memberOptional = Optional.ofNullable(memberRepository.findById(memberId).orElseThrow(
-                () -> new Exception400(memberId.toString(), ExceptionMessage.NO_MEMBER_ID)));
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new Exception400(memberId.toString(), ExceptionMessage.NO_MEMBER_ID));
 
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
+        if (member!= null) {
 
-            Optional<Building> buildingOptional = Optional.ofNullable(member.getBuilding());
-            Optional<Room> roomOptional = Optional.ofNullable(member.getRoom());
+            Building building = member.getBuilding();
+            Room room = member.getRoom();
 
 
             long followedCount = getFollowedCount(memberId);
@@ -62,9 +60,9 @@ public class MemberService {
                     .bio(member.getBio())
                     .job(member.getJob() != null ? member.getJob().getValue() : null)
                     .position(member.getPosition() != null ? member.getPosition().getValue() : null)
-                    .building(buildingOptional.map(Building::getName).orElse(null))
-                    .wing(roomOptional.map(Room::getWing).orElse(null))
-                    .roomNumber(roomOptional.map(Room::getRoomNumber).orElse(null))
+                    .building(building.getName())
+                    .wing(room.getWing())
+                    .roomNumber(room.getRoomNumber())
                     .followedCount(followedCount)
                     .followingCount(followingCount)
                     .build();
@@ -73,11 +71,6 @@ public class MemberService {
         }
 
     }
-
-
-
-
-
     public long getFollowedCount(Long memberId) {
         return followRepository.countByFollowedId(memberId);
     }
@@ -148,10 +141,5 @@ public class MemberService {
 
 
 }
-
-
-
-
-
 
 

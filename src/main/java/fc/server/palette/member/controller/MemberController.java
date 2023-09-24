@@ -23,12 +23,12 @@ public class MemberController {
 
 
     @GetMapping("/mypage/{memberId}")
-    public ResponseEntity<?> mypage (@PathVariable Long memberId){
+    public ResponseEntity<?> myPageInfo (@PathVariable Long memberId){
         return ResponseEntity.ok(memberService.myPageInfo(memberId));
     }
 
     @PostMapping("/mypage/{memberId}")
-    public ResponseEntity<?> updateProfile (
+    public ResponseEntity<?> updateMember (
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long memberId,
             @RequestBody MemberProfileDto memberProfileDto
@@ -49,7 +49,7 @@ public class MemberController {
 
 
     @GetMapping("/mypage/following/{followingId}")
-    public ResponseEntity<List<FollowInfoDto>> getFollowing(@PathVariable Long followingId) {
+    public ResponseEntity<List<FollowInfoDto>> getFollowings(@PathVariable Long followingId) {
         List<FollowInfoDto> following = memberService.getFollowings(followingId);
         return ResponseEntity.ok(following);
     }
@@ -68,11 +68,4 @@ public class MemberController {
         memberService.unfollow(followedId, followingId);
         return ResponseEntity.ok("언팔로우완료");
     }
-
-
-
-
-
-
-
 }

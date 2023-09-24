@@ -11,8 +11,6 @@ import lombok.*;
 import java.time.LocalDate;
 
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor
 public class MemberProfileDto {
     private String image;
     private String email;
