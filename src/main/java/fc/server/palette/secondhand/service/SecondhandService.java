@@ -1,6 +1,7 @@
 package fc.server.palette.secondhand.service;
 
 import fc.server.palette.purchase.dto.response.MemberDto;
+import fc.server.palette.secondhand.dto.request.EditProductDto;
 import fc.server.palette.secondhand.dto.response.ProductDto;
 import fc.server.palette.secondhand.dto.response.ProductListDto;
 import fc.server.palette.secondhand.entity.Media;
@@ -55,6 +56,14 @@ public class SecondhandService {
         Secondhand savedProduct = secondhandRespository.save(secondhand);
         secondhandMediaRepository.saveAll(mediaList);
         return buildProductDto(savedProduct);
+    }
+
+    @Transactional
+    public ProductDto editProduct(Long productId, EditProductDto editProductDto){
+        Secondhand product = secondhandRespository.findById(productId)
+                .orElseThrow(()->new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+        product.updateProduct(editProductDto);
+        return buildProductDto(product);
     }
 
     private ProductListDto buildProductList(Secondhand secondhand) {
