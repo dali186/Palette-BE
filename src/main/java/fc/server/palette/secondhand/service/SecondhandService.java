@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,6 +107,13 @@ public class SecondhandService {
         return secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
                 .get(0)
                 .getUrl();
+    }
+
+    @Transactional(readOnly = true)
+    public Long getAuthorId(Long productId){
+        Secondhand product = secondhandRespository.findById(productId)
+                .orElseThrow(()-> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+        return product.getMember().getId();
     }
 
     private List<String> getImagesUrl(Long secondhandId) {
