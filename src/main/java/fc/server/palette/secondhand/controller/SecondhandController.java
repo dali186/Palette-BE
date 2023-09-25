@@ -1,5 +1,6 @@
 package fc.server.palette.secondhand.controller;
 
+import fc.server.palette._common.validation.MemberValidator;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.secondhand.dto.request.CreateProductDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
@@ -36,13 +37,17 @@ public class SecondhandController {
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long productId) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long productId,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MemberValidator.validateAuthority(userDetails.getMember().getId(), secondhandService.getAuthorId(productId));
         secondhandService.deleteProduct(productId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
     @PostMapping("/{productId}/closing")
-    public ResponseEntity<ProductDto> closeTransaction(@PathVariable Long productId) {
+    public ResponseEntity<ProductDto> closeTransaction(@PathVariable Long productId,
+                                                       @AuthenticationPrincipal CustomUserDetails userDetails) {
+        MemberValidator.validateAuthority(userDetails.getMember().getId(), secondhandService.getAuthorId(productId));
         ProductDto product = secondhandService.closeTransaction(productId);
         return new ResponseEntity<ProductDto>(product, HttpStatus.OK);
     }
@@ -68,6 +73,7 @@ public class SecondhandController {
     public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
                                                   @RequestBody EditProductDto editProductDto,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
+        MemberValidator.validateAuthority(userDetails.getMember().getId(), secondhandService.getAuthorId(productId));
         ProductDto product = secondhandService.editProduct(productId, editProductDto);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
