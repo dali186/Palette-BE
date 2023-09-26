@@ -21,19 +21,34 @@ public class ChatRoomService {
         return savedRoom.getId();
     }
 
+    //개인 톡방 조회
     @Transactional
     public List<ChatRoom> findPersonalChatRoomList(Long memberId) {
         return chatRoomRepository.findPersonalRoomByMemberId(memberId);
     }
 
+    //단체 톡방 조회
     @Transactional
     public List<ChatRoom> findGroupChatRoomList(Long memberId) {
         return chatRoomRepository.findGroupRoomByMemberId(memberId);
     }
 
+    //roomId로 채팅방 조회
+    @Transactional
+    public ChatRoom findChatRoomById(String roomId) {
+        return chatRoomRepository.findChatRoomById(roomId);
+    }
+
+    //ChatRoom 정보 업데이트
+    @Transactional
+    public void updateChatRoom(ChatRoom chatRoom) {
+        chatRoomRepository.save(chatRoom);
+    }
+
+    //소켓 연결 해제 시 시간 정보 업데이트
     @Transactional
     public void updateChatRoomExitTime(Long memberId, String roomId) {
-        ChatRoom chatRoom = chatRoomRepository.findChatRoomById(roomId);
+        ChatRoom chatRoom = findChatRoomById(roomId);
         chatRoom.getExitList().put(memberId, LocalDateTime.now());
         chatRoomRepository.save(chatRoom);
     }

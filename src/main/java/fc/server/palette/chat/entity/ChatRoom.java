@@ -20,7 +20,7 @@ public class ChatRoom {
     private String title;
     private String thumbnail;
     private Long host;
-    private List<String> notice;
+    private List<String> noticeList;
     private Long contentId;
     private List<Long> memberList;
     private Map<Long, LocalDateTime> exitList;
@@ -28,5 +28,6 @@ public class ChatRoom {
     public ChatRoom() {
         this.memberList = new ArrayList<>();
         this.exitList = new HashMap<>();
+        this.noticeList = new ArrayList<>();
     }
 }

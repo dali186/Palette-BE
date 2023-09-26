@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
@@ -14,7 +13,7 @@ public class ChatRoomListResponseDto {
     private String id;
     private String title;
     private String image;
-    private List<Long> memberList;
+    private Integer members;
     private String recentMessage;
     private LocalDateTime recentTime;
     private Long unRead;
