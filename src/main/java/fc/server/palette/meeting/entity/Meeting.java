@@ -59,7 +59,6 @@ public class Meeting extends BaseEntity {
     @Builder.Default
     @ElementCollection(targetClass = Age.class)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private List<Age> ageRange = new ArrayList<>();
 
     @Builder.Default

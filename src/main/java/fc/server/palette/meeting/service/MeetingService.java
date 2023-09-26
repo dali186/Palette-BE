@@ -138,7 +138,6 @@ public class MeetingService {
                 .job(Job.fromValue(meetingCreateRequestDto.getJobs()))
                 .position(Position.fromValue(meetingCreateRequestDto.getPositions()))
                 .sex(Sex.fromValue(meetingCreateRequestDto.getSex()))
-                .ageRange(Age.fromValue(meetingCreateRequestDto.getAgeRange()))
                 .image(mediaList)
                 .title(meetingCreateRequestDto.getTitle())
                 .description(meetingCreateRequestDto.getDescription())
@@ -182,9 +181,6 @@ public class MeetingService {
                         .map(Position::getValue)
                         .collect(Collectors.toList()))
                 .sex(saveMeeting.getSex().getValue())
-                .ageRange(saveMeeting.getAgeRange().stream()
-                        .map(Age::getDescription)
-                        .collect(Collectors.toList()))
                 .image(saveMeeting.getImage().stream()
                         .map(Media::getUrl)
                         .collect(Collectors.toList()))
@@ -245,9 +241,6 @@ public class MeetingService {
                         .map(Position::getValue)
                         .collect(Collectors.toList()))
                 .sex(meeting.getSex().getValue())
-                .ageRange(meeting.getAgeRange().stream()
-                        .map(Age::getDescription)
-                        .collect(Collectors.toList()))
                 .image(meeting.getImage().stream()
                         .map(Media::getUrl)
                         .collect(Collectors.toList()))
@@ -283,9 +276,6 @@ public class MeetingService {
                         map(Position::getValue)
                         .collect(Collectors.toList()))
                 .sex(meeting.getSex().getValue())
-                .ageRange(meeting.getAgeRange().stream()
-                        .map(Age::getDescription)
-                        .collect(Collectors.toList()))
                 .image(meeting.getImage().stream()
                         .map(Media::getUrl)
                         .collect(Collectors.toList()))
@@ -475,18 +465,4 @@ public class MeetingService {
         }
     }
 
-    public void closeMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
-                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-        if (meeting.isClosing()){
-            throw new IllegalArgumentException("이미 모집된 마감입니다.");
-        }
-        meeting.setClosing(true);
-    }
-
-    public void reopenMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId).orElseThrow(
-                () -> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-        meeting.setClosing(false);
-    }
 }

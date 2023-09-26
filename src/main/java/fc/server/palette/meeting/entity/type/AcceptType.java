@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AcceptType {
-    FIRST_COME("선착순"), APPROVAL("승인");
+    FIRST_COME("선착순"), APPROVAL("승인제");
 
     private final String description;
     @JsonCreator
