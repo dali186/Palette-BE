@@ -55,10 +55,11 @@ public class MeetingController {
     public ResponseEntity<?> updateMeeting(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long meetingId,
-            @RequestBody MeetingUpdateRequestDto meetingUpdateRequestDto
+            @RequestPart(value = "dto") MeetingUpdateRequestDto meetingUpdateRequestDto,
+            @RequestPart(value = "file", required = false)List<MultipartFile> images
     ){
         userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
-        meetingService.updateMeeting(meetingId, meetingUpdateRequestDto);
+        meetingService.updateMeeting(meetingId, meetingUpdateRequestDto, images);
         return ResponseEntity.ok("업데이트 완료");
 
     }

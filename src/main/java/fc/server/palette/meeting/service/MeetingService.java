@@ -172,9 +172,28 @@ public class MeetingService {
         meetingRepository.deleteById(meetingId);
     }
 
-    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
+    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto, List<MultipartFile> images) {
         Meeting meeting = getMeeting(meetingId);
-        meeting.update(meetingUpdateRequestDto);
+
+        List<Media> existingMedia = meeting.getImage();
+        existingMedia.stream().forEach(mediaRepository::delete);
+
+        List<Media> mediaList = new ArrayList<>();
+        boolean isImageEmpty = images.stream().anyMatch(MultipartFile::isEmpty);
+
+        if (!isImageEmpty) {
+            for(MultipartFile image : images){
+                String imageUrl = meetingMediaService.uploadImage(image);
+                Media media = Media.builder()
+                        .url(imageUrl)
+                        .meeting(meeting)
+                        .build();
+                mediaList.add(media);
+                mediaRepository.save(media);
+            }
+        }
+        meeting.update(meetingUpdateRequestDto, mediaList);
+
     }
 
     public MeetingDetailResponseDto getDetailMeeting(Long meetingId) {
