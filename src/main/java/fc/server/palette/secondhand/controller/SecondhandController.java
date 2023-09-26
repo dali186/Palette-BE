@@ -39,7 +39,7 @@ public class SecondhandController {
     @DeleteMapping("/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable Long productId,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MemberValidator.validateAuthority(userDetails.getMember().getId(), secondhandService.getAuthorId(productId));
+        userDetails.validateAuthority(secondhandService.getAuthorId(productId));
         secondhandService.deleteProduct(productId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -47,7 +47,7 @@ public class SecondhandController {
     @PostMapping("/{productId}/closing")
     public ResponseEntity<ProductDto> closeTransaction(@PathVariable Long productId,
                                                        @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MemberValidator.validateAuthority(userDetails.getMember().getId(), secondhandService.getAuthorId(productId));
+        userDetails.validateAuthority(secondhandService.getAuthorId(productId));
         ProductDto product = secondhandService.closeTransaction(productId);
         return new ResponseEntity<ProductDto>(product, HttpStatus.OK);
     }
@@ -73,7 +73,7 @@ public class SecondhandController {
     public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
                                                   @RequestBody EditProductDto editProductDto,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
-        MemberValidator.validateAuthority(userDetails.getMember().getId(), secondhandService.getAuthorId(productId));
+        userDetails.validateAuthority(secondhandService.getAuthorId(productId));
         ProductDto product = secondhandService.editProduct(productId, editProductDto);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }

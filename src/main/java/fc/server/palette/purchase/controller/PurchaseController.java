@@ -1,6 +1,5 @@
 package fc.server.palette.purchase.controller;
 
-import fc.server.palette._common.validation.MemberValidator;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
@@ -65,7 +64,7 @@ public class PurchaseController {
     @DeleteMapping("/{offerId}")
     public ResponseEntity<?> deleteOffer(@PathVariable Long offerId,
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MemberValidator.validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
+        userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
         purchaseService.deleteOffer(offerId);
         return new ResponseEntity<>(HttpStatus.OK);
     }
@@ -74,7 +73,7 @@ public class PurchaseController {
     public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
                                               @RequestBody EditOfferDto editOfferDto,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MemberValidator.validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
+        userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
         OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
@@ -82,7 +81,7 @@ public class PurchaseController {
     @PostMapping("/{offerId}/closing")
     public ResponseEntity<OfferDto> closeOffer(@PathVariable Long offerId,
                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
-        MemberValidator.validateAuthority(userDetails.getMember().getId(), purchaseService.getAuthorId(offerId));
+        userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
         OfferDto offer = purchaseService.closeOffer(offerId);
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
