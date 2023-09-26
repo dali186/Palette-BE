@@ -24,6 +24,7 @@ import fc.server.palette.member.entity.type.Job;
 import fc.server.palette.member.entity.type.Position;
 import fc.server.palette.member.entity.type.Sex;
 import fc.server.palette.member.repository.MemberRepository;
+import fc.server.palette.purchase.entity.Purchase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -167,23 +168,17 @@ public class MeetingService {
     }
 
     public void delete(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         meetingRepository.deleteById(meetingId);
     }
 
-    public void updateMeeting(Long loginMemberId, Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
-        if (meeting.getMember().getId() != loginMemberId) {
-            throw new Exception403(ExceptionMessage.ACCESS_DENIED);
-        }
+    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
+        Meeting meeting = getMeeting(meetingId);
         meeting.update(meetingUpdateRequestDto);
     }
 
     public MeetingDetailResponseDto getDetailMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         meeting.setHits(); //조회수 증가
         MeetingMemberResponseDto responseMember = MeetingMemberResponseDto.builder()
                 .nickname(meeting.getMember().getNickname())
@@ -262,8 +257,7 @@ public class MeetingService {
     }
 
     public void likesMeeting(Long meetingId, Member member) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         Bookmark bookmark = Bookmark.builder()
                 .member(member)
                 .meeting(meeting)
@@ -273,8 +267,7 @@ public class MeetingService {
     }
 
     public void dislikesMeeting(Long meetingId, Member member) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
 
         Bookmark bookmark = bookmarkRepository.findByMemberAndMeeting(member, meeting);
         if (bookmark != null) {
@@ -284,8 +277,7 @@ public class MeetingService {
     }
 
     public void closeMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         if (meeting.isClosing()) {
             throw new Exception400(meetingId.toString(), ExceptionMessage.AlREADY_CLOSING);
         }
@@ -293,14 +285,12 @@ public class MeetingService {
     }
 
     public void reopenMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         meeting.reopen();
     }
 
     public List<MeetingListResponseDto> recommendMeeting(Long loginMemberId, Long meetingId) {
-        Meeting baseMeeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting baseMeeting = getMeeting(meetingId);
         List<Meeting> recommededMeeting = new ArrayList<>();
 
         if (recommededMeeting.size() < 2) {
@@ -354,8 +344,7 @@ public class MeetingService {
     }
 
     public boolean checkParticipateMeeting(Long meetingId, Member member) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
 
         return meeting.getPosition().stream()
                 .anyMatch(position -> member.getPosition().equals(position)
@@ -363,8 +352,7 @@ public class MeetingService {
     }
 
     public List<MeetingMemberResponseDto> participateMemberList(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.APPROVAL);
 
         List<MeetingMemberResponseDto> approvedMembers = applications.stream()
@@ -378,8 +366,7 @@ public class MeetingService {
     }
 
     public void participateMeeting(Long meetingId, Member member, ApplicationRequestDto applicationRequestDto) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
 
         Application application = Application.builder()
                 .meeting(meeting)
@@ -390,8 +377,7 @@ public class MeetingService {
     }
 
     public List<WaitingParticipateMemberResponseDto> waitingParticipateMemberList(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.WAITING);
 
         List<WaitingParticipateMemberResponseDto> waitingMember = applications.stream()
@@ -424,6 +410,12 @@ public class MeetingService {
             application.participateApprove();
             application.getMeeting().setRecruitedPersonnel();
         }
+    }
+
+    public Meeting getMeeting(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        return meeting;
     }
 
 }

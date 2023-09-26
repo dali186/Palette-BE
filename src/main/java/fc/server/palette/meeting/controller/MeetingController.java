@@ -3,7 +3,6 @@ package fc.server.palette.meeting.controller;
 import fc.server.palette.meeting.dto.request.ApplicationRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingCreateRequestDto;
 import fc.server.palette.meeting.dto.request.MeetingUpdateRequestDto;
-import fc.server.palette.meeting.dto.response.MeetingDetailResponseDto;
 import fc.server.palette.meeting.dto.response.MeetingListResponseDto;
 import fc.server.palette.meeting.service.MeetingService;
 import fc.server.palette.member.auth.CustomUserDetails;
@@ -13,7 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -59,13 +57,18 @@ public class MeetingController {
             @PathVariable Long meetingId,
             @RequestBody MeetingUpdateRequestDto meetingUpdateRequestDto
     ){
-        meetingService.updateMeeting(userDetails.getMember().getId(), meetingId, meetingUpdateRequestDto);
+        userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
+        meetingService.updateMeeting(meetingId, meetingUpdateRequestDto);
         return ResponseEntity.ok("업데이트 완료");
 
     }
 
     @PostMapping("/delete/{meetingId}")
-    public ResponseEntity<?> deleteMeeting(@PathVariable Long meetingId){
+    public ResponseEntity<?> deleteMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
         meetingService.delete(meetingId);
         return ResponseEntity.ok("삭제완료");
     }
@@ -94,13 +97,21 @@ public class MeetingController {
     }
 
     @PostMapping("/close/{meetingId}")
-    public ResponseEntity<?> closeMeeting(@PathVariable Long meetingId){
+    public ResponseEntity<?> closeMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
         meetingService.closeMeeting(meetingId);
         return ResponseEntity.ok("모집 마감되었습니다.");
     }
 
     @PostMapping("/reopen/{meetingId}")
-    public ResponseEntity<?> reopenMeeting(@PathVariable Long meetingId){
+    public ResponseEntity<?> reopenMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
         meetingService.reopenMeeting(meetingId);
         return ResponseEntity.ok("모집이 시작되었습니다.");
     }
@@ -118,12 +129,11 @@ public class MeetingController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long meetingId
     ){
+        userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
         if (!meetingService.checkParticipateMeeting(meetingId, userDetails.getMember())) {
             return ResponseEntity.ok("가입요건이 맞지 않아요");
         }
-        else {
-            return ResponseEntity.ok("가입요건이 충족되었습니다.");
-        }
+        return ResponseEntity.ok("가입요건이 충족되었습니다.");
     }
 
     @GetMapping("/{meetingId}/member")
@@ -142,7 +152,11 @@ public class MeetingController {
     }
 
     @GetMapping("/{meetingId}/participate/member")
-    public ResponseEntity<?> waitingParticipateMemberList(@PathVariable Long meetingId){
+    public ResponseEntity<?> waitingParticipateMemberList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
         return ResponseEntity.ok(meetingService.waitingParticipateMemberList(meetingId));
     }
 
