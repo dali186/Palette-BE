@@ -49,8 +49,8 @@ public class MeetingController {
             @RequestPart(value = "dto") MeetingCreateRequestDto meetingCreateRequestDto,
             @RequestPart(value = "file", required = false)List<MultipartFile> images
     ){
-        MeetingDetailResponseDto meetingDetailResponseDto = meetingService.createMeeting(meetingCreateRequestDto, userDetails.getMember(), images);
-        return ResponseEntity.ok(meetingDetailResponseDto);
+        meetingService.createMeeting(meetingCreateRequestDto, userDetails.getMember(), images);
+        return ResponseEntity.ok("모임을 개설하였습니다.");
     }
 
     @PostMapping("/update/{meetingId}")

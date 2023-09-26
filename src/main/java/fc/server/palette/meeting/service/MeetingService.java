@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -115,13 +116,13 @@ public class MeetingService {
         return meetingListResponseDtoList;
     }
 
-    public MeetingDetailResponseDto createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Member member, List<MultipartFile> imges) {
-
+    public void createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Member member, List<MultipartFile> images) {
         List<Media> mediaList = new ArrayList<>();
         List<String> urlList = new ArrayList<>();
+        boolean isImageEmpty = images.stream().anyMatch(MultipartFile::isEmpty);
 
-        if (imges != null) {
-            for(MultipartFile image : imges){
+        if (!isImageEmpty) {
+            for(MultipartFile image : images){
                 String imageUrl = meetingMediaService.uploadImage(image);
                 urlList.add(imageUrl);
                 Media media = Media.builder()
@@ -162,46 +163,6 @@ public class MeetingService {
                     .build();
             mediaRepository.save(media);
         }
-
-        MeetingMemberResponseDto responseMember = MeetingMemberResponseDto.builder()
-                .nickname(saveMeeting.getMember().getNickname())
-                .bio(saveMeeting.getMember().getBio())
-                .image(saveMeeting.getMember().getImage())
-                .build();
-
-        return MeetingDetailResponseDto.builder()
-                .meetingMemberResponseDto(responseMember)
-                .id(saveMeeting.getId())
-                .category(saveMeeting.getCategory().getDescription())
-                .type(saveMeeting.getType().getDescription())
-                .jobs(saveMeeting.getJob().stream()
-                        .map(Job::getValue)
-                        .collect(Collectors.toList()))
-                .positions(saveMeeting.getPosition().stream()
-                        .map(Position::getValue)
-                        .collect(Collectors.toList()))
-                .sex(saveMeeting.getSex().getValue())
-                .image(saveMeeting.getImage().stream()
-                        .map(Media::getUrl)
-                        .collect(Collectors.toList()))
-                .title(saveMeeting.getTitle())
-                .description(saveMeeting.getDescription())
-                .headCount(saveMeeting.getHeadCount())
-                .startDate(saveMeeting.getStartDate())
-                .endDate(saveMeeting.getEndDate())
-                .onOff(saveMeeting.isOnOff())
-                .place(saveMeeting.getPlace())
-                .week(saveMeeting.getWeek().getDescription())
-                .days(saveMeeting.getDays().stream()
-                        .map(Day::getDescription)
-                        .collect(Collectors.toList()))
-                .time(saveMeeting.getTime())
-                .progressTime(saveMeeting.getProgressTime())
-                .acceptType(saveMeeting.getAcceptType().getDescription())
-                .hits(saveMeeting.getHits())
-                .likes(saveMeeting.getLikes())
-                .createdAt(saveMeeting.getCreatedAt())
-                .build();
 
     }
 
