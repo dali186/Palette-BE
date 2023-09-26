@@ -18,6 +18,12 @@ public class CustomUserDetails implements UserDetails {
         return null;
     }
 
+    public void validateAuthority(Long authorId) {
+        if (!member.getId().equals(authorId)) {
+            throw new IllegalArgumentException("권한이 없습니다.");
+        }
+    }
+
     @Override
     public String getPassword() {
         return member.getPassword();

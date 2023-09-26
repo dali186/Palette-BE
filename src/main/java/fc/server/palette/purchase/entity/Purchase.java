@@ -14,6 +14,7 @@ import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -75,6 +76,13 @@ public class Purchase extends BaseEntity {
     @Column(nullable = false)
     @ColumnDefault("0")
     private Integer hits;
+
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Media> mediaList;
+
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Bookmark> bookmarks;
+
 
     // db에 저장된 기본값이 적용되지 않고 필드에 null로 저장되는데 따른 조치
     public ClosingType getClosingType() {
