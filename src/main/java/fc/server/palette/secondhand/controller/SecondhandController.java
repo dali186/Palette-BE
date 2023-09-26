@@ -1,6 +1,5 @@
 package fc.server.palette.secondhand.controller;
 
-import fc.server.palette._common.validation.MemberValidator;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.secondhand.dto.request.CreateProductDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
