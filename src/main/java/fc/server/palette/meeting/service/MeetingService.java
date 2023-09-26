@@ -80,7 +80,7 @@ public class MeetingService {
         if (!onOff.isEmpty()) {
             boolean isOnline = "온라인".equalsIgnoreCase(onOff);
             meetings = meetings.stream()
-                    .filter(meeting -> meeting.isOnOff() == isOnline)
+                    .filter(meeting -> meeting.isOnOff() != isOnline)
                     .collect(Collectors.toList());
         }
 
