@@ -19,7 +19,6 @@ public class CreateProductDto {
     private Time transactionStartTime;
     private Time transactionEndTime;
     //todo 요일 필드
-    private List<String> images;
     private Boolean isFree;
     private String description;
     private Integer price;
