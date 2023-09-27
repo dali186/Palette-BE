@@ -24,12 +24,14 @@ import fc.server.palette.member.entity.type.Job;
 import fc.server.palette.member.entity.type.Position;
 import fc.server.palette.member.entity.type.Sex;
 import fc.server.palette.member.repository.MemberRepository;
+import fc.server.palette.purchase.entity.Purchase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -78,7 +80,7 @@ public class MeetingService {
         if (!onOff.isEmpty()) {
             boolean isOnline = "온라인".equalsIgnoreCase(onOff);
             meetings = meetings.stream()
-                    .filter(meeting -> meeting.isOnOff() == isOnline)
+                    .filter(meeting -> meeting.isOnOff() != isOnline)
                     .collect(Collectors.toList());
         }
 
@@ -115,13 +117,13 @@ public class MeetingService {
         return meetingListResponseDtoList;
     }
 
-    public MeetingDetailResponseDto createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Member member, List<MultipartFile> imges) {
-
+    public void createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Member member, List<MultipartFile> images) {
         List<Media> mediaList = new ArrayList<>();
         List<String> urlList = new ArrayList<>();
+        boolean isImageEmpty = images.stream().anyMatch(MultipartFile::isEmpty);
 
-        if (imges != null) {
-            for(MultipartFile image : imges){
+        if (!isImageEmpty) {
+            for(MultipartFile image : images){
                 String imageUrl = meetingMediaService.uploadImage(image);
                 urlList.add(imageUrl);
                 Media media = Media.builder()
@@ -138,7 +140,6 @@ public class MeetingService {
                 .job(Job.fromValue(meetingCreateRequestDto.getJobs()))
                 .position(Position.fromValue(meetingCreateRequestDto.getPositions()))
                 .sex(Sex.fromValue(meetingCreateRequestDto.getSex()))
-                .ageRange(Age.fromValue(meetingCreateRequestDto.getAgeRange()))
                 .image(mediaList)
                 .title(meetingCreateRequestDto.getTitle())
                 .description(meetingCreateRequestDto.getDescription())
@@ -164,69 +165,39 @@ public class MeetingService {
             mediaRepository.save(media);
         }
 
-        MeetingMemberResponseDto responseMember = MeetingMemberResponseDto.builder()
-                .nickname(saveMeeting.getMember().getNickname())
-                .bio(saveMeeting.getMember().getBio())
-                .image(saveMeeting.getMember().getImage())
-                .build();
-
-        return MeetingDetailResponseDto.builder()
-                .meetingMemberResponseDto(responseMember)
-                .id(saveMeeting.getId())
-                .category(saveMeeting.getCategory().getDescription())
-                .type(saveMeeting.getType().getDescription())
-                .jobs(saveMeeting.getJob().stream()
-                        .map(Job::getValue)
-                        .collect(Collectors.toList()))
-                .positions(saveMeeting.getPosition().stream()
-                        .map(Position::getValue)
-                        .collect(Collectors.toList()))
-                .sex(saveMeeting.getSex().getValue())
-                .ageRange(saveMeeting.getAgeRange().stream()
-                        .map(Age::getDescription)
-                        .collect(Collectors.toList()))
-                .image(saveMeeting.getImage().stream()
-                        .map(Media::getUrl)
-                        .collect(Collectors.toList()))
-                .title(saveMeeting.getTitle())
-                .description(saveMeeting.getDescription())
-                .headCount(saveMeeting.getHeadCount())
-                .startDate(saveMeeting.getStartDate())
-                .endDate(saveMeeting.getEndDate())
-                .onOff(saveMeeting.isOnOff())
-                .place(saveMeeting.getPlace())
-                .week(saveMeeting.getWeek().getDescription())
-                .days(saveMeeting.getDays().stream()
-                        .map(Day::getDescription)
-                        .collect(Collectors.toList()))
-                .time(saveMeeting.getTime())
-                .progressTime(saveMeeting.getProgressTime())
-                .acceptType(saveMeeting.getAcceptType().getDescription())
-                .hits(saveMeeting.getHits())
-                .likes(saveMeeting.getLikes())
-                .createdAt(saveMeeting.getCreatedAt())
-                .build();
-
     }
 
     public void delete(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         meetingRepository.deleteById(meetingId);
     }
 
-    public void updateMeeting(Long loginMemberId, Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
-        if (meeting.getMember().getId() != loginMemberId) {
-            throw new Exception403(ExceptionMessage.ACCESS_DENIED);
+    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto, List<MultipartFile> images) {
+        Meeting meeting = getMeeting(meetingId);
+
+        List<Media> existingMedia = meeting.getImage();
+        existingMedia.stream().forEach(mediaRepository::delete);
+
+        List<Media> mediaList = new ArrayList<>();
+        boolean isImageEmpty = images.stream().anyMatch(MultipartFile::isEmpty);
+
+        if (!isImageEmpty) {
+            for(MultipartFile image : images){
+                String imageUrl = meetingMediaService.uploadImage(image);
+                Media media = Media.builder()
+                        .url(imageUrl)
+                        .meeting(meeting)
+                        .build();
+                mediaList.add(media);
+                mediaRepository.save(media);
+            }
         }
-        meeting.update(meetingUpdateRequestDto);
+        meeting.update(meetingUpdateRequestDto, mediaList);
+
     }
 
     public MeetingDetailResponseDto getDetailMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         meeting.setHits(); //조회수 증가
         MeetingMemberResponseDto responseMember = MeetingMemberResponseDto.builder()
                 .nickname(meeting.getMember().getNickname())
@@ -245,9 +216,6 @@ public class MeetingService {
                         .map(Position::getValue)
                         .collect(Collectors.toList()))
                 .sex(meeting.getSex().getValue())
-                .ageRange(meeting.getAgeRange().stream()
-                        .map(Age::getDescription)
-                        .collect(Collectors.toList()))
                 .image(meeting.getImage().stream()
                         .map(Media::getUrl)
                         .collect(Collectors.toList()))
@@ -283,9 +251,6 @@ public class MeetingService {
                         map(Position::getValue)
                         .collect(Collectors.toList()))
                 .sex(meeting.getSex().getValue())
-                .ageRange(meeting.getAgeRange().stream()
-                        .map(Age::getDescription)
-                        .collect(Collectors.toList()))
                 .image(meeting.getImage().stream()
                         .map(Media::getUrl)
                         .collect(Collectors.toList()))
@@ -311,8 +276,7 @@ public class MeetingService {
     }
 
     public void likesMeeting(Long meetingId, Member member) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         Bookmark bookmark = Bookmark.builder()
                 .member(member)
                 .meeting(meeting)
@@ -322,8 +286,7 @@ public class MeetingService {
     }
 
     public void dislikesMeeting(Long meetingId, Member member) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
 
         Bookmark bookmark = bookmarkRepository.findByMemberAndMeeting(member, meeting);
         if (bookmark != null) {
@@ -333,8 +296,7 @@ public class MeetingService {
     }
 
     public void closeMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         if (meeting.isClosing()) {
             throw new Exception400(meetingId.toString(), ExceptionMessage.AlREADY_CLOSING);
         }
@@ -342,14 +304,12 @@ public class MeetingService {
     }
 
     public void reopenMeeting(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         meeting.reopen();
     }
 
     public List<MeetingListResponseDto> recommendMeeting(Long loginMemberId, Long meetingId) {
-        Meeting baseMeeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting baseMeeting = getMeeting(meetingId);
         List<Meeting> recommededMeeting = new ArrayList<>();
 
         if (recommededMeeting.size() < 2) {
@@ -403,8 +363,7 @@ public class MeetingService {
     }
 
     public boolean checkParticipateMeeting(Long meetingId, Member member) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
 
         return meeting.getPosition().stream()
                 .anyMatch(position -> member.getPosition().equals(position)
@@ -412,8 +371,7 @@ public class MeetingService {
     }
 
     public List<MeetingMemberResponseDto> participateMemberList(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.APPROVAL);
 
         List<MeetingMemberResponseDto> approvedMembers = applications.stream()
@@ -427,8 +385,7 @@ public class MeetingService {
     }
 
     public void participateMeeting(Long meetingId, Member member, ApplicationRequestDto applicationRequestDto) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
 
         Application application = Application.builder()
                 .meeting(meeting)
@@ -439,8 +396,7 @@ public class MeetingService {
     }
 
     public List<WaitingParticipateMemberResponseDto> waitingParticipateMemberList(Long meetingId) {
-        Meeting meeting = meetingRepository.findById(meetingId)
-                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        Meeting meeting = getMeeting(meetingId);
         List<Application> applications = applicationRepository.findByMeetingAndStatus(meeting, Status.WAITING);
 
         List<WaitingParticipateMemberResponseDto> waitingMember = applications.stream()
@@ -474,4 +430,11 @@ public class MeetingService {
             application.getMeeting().setRecruitedPersonnel();
         }
     }
+
+    public Meeting getMeeting(Long meetingId) {
+        Meeting meeting = meetingRepository.findById(meetingId)
+                .orElseThrow(() -> new Exception400(meetingId.toString(), ExceptionMessage.NO_MEMBER_ID));
+        return meeting;
+    }
+
 }

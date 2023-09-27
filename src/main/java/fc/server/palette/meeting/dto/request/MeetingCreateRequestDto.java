@@ -18,7 +18,6 @@ public class MeetingCreateRequestDto {
     private List<String> jobs;
     private List<String> positions;
     private String sex;
-    private List<String> ageRange;
     private String title;
     private String description;
     private int headCount;

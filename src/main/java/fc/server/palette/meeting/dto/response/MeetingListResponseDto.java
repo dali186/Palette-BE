@@ -15,7 +15,6 @@ public class MeetingListResponseDto {
     private List<String> jobs;
     private List<String> positions;
     private String sex;
-    private List<String> ageRange;
     private List<String> image;
     private String title;
     private String description;

@@ -14,11 +14,12 @@ public enum Sex {
 
     @JsonCreator
     public static Sex fromValue(String value) {
-        for (Sex sex : Sex.values()) {
-            if (sex.getValue().equals(value)) {
-                return sex;
-            }
+        if ("여성".equals(value) || "여성만".equals(value)) {
+            return FEMALE;
+        } else if ("남성".equals(value)) {
+            return MALE;
+        } else {
+            throw new IllegalArgumentException("Invalid sex: " + value);
         }
-        throw new IllegalArgumentException("Invalid sex: " + value);
     }
 }

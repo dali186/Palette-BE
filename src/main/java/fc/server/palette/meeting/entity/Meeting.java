@@ -59,7 +59,6 @@ public class Meeting extends BaseEntity {
     @Builder.Default
     @ElementCollection(targetClass = Age.class)
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private List<Age> ageRange = new ArrayList<>();
 
     @Builder.Default
@@ -120,7 +119,8 @@ public class Meeting extends BaseEntity {
     @Column(nullable = false)
     private Integer likes = 0;
 
-    public void update(MeetingUpdateRequestDto meetingUpdateRequestDto){
+    public void update(MeetingUpdateRequestDto meetingUpdateRequestDto, List<Media> image){
+        this.image = image;
         this.title = meetingUpdateRequestDto.getTitle();
         this.description = meetingUpdateRequestDto.getDescription();
         this.headCount = meetingUpdateRequestDto.getHeadCount();
