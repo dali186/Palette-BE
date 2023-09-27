@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Builder
-public class ChatRoomListResponseDto {
+public class ChatRoomListDto {
     private String id;
     private String title;
     private String image;

@@ -1,10 +1,12 @@
 package fc.server.palette.chat.dto.response;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-public class ChatRoomDetailResponseDto {
+@Setter
+public class ChatRoomDetailDto {
     private Long host;
     private String notice;
-    private ChatRoomDetailContentResponseDto contentNotice;
+    private ChatRoomDetailContentDto contentNotice;
 }
