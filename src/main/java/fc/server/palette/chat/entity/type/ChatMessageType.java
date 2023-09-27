@@ -11,6 +11,5 @@ public enum ChatMessageType {
     LEAVE,
     IMAGE,
     FILE,
-    SHARE,
-    SYSTEM
+    SHARE
 }
