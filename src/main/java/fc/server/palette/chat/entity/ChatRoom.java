@@ -24,10 +24,12 @@ public class ChatRoom {
     private Long contentId;
     private List<Long> memberList;
     private Map<Long, LocalDateTime> exitList;
+    private Map<Long, LocalDateTime> enterList;
 
     public ChatRoom() {
         this.memberList = new ArrayList<>();
         this.exitList = new HashMap<>();
+        this.enterList = new HashMap<>();
         this.noticeList = new ArrayList<>();
     }
 }
