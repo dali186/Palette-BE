@@ -1,5 +1,7 @@
 package fc.server.palette.purchase.controller;
 
+import fc.server.palette._common.s3.S3DirectoryNames;
+import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
@@ -14,7 +16,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PurchaseController {
     private final PurchaseService purchaseService;
+    private final S3ImageUploader s3ImageUploader;
 
     @GetMapping("")
     public ResponseEntity<List<OfferListDto>> getAllOffers() {
@@ -38,10 +43,12 @@ public class PurchaseController {
     }
 
     @PostMapping("")
-    public ResponseEntity<OfferDto> createOffer(@RequestBody GroupPurchaseOfferDto groupPurchaseOfferDto,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<OfferDto> createOffer(@RequestPart("dto") GroupPurchaseOfferDto groupPurchaseOfferDto,
+                                                @RequestPart("file") List<MultipartFile> images,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
         Purchase purchase = groupPurchaseOfferDto.toEntity(userDetails.getMember());
-        List<Media> mediaList = toMediaList(groupPurchaseOfferDto.getImages(), purchase);
+        List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
+        List<Media> mediaList = toMediaList(savedImageUrls, purchase);
         OfferDto offer = purchaseService.createOffer(purchase, mediaList);
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
