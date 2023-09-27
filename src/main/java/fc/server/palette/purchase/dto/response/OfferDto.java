@@ -1,10 +1,11 @@
 package fc.server.palette.purchase.dto.response;
 
+import fc.server.palette.chat.dto.response.ChatRoomDetailContentDto;
+import fc.server.palette.chat.entity.type.ChatRoomType;
 import fc.server.palette.purchase.entity.type.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -30,4 +31,14 @@ public class OfferDto {
     private Boolean isClosing;
     private Integer hits;
     private LocalDateTime created_at;
+
+    public ChatRoomDetailContentDto toChatRoomInfo() {
+        return ChatRoomDetailContentDto.builder()
+                .contentId(id)
+                .title(title)
+                .image(image.get(0))
+                .price(price)
+                .type(ChatRoomType.PURCHASE)
+                .build();
+    }
 }
