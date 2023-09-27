@@ -1,5 +1,7 @@
 package fc.server.palette.secondhand.controller;
 
+import fc.server.palette._common.s3.S3DirectoryNames;
+import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.secondhand.dto.request.CreateProductDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
@@ -13,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,7 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SecondhandController {
     private final SecondhandService secondhandService;
-
+    private final S3ImageUploader s3ImageUploader;
     @GetMapping("")
     public ResponseEntity<List<ProductListDto>> getAllProducts() {
         List<ProductListDto> products = secondhandService.getAllProducts();
@@ -52,10 +56,12 @@ public class SecondhandController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ProductDto> createProduct(@RequestBody CreateProductDto createProductDto,
-                                                    @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<ProductDto> createProduct(@RequestPart("dto") CreateProductDto createProductDto,
+                                                    @RequestPart("file") List<MultipartFile> images,
+                                                    @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
         Secondhand product = createProductDto.toEntity(userDetails.getMember());
-        List<Media> mediaList = toMediaList(createProductDto.getImages(), product);
+        List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.SECONDHAND,images);
+        List<Media> mediaList = toMediaList(savedImageUrls, product);
         ProductDto savedProduct = secondhandService.createProduct(product, mediaList);
         return new ResponseEntity<>(savedProduct, HttpStatus.OK);
     }
