@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -52,6 +53,13 @@ public class S3ImageUploader {
         }
 
         return paths;
+    }
+
+    private List<String> removeEndpoint(List<String> urls) {
+        return urls
+                .stream()
+                .map(url -> url.replace(endPoint, ""))
+                .collect(Collectors.toList());
     }
 }
 
