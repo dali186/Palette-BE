@@ -208,6 +208,7 @@ public class MeetingService {
         Meeting meeting = getMeeting(meetingId);
         meeting.setHits(); //조회수 증가
         MeetingMemberDto responseMember = MeetingMemberDto.builder()
+                .id(meeting.getMember().getId())
                 .nickname(meeting.getMember().getNickname())
                 .bio(meeting.getMember().getBio())
                 .image(meeting.getMember().getImage())
@@ -384,6 +385,7 @@ public class MeetingService {
 
         List<MeetingMemberDto> approvedMembers = applications.stream()
                 .map(application -> MeetingMemberDto.builder()
+                        .id(application.getMember().getId())
                         .nickname(application.getMember().getNickname())
                         .bio(application.getMember().getBio())
                         .image(application.getMember().getImage())
