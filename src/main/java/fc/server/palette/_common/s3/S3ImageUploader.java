@@ -38,26 +38,28 @@ public class S3ImageUploader {
      * @return 이미지의 저장경로 즉, URL이 담긴 리스트
      * @throws IOException
      */
-    public List<String> save(String directory, List<MultipartFile> images) throws IOException {
+    public List<String> save(String directory, List<MultipartFile> images) {
         List<String> paths = new ArrayList<>();
 
-        for (MultipartFile image : images) {
-            InputStream inputStream = image.getInputStream();
-            String path = directory + "/" + image.getOriginalFilename();
+        try {
+            for (MultipartFile image : images) {
+                InputStream inputStream = image.getInputStream();
+                String path = directory + "/" + image.getOriginalFilename();
 
-            paths.add(endPoint + path);
+                paths.add(endPoint + path);
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(path)
-                    .build();
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(path)
+                        .build();
 
-            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, inputStream.available()));
+                s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, inputStream.available()));
 
-            inputStream.close();
+                inputStream.close();
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
-        s3Client.close();
-
         return paths;
     }
 
