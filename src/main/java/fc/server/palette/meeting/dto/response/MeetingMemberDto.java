@@ -7,10 +7,9 @@ import lombok.Getter;
 @Getter
 @Builder
 @AllArgsConstructor
-public class WaitingParticipateMemberResponseDto {
+public class MeetingMemberDto {
     private Long id;
     private String nickname;
     private String bio;
-    private String pr;
     private String image;
 }
