@@ -1,7 +1,6 @@
 package fc.server.palette.meeting.service;
 
 import fc.server.palette._common.exception.Exception400;
-import fc.server.palette._common.exception.Exception403;
 import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
@@ -26,7 +25,6 @@ import fc.server.palette.member.entity.type.Job;
 import fc.server.palette.member.entity.type.Position;
 import fc.server.palette.member.entity.type.Sex;
 import fc.server.palette.member.repository.MemberRepository;
-import fc.server.palette.purchase.entity.Purchase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +32,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -120,7 +117,7 @@ public class MeetingService {
         return meetingListResponseDtoList;
     }
 
-    public void createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Member member, List<MultipartFile> images) throws IOException {
+    public void createMeeting(MeetingCreateRequestDto meetingCreateRequestDto, Member member, List<MultipartFile> images) {
         List<Media> mediaList = new ArrayList<>();
         List<String> urlList = new ArrayList<>();
         boolean isImageEmpty = images.stream().anyMatch(MultipartFile::isEmpty);
@@ -174,7 +171,7 @@ public class MeetingService {
         meetingRepository.deleteById(meetingId);
     }
 
-    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto, List<MultipartFile> images) throws IOException {
+    public void updateMeeting(Long meetingId, MeetingUpdateRequestDto meetingUpdateRequestDto, List<MultipartFile> images) {
         Meeting meeting = getMeeting(meetingId);
 
         List<Media> existingMedia = meeting.getImage();
