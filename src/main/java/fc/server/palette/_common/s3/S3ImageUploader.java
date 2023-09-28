@@ -1,21 +1,30 @@
 package fc.server.palette._common.s3;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.Delete;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class S3ImageUploader {
+    @Value("${s3.end-point}")
+    private String endPoint;
+
     @Value("${s3.bucket-name}")
     private String bucketName;
 
@@ -29,26 +38,49 @@ public class S3ImageUploader {
      * @return 이미지의 저장경로 즉, URL이 담긴 리스트
      * @throws IOException
      */
-    public List<String> save(String directory, List<MultipartFile> images) throws IOException {
+    public List<String> save(String directory, List<MultipartFile> images) {
         List<String> paths = new ArrayList<>();
 
-        for (MultipartFile image : images) {
-            InputStream inputStream = image.getInputStream();
-            String path = directory + "/" + image.getOriginalFilename();
+        try {
+            for (MultipartFile image : images) {
+                InputStream inputStream = image.getInputStream();
+                String path = directory + "/" + image.getOriginalFilename();
 
-            paths.add(path);
+                paths.add(endPoint + path);
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(path)
-                    .build();
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(path)
+                        .build();
 
-            s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, inputStream.available()));
+                s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(inputStream, inputStream.available()));
 
-            inputStream.close();
+                inputStream.close();
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
         }
-
         return paths;
+    }
+
+    public void remove(List<String> removeUrls) {
+        List<String> paths = removeEndpoint(removeUrls);
+
+        List<ObjectIdentifier> objectIdentifiers = new ArrayList<>();
+        paths.forEach(path -> objectIdentifiers.add(ObjectIdentifier.builder().key(path).build()));
+
+        DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                .bucket(bucketName)
+                .delete(Delete.builder().objects(objectIdentifiers).build())
+                .build();
+        s3Client.deleteObjects(deleteObjectsRequest);
+    }
+
+    private List<String> removeEndpoint(List<String> urls) {
+        return urls
+                .stream()
+                .map(url -> url.replace(endPoint, ""))
+                .collect(Collectors.toList());
     }
 }
 
