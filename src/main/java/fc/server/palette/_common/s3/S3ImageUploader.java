@@ -1,11 +1,15 @@
 package fc.server.palette._common.s3;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.Delete;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
@@ -16,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class S3ImageUploader {
     @Value("${s3.end-point}")
     private String endPoint;
@@ -51,8 +56,22 @@ public class S3ImageUploader {
 
             inputStream.close();
         }
+        s3Client.close();
 
         return paths;
+    }
+
+    public void remove(List<String> removeUrls) {
+        List<String> paths = removeEndpoint(removeUrls);
+
+        List<ObjectIdentifier> objectIdentifiers = new ArrayList<>();
+        paths.forEach(path -> objectIdentifiers.add(ObjectIdentifier.builder().key(path).build()));
+
+        DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                .bucket(bucketName)
+                .delete(Delete.builder().objects(objectIdentifiers).build())
+                .build();
+        s3Client.deleteObjects(deleteObjectsRequest);
     }
 
     private List<String> removeEndpoint(List<String> urls) {
