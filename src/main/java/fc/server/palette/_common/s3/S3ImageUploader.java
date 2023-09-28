@@ -16,6 +16,9 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class S3ImageUploader {
+    @Value("${s3.end-point}")
+    private String endPoint;
+    
     @Value("${s3.bucket-name}")
     private String bucketName;
 
