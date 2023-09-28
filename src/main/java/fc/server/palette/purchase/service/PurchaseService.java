@@ -50,6 +50,11 @@ public class PurchaseService {
     }
 
     @Transactional
+    public void saveImages(List<Media> mediaList){
+        purchaseMediaRepository.saveAll(mediaList);
+    }
+
+    @Transactional
     public OfferDto createOffer(Purchase purchase, List<Media> mediaList) {
         Purchase savedPurchase = purchaseRepository.save(purchase);
         purchaseMediaRepository.saveAll(mediaList);
