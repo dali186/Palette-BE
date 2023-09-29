@@ -85,13 +85,7 @@ public class PurchaseController {
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
 
-        if (images != null) {
-            //s3 저장
-            List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
-            //db 저장(toMediaList, purchaseService.saveImages)
-            List<Media> saveMediaList = toMediaList(savedImageUrls, purchaseService.getPurchase(offerId));
-            purchaseService.saveImages(saveMediaList);
-        }
+        saveImages(images, offerId);
 
         //s3삭제
         s3ImageUploader.remove(removeImageDto.getUrls());
@@ -112,13 +106,8 @@ public class PurchaseController {
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
 
-        if (images != null) {
-            //s3 저장
-            List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
-            //db 저장(toMediaList, purchaseService.saveImages)
-            List<Media> saveMediaList = toMediaList(savedImageUrls, purchaseService.getPurchase(offerId));
-            purchaseService.saveImages(saveMediaList);
-        }
+        saveImages(images, offerId);
+
         //이미지 외 콘텐츠 수정
         OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
 
@@ -131,5 +120,15 @@ public class PurchaseController {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
         OfferDto offer = purchaseService.closeOffer(offerId);
         return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
+
+    private void saveImages(List<MultipartFile> images, Long offerId){
+        if (images != null) {
+            //s3 저장
+            List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
+            //db 저장(toMediaList, purchaseService.saveImages)
+            List<Media> MediaList = toMediaList(savedImageUrls, purchaseService.getPurchase(offerId));
+            purchaseService.saveImages(MediaList);
+        }
     }
 }
