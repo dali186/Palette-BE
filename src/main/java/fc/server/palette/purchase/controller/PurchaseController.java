@@ -5,6 +5,7 @@ import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
+import fc.server.palette.purchase.dto.request.RemoveImageDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.dto.response.OfferListDto;
 import fc.server.palette.purchase.entity.Media;
@@ -76,12 +77,51 @@ public class PurchaseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PatchMapping("/{offerId}")
+    @PatchMapping(value = "/{offerId}", params = {"dto", "removeFileUrl"})
     public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
-                                              @RequestBody EditOfferDto editOfferDto,
+                                              @RequestPart("dto") EditOfferDto editOfferDto,
+                                              @RequestPart(value = "file", required = false) List<MultipartFile> images,
+                                              @RequestPart("removeFileUrl") RemoveImageDto removeImageDto,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
+
+        if (images != null) {
+            //s3 저장
+            List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
+            //db 저장(toMediaList, purchaseService.saveImages)
+            List<Media> saveMediaList = toMediaList(savedImageUrls, purchaseService.getPurchase(offerId));
+            purchaseService.saveImages(saveMediaList);
+        }
+
+        //s3삭제
+        s3ImageUploader.remove(removeImageDto.getUrls());
+        //db삭제
+        List<Media> removeMediaList = toMediaList(removeImageDto.getUrls(), purchaseService.getPurchase(offerId));
+        purchaseService.deleteImages(removeMediaList);
+
+        //이미지 외 콘텐츠 수정
         OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
+
+        return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
+
+    @PatchMapping(value = "/{offerId}", params = {"dto"})
+    public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
+                                              @RequestPart("dto") EditOfferDto editOfferDto,
+                                              @RequestPart(value = "file", required = false) List<MultipartFile> images,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
+
+        if (images != null) {
+            //s3 저장
+            List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
+            //db 저장(toMediaList, purchaseService.saveImages)
+            List<Media> saveMediaList = toMediaList(savedImageUrls, purchaseService.getPurchase(offerId));
+            purchaseService.saveImages(saveMediaList);
+        }
+        //이미지 외 콘텐츠 수정
+        OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
+
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
