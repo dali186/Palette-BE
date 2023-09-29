@@ -39,6 +39,9 @@ public class ChatRoomService {
         if (!duplicatedRoom.isPresent()) {
             return openNewChatRoom(memberId, request).getId();
         } else {
+            if (duplicatedRoom.get().getMemberList().size() == 2) {
+                return duplicatedRoom.get().getId();
+            }
             if (duplicatedRoom.get().getType().equals(ChatRoomType.SECONDHAND) && !duplicatedRoom.get().getContentId().equals(request.getContentId())) {
                 return openNewChatRoom(memberId, request).getId();
             }
