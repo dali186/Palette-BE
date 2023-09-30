@@ -78,12 +78,21 @@ public class SecondhandController {
     @PatchMapping(value = "/{productId}", params = {"dto","removeFileUrl"})
     public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
                                                   @RequestBody EditProductDto editProductDto,
+                                                  @RequestPart(value = "file",  required = false) List<MultipartFile> images,
+                                                  @RequestPart("removeFileUrl") RemoveImageDto removeImageDto,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
         userDetails.validateAuthority(secondhandService.getAuthorId(productId));
+
+        saveImages(images, productId);
+
+        s3ImageUploader.remove(removeImageDto.getUrls());
+        secondhandService.deleteImages(removeImageDto.getUrls());
+        
         ProductDto product = secondhandService.editProduct(productId, editProductDto);
+
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
-    
+
     private void saveImages(List<MultipartFile> images, Long productId) {
         if (images != null) {
             //s3 저장
