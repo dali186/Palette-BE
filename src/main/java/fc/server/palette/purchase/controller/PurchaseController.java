@@ -80,7 +80,7 @@ public class PurchaseController {
     @PatchMapping(value = "/{offerId}", params = {"dto", "removeFileUrl"})
     public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
                                               @RequestPart("dto") EditOfferDto editOfferDto,
-                                              @RequestPart(value = "file", required = false) List<MultipartFile> images,
+                                              @RequestPart(value = "file",  required = false) List<MultipartFile> images,
                                               @RequestPart("removeFileUrl") RemoveImageDto removeImageDto,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));

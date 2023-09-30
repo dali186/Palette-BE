@@ -67,7 +67,8 @@ public class S3ImageUploader {
         List<String> paths = removeEndpoint(removeUrls);
 
         List<ObjectIdentifier> objectIdentifiers = new ArrayList<>();
-        paths.forEach(path -> objectIdentifiers.add(ObjectIdentifier.builder().key(path).build()));
+        paths
+                .forEach(path -> objectIdentifiers.add(ObjectIdentifier.builder().key(path).build()));
 
         DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
                 .bucket(bucketName)
