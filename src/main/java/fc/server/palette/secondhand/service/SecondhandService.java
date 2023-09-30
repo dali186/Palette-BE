@@ -39,6 +39,12 @@ public class SecondhandService {
         return buildProductDto(product);
     }
 
+    @Transactional(readOnly = true)
+    public Secondhand getSecondhand(Long productId){
+        return secondhandRespository.findById(productId)
+                .orElseThrow(()-> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+    }
+
     @Transactional
     public void deleteProduct(Long productId) {
         secondhandRespository.deleteById(productId);
