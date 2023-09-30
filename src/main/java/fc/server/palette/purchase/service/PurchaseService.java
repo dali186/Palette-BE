@@ -44,19 +44,23 @@ public class PurchaseService {
     }
 
     @Transactional(readOnly = true)
-    public Purchase getPurchase(Long offerId){
+    public Purchase getPurchase(Long offerId) {
         return purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
     }
 
     @Transactional
-    public void saveImages(List<Media> mediaList){
+    public void saveImages(List<Media> mediaList) {
         purchaseMediaRepository.saveAll(mediaList);
     }
 
     @Transactional
-    public void deleteImages(List<Media> mediaList){
-        purchaseMediaRepository.deleteAll(mediaList);
+    public void deleteImages(List<String> urls) {
+        urls
+                .forEach(url ->
+                        purchaseMediaRepository.delete(
+                                purchaseMediaRepository.findByUrl(url)
+                        ));
     }
 
     @Transactional
