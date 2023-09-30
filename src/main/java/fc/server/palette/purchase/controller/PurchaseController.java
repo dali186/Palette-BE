@@ -90,8 +90,7 @@ public class PurchaseController {
         //s3삭제
         s3ImageUploader.remove(removeImageDto.getUrls());
         //db삭제
-        List<Media> removeMediaList = toMediaList(removeImageDto.getUrls(), purchaseService.getPurchase(offerId));
-        purchaseService.deleteImages(removeMediaList);
+        purchaseService.deleteImages(removeImageDto.getUrls());
 
         //이미지 외 콘텐츠 수정
         OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
@@ -122,11 +121,11 @@ public class PurchaseController {
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
-    private void saveImages(List<MultipartFile> images, Long offerId){
+    private void saveImages(List<MultipartFile> images, Long offerId) {
         if (images != null) {
             //s3 저장
             List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
-            //db 저장(toMediaList, purchaseService.saveImages)
+            //db 저장
             List<Media> MediaList = toMediaList(savedImageUrls, purchaseService.getPurchase(offerId));
             purchaseService.saveImages(MediaList);
         }
