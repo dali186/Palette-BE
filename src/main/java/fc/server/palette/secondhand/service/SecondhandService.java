@@ -46,6 +46,11 @@ public class SecondhandService {
     }
 
     @Transactional
+    public void saveImages(List<Media> mediaList){
+        secondhandMediaRepository.saveAll(mediaList);
+    }
+
+    @Transactional
     public void deleteProduct(Long productId) {
         secondhandRespository.deleteById(productId);
     }
