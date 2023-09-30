@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -40,14 +39,23 @@ public class SecondhandService {
     }
 
     @Transactional(readOnly = true)
-    public Secondhand getSecondhand(Long productId){
+    public Secondhand getSecondhand(Long productId) {
         return secondhandRespository.findById(productId)
-                .orElseThrow(()-> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
     }
 
     @Transactional
-    public void saveImages(List<Media> mediaList){
+    public void saveImages(List<Media> mediaList) {
         secondhandMediaRepository.saveAll(mediaList);
+    }
+
+    @Transactional
+    public void deleteImages(List<String> urls) {
+        urls
+                .forEach(url ->
+                        secondhandMediaRepository.delete(
+                                secondhandMediaRepository.findByUrl(url)
+                        ));
     }
 
     @Transactional
@@ -56,7 +64,7 @@ public class SecondhandService {
     }
 
     @Transactional
-    public ProductDto closeTransaction(Long productId){
+    public ProductDto closeTransaction(Long productId) {
         Secondhand product = secondhandRespository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
         product.closeTransaction();
@@ -64,16 +72,16 @@ public class SecondhandService {
     }
 
     @Transactional
-    public ProductDto createProduct(Secondhand secondhand, List<Media> mediaList){
+    public ProductDto createProduct(Secondhand secondhand, List<Media> mediaList) {
         Secondhand savedProduct = secondhandRespository.save(secondhand);
         secondhandMediaRepository.saveAll(mediaList);
         return buildProductDto(savedProduct);
     }
 
     @Transactional
-    public ProductDto editProduct(Long productId, EditProductDto editProductDto){
+    public ProductDto editProduct(Long productId, EditProductDto editProductDto) {
         Secondhand product = secondhandRespository.findById(productId)
-                .orElseThrow(()->new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
         product.updateProduct(editProductDto);
         return buildProductDto(product);
     }
@@ -121,9 +129,9 @@ public class SecondhandService {
     }
 
     @Transactional(readOnly = true)
-    public Long getAuthorId(Long productId){
+    public Long getAuthorId(Long productId) {
         Secondhand product = secondhandRespository.findById(productId)
-                .orElseThrow(()-> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
         return product.getMember().getId();
     }
 
