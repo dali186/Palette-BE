@@ -78,7 +78,7 @@ public class SecondhandController {
 
     @PatchMapping(value = "/{productId}", params = {"dto", "removeFileUrl"})
     public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
-                                                  @RequestBody EditProductDto editProductDto,
+                                                  @RequestPart("dto") EditProductDto editProductDto,
                                                   @RequestPart(value = "file", required = false) List<MultipartFile> images,
                                                   @RequestPart("removeFileUrl") RemoveImageDto removeImageDto,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -96,7 +96,7 @@ public class SecondhandController {
 
     @PatchMapping(value = "/{productId}", params = {"dto"})
     public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
-                                                  @RequestBody EditProductDto editProductDto,
+                                                  @RequestPart("dto") EditProductDto editProductDto,
                                                   @RequestPart(value = "file", required = false) List<MultipartFile> images,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(secondhandService.getAuthorId(productId));
