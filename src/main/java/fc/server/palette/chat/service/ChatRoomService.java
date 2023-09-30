@@ -47,15 +47,18 @@ public class ChatRoomService {
             }
             List<Long> memberList = duplicatedRoom.get().getMemberList();
             Map<Long, LocalDateTime> enterList = duplicatedRoom.get().getEnterList();
+            Map<Long, LocalDateTime> exitList = duplicatedRoom.get().getExitList();
             if (!memberList.contains(memberId)) {
                 memberList.add(memberId);
                 enterList.put(memberId, LocalDateTime.now());
+                exitList.put(memberId, LocalDateTime.now());
 
                 chatRoomRepository.save(duplicatedRoom.get());
             }
             if (!memberList.contains(request.getParticipant())) {
                 memberList.add(request.getParticipant());
                 enterList.put(request.getParticipant(), LocalDateTime.now());
+                exitList.put(request.getParticipant(), LocalDateTime.now());
 
                 chatRoomRepository.save(duplicatedRoom.get());
             }
@@ -73,6 +76,8 @@ public class ChatRoomService {
         chatRoom.getMemberList().add(memberId);
         chatRoom.getEnterList().put(opId, LocalDateTime.now());
         chatRoom.getEnterList().put(memberId, LocalDateTime.now());
+        chatRoom.getExitList().put(opId, LocalDateTime.now());
+        chatRoom.getExitList().put(memberId, LocalDateTime.now());
         if (request.getType().equals(ChatRoomType.SECONDHAND)) {
             chatRoom.setContentId(request.getContentId());
         }

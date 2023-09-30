@@ -37,8 +37,8 @@ public class ChatService {
     }
 
     @Transactional
-    public Long countRecentMessages(Long memberId, String roomId, LocalDateTime time) {
-        return chatMessageRepository.countRecentMessages(memberId, roomId, time);
+    public Long countRecentMessages(String roomId, LocalDateTime time) {
+        return chatMessageRepository.countRecentMessages(roomId, time);
     }
 
     //ChatRoomListDto에 정보를 설정하는 메소드
@@ -52,7 +52,7 @@ public class ChatService {
                     .title(rooms.getTitle())
                     .image(rooms.getThumbnail())
                     .members(rooms.getMemberList().size())
-                    .unRead(countRecentMessages(memberId, rooms.getId(), exitedAt))
+                    .unRead(countRecentMessages(rooms.getId(), exitedAt))
                     .build();
             Optional<ChatMessage> message = findRecentMessage(rooms.getId());
             if (message.isPresent()) {

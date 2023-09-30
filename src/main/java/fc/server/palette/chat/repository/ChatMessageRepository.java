@@ -13,8 +13,8 @@ public interface ChatMessageRepository extends MongoRepository<ChatMessage, Stri
     @Query("{roomId: ?0}")
     List<ChatMessage> findByRoomId(String Id);
 
-    @Query(value = "{sender: ?0, roomId: ?1, createdAt: { $gt: ?2 } }", count = true)
-    Long countRecentMessages(Long memberId, String roomId, LocalDateTime exitTime);
+    @Query(value = "{roomId: ?0, createdAt: { $gt: ?1 } }", count = true)
+    Long countRecentMessages(String roomId, LocalDateTime exitTime);
 
     Optional<ChatMessage> findTopByRoomIdOrderByCreatedAtDesc(String id);
 }
