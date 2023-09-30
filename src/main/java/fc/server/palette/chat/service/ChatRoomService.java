@@ -119,4 +119,9 @@ public class ChatRoomService {
     public void addParticipant() {
 
     }
+
+    @Transactional
+    public void deleteChatRoom(ChatRoom chatRoom) {
+        chatRoomRepository.delete(chatRoom);
+    }
 }

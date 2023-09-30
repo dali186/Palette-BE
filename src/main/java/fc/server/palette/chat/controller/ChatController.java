@@ -123,8 +123,15 @@ public class ChatController {
     public ResponseEntity<?> memberRemove(@RequestParam("roomId") String roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
         Member member = userDetails.getMember();
+        if (member.getId().equals(chatRoom.getHost()) && !chatRoom.getType().equals(ChatRoomType.PERSONAL)) {
+            throw new IllegalArgumentException("호스트는 나갈 수 없습니다.");
+        }
         chatRoom.getMemberList().remove(member.getId());
         chatRoom.getExitList().remove(member.getId());
+
+        if (chatRoom.getMemberList().size() == 0) {
+            chatRoomService.deleteChatRoom(chatRoom);
+        }
 
         if (chatRoom.getType().equals(ChatRoomType.MEETING) || chatRoom.getType().equals(ChatRoomType.PURCHASE)) {
             ChatMessage chatMessage = ChatMessage.builder()
