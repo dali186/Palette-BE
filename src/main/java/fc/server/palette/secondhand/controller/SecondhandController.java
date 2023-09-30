@@ -3,6 +3,7 @@ package fc.server.palette.secondhand.controller;
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.member.auth.CustomUserDetails;
+import fc.server.palette.purchase.dto.request.RemoveImageDto;
 import fc.server.palette.secondhand.dto.request.CreateProductDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
 import fc.server.palette.secondhand.dto.response.ProductDto;
@@ -74,7 +75,7 @@ public class SecondhandController {
                 .collect(Collectors.toList());
     }
 
-    @PatchMapping("/{productId}")
+    @PatchMapping(value = "/{productId}", params = {"dto","removeFileUrl"})
     public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
                                                   @RequestBody EditProductDto editProductDto,
                                                   @AuthenticationPrincipal CustomUserDetails userDetails){
@@ -82,4 +83,15 @@ public class SecondhandController {
         ProductDto product = secondhandService.editProduct(productId, editProductDto);
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
+    
+    private void saveImages(List<MultipartFile> images, Long productId) {
+        if (images != null) {
+            //s3 저장
+            List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.SECONDHAND, images);
+            //db 저장
+            List<Media> MediaList = toMediaList(savedImageUrls, secondhandService.getSecondhand(productId));
+            secondhandService.saveImages(MediaList);
+        }
+    }
+
 }
