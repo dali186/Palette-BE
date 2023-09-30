@@ -1,7 +1,7 @@
 package fc.server.palette.chat.service;
 
-import fc.server.palette.chat.dto.response.ChatRoomListResponseDto;
-import fc.server.palette.chat.dto.response.ChatRoomNoticeListResponseDto;
+import fc.server.palette.chat.dto.response.ChatRoomListDto;
+import fc.server.palette.chat.dto.response.ChatRoomNoticeListDto;
 import fc.server.palette.chat.entity.ChatMessage;
 import fc.server.palette.chat.entity.ChatRoom;
 import fc.server.palette.chat.repository.ChatMessageRepository;
@@ -43,11 +43,11 @@ public class ChatService {
 
     //ChatRoomListDto에 정보를 설정하는 메소드
     @Transactional
-    public List<ChatRoomListResponseDto> setChatRoomListResponse(List<ChatRoom> chatRoomList, Long memberId) {
-        List<ChatRoomListResponseDto> chatRoomResponseList = new ArrayList<>();
+    public List<ChatRoomListDto> setChatRoomListResponse(List<ChatRoom> chatRoomList, Long memberId) {
+        List<ChatRoomListDto> chatRoomResponseList = new ArrayList<>();
         for (ChatRoom rooms : chatRoomList) {
             LocalDateTime exitedAt = rooms.getExitList().get(memberId);
-            ChatRoomListResponseDto response = ChatRoomListResponseDto.builder()
+            ChatRoomListDto response = ChatRoomListDto.builder()
                     .id(rooms.getId())
                     .title(rooms.getTitle())
                     .image(rooms.getThumbnail())
@@ -66,10 +66,10 @@ public class ChatService {
 
     //ChatRoomNoticeListDto에 정보를 설정하는 메소드
     @Transactional
-    public List<ChatRoomNoticeListResponseDto> setChatRoomNoticeListResponse(ChatRoom chatRoom) {
-        List<ChatRoomNoticeListResponseDto> chatRoomNoticeResponseList = new ArrayList<>();
+    public List<ChatRoomNoticeListDto> setChatRoomNoticeListResponse(ChatRoom chatRoom) {
+        List<ChatRoomNoticeListDto> chatRoomNoticeResponseList = new ArrayList<>();
         for (String noticeId : chatRoom.getNoticeList()) {
-            ChatRoomNoticeListResponseDto response = ChatRoomNoticeListResponseDto
+            ChatRoomNoticeListDto response = ChatRoomNoticeListDto
                     .builder()
                     .host(chatRoom.getHost())
                     .build();

@@ -1,16 +1,19 @@
 package fc.server.palette.chat.dto.response;
 
 import fc.server.palette.chat.entity.type.ChatRoomType;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
-public class ChatRoomDetailContentResponseDto {
+@Builder
+public class ChatRoomDetailContentDto {
     private Long contentId;
-    private String title;
-    private List<Object> tag;
-    private String image;
-    private Object week;
     private ChatRoomType type;
+    private String title;
+    private String image;
+
+    private String week;
+    private int price;
 }
