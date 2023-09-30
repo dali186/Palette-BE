@@ -3,10 +3,8 @@ package fc.server.palette.purchase.dto.request;
 import fc.server.palette.purchase.entity.type.ClosingType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
 @Getter
 @AllArgsConstructor
