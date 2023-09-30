@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 public class SecondhandController {
     private final SecondhandService secondhandService;
     private final S3ImageUploader s3ImageUploader;
+
     @GetMapping("")
     public ResponseEntity<List<ProductListDto>> getAllProducts() {
         List<ProductListDto> products = secondhandService.getAllProducts();
@@ -61,7 +62,7 @@ public class SecondhandController {
                                                     @RequestPart("file") List<MultipartFile> images,
                                                     @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
         Secondhand product = createProductDto.toEntity(userDetails.getMember());
-        List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.SECONDHAND,images);
+        List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.SECONDHAND, images);
         List<Media> mediaList = toMediaList(savedImageUrls, product);
         ProductDto savedProduct = secondhandService.createProduct(product, mediaList);
         return new ResponseEntity<>(savedProduct, HttpStatus.OK);
@@ -75,22 +76,37 @@ public class SecondhandController {
                 .collect(Collectors.toList());
     }
 
-    @PatchMapping(value = "/{productId}", params = {"dto","removeFileUrl"})
+    @PatchMapping(value = "/{productId}", params = {"dto", "removeFileUrl"})
     public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
                                                   @RequestBody EditProductDto editProductDto,
-                                                  @RequestPart(value = "file",  required = false) List<MultipartFile> images,
+                                                  @RequestPart(value = "file", required = false) List<MultipartFile> images,
                                                   @RequestPart("removeFileUrl") RemoveImageDto removeImageDto,
-                                                  @AuthenticationPrincipal CustomUserDetails userDetails){
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(secondhandService.getAuthorId(productId));
 
         saveImages(images, productId);
 
         s3ImageUploader.remove(removeImageDto.getUrls());
         secondhandService.deleteImages(removeImageDto.getUrls());
-        
+
         ProductDto product = secondhandService.editProduct(productId, editProductDto);
 
         return new ResponseEntity<>(product, HttpStatus.OK);
+    }
+
+    @PatchMapping(value = "/{productId}", params = {"dto"})
+    public ResponseEntity<ProductDto> EditProduct(@PathVariable Long productId,
+                                                  @RequestBody EditProductDto editProductDto,
+                                                  @RequestPart(value = "file", required = false) List<MultipartFile> images,
+                                                  @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userDetails.validateAuthority(secondhandService.getAuthorId(productId));
+
+        saveImages(images, productId);
+
+        ProductDto product = secondhandService.editProduct(productId, editProductDto);
+
+        return new ResponseEntity<>(product, HttpStatus.OK);
+
     }
 
     private void saveImages(List<MultipartFile> images, Long productId) {
