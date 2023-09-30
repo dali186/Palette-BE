@@ -38,6 +38,7 @@ public class ChatController {
     private final SimpMessageSendingOperations template;
 
     //채팅방 생성
+
     /**
      * 채팅방 유입 경로
      * <p>
@@ -99,8 +100,10 @@ public class ChatController {
     @PostMapping("/notice")
     public ResponseEntity<?> noticeSave(@RequestBody ChatRoomNoticeDto request) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(request.getRoomId());
-        chatRoom.getNoticeList().add(request.getMessageId());
-        chatRoomService.updateChatRoom(chatRoom);
+        if (!chatRoom.getNoticeList().contains(request.getMessageId())) {
+            chatRoom.getNoticeList().add(request.getMessageId());
+            chatRoomService.updateChatRoom(chatRoom);
+        }
 
         return ResponseEntity.ok(request);
     }

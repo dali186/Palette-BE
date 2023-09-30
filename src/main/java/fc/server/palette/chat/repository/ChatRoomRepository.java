@@ -18,7 +18,7 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
     @Query(value = "{_id: ?0}")
     Optional<ChatRoom> findChatRoomById(String roomId);
 
-    @Query(value = "{enterList: {$in: [?0, ?1]}}")
+    @Query(value = "{ 'enterList.?0': { $exists: true }, 'enterList.?1': { $exists: true }}")
     Optional<ChatRoom> findChatRoomByEnterList(Long memberId, Long opId);
 
     @Query(value = "{enterList: {$in: [?0, ?1]}, type: ?2}")
