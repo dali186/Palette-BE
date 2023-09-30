@@ -1,6 +1,7 @@
 package fc.server.palette.secondhand.dto.response;
 
-import fc.server.palette.member.entity.Member;
+import fc.server.palette.chat.dto.response.ChatRoomDetailContentDto;
+import fc.server.palette.chat.entity.type.ChatRoomType;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.entity.type.Category;
 import lombok.AllArgsConstructor;
@@ -29,4 +30,14 @@ public class ProductDto {
     private Boolean isSoldOut;
     private Boolean isFree;
     private LocalDateTime createdAt;
+
+    public ChatRoomDetailContentDto toChatRoomInfo() {
+        return ChatRoomDetailContentDto.builder()
+                .contentId(id)
+                .type(ChatRoomType.SECONDHAND)
+                .title(title)
+                .image(images.get(0))
+                .price(price)
+                .build();
+    }
 }
