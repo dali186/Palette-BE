@@ -1,5 +1,7 @@
 package fc.server.palette.secondhand.service;
 
+import fc.server.palette._common.exception.Exception404;
+import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
 import fc.server.palette.secondhand.dto.response.ProductDto;
@@ -34,7 +36,7 @@ public class SecondhandService {
     @Transactional(readOnly = true)
     public ProductDto getProduct(Long productId) {
         Secondhand product = secondhandRespository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         return buildProductDto(product);
     }
 
@@ -66,7 +68,7 @@ public class SecondhandService {
     @Transactional
     public ProductDto closeTransaction(Long productId) {
         Secondhand product = secondhandRespository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         product.closeTransaction();
         return buildProductDto(product);
     }
@@ -81,7 +83,7 @@ public class SecondhandService {
     @Transactional
     public ProductDto editProduct(Long productId, EditProductDto editProductDto) {
         Secondhand product = secondhandRespository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         product.updateProduct(editProductDto);
         return buildProductDto(product);
     }
@@ -131,7 +133,7 @@ public class SecondhandService {
     @Transactional(readOnly = true)
     public Long getAuthorId(Long productId) {
         Secondhand product = secondhandRespository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         return product.getMember().getId();
     }
 
