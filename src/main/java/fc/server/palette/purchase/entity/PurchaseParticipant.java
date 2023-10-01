@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -21,4 +22,7 @@ public class PurchaseParticipant extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Purchase purchase;
+
+    @OneToMany(mappedBy = "purchaseParticipant", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<ParticipantMember> participantMemberList;
 }
