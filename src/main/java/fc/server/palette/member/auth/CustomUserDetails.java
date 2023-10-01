@@ -1,5 +1,7 @@
 package fc.server.palette.member.auth;
 
+import fc.server.palette._common.exception.Exception403;
+import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.member.entity.Member;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +22,7 @@ public class CustomUserDetails implements UserDetails {
 
     public void validateAuthority(Long authorId) {
         if (!member.getId().equals(authorId)) {
-            throw new IllegalArgumentException("권한이 없습니다.");
+            throw new Exception403(ExceptionMessage.ACCESS_DENIED);
         }
     }
 
