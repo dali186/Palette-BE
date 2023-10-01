@@ -3,6 +3,7 @@ package fc.server.palette.chat.controller;
 import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
 import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
 import fc.server.palette.chat.dto.response.ChatRoomDetailDto;
+import fc.server.palette.chat.dto.response.ChatRoomUserListDto;
 import fc.server.palette.chat.entity.ChatMessage;
 import fc.server.palette.chat.entity.ChatRoom;
 import fc.server.palette.chat.entity.type.ChatMessageType;
@@ -12,6 +13,7 @@ import fc.server.palette.chat.service.ChatService;
 import fc.server.palette.meeting.service.MeetingService;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.member.entity.Member;
+import fc.server.palette.member.repository.MemberRepository;
 import fc.server.palette.purchase.service.PurchaseService;
 import fc.server.palette.secondhand.service.SecondhandService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -35,6 +41,7 @@ public class ChatController {
     private final MeetingService meetingService;
     private final PurchaseService purchaseService;
     private final SecondhandService secondhandService;
+    private final MemberRepository memberRepository;
     private final SimpMessageSendingOperations template;
 
     //개인 채팅방 생성
@@ -83,6 +90,27 @@ public class ChatController {
             return ResponseEntity.ok(response);
         }
         throw new IllegalArgumentException("해당 채팅방 정보가 없습니다.");
+    }
+
+    //채팅방 유저 목록 조회
+    @GetMapping("/member")
+    public ResponseEntity<?> chatRoomUserList(@RequestParam("roomId") String roomId) {
+        ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
+        List<Long> memberIdList = chatRoom.getMemberList();
+
+        List<ChatRoomUserListDto> memberList = memberIdList.stream()
+                .map(id -> {
+                    Optional<Member> member = memberRepository.findById(id);
+                    return ChatRoomUserListDto.builder()
+                            .memberId(id)
+                            .nickName(member.get().getNickname())
+                            .profileImgUrl(member.get().getImage())
+                            .host(chatRoom.getHost())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(memberList);
     }
 
     //공지 등록
