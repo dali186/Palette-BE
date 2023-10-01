@@ -37,22 +37,6 @@ public class ChatController {
     private final SecondhandService secondhandService;
     private final SimpMessageSendingOperations template;
 
-    //채팅방 생성
-
-    /**
-     * 채팅방 유입 경로
-     * <p>
-     * - 개인 채팅
-     * (생성, 입장 - 호스트/참여자) 마이페이지 -> 채팅하기, title memberId_otherId
-     * (생성 - 참여자) 중고거래 -> 중고거래 시작하기,
-     * <p>
-     * <p>
-     * - 단체 채팅
-     * (생성 - 호스트) 같이 성장해요 -> 채팅방 개설하기
-     * (입장 - 참여자) 같이 성장해요 -> 채팅하기
-     * (생성) 같이사요 -> 게시글 등록 시
-     * (입장) 같이사요 -> 공동구매 제안하기
-     */
     //개인 채팅방 생성
     //TODO 개인 채팅방은 api이용해서 생성, 단체 채팅방은 해당 repository에서 생성
     @PostMapping("/open")
@@ -88,12 +72,17 @@ public class ChatController {
         }
         if (type.equals(ChatRoomType.MEETING)) {
             response.setContentNotice(meetingService.getDetailMeeting(contentId).toChatRoomInfo());
-        } else if (type.equals(ChatRoomType.PURCHASE)) {
-            response.setContentNotice(purchaseService.getOffer(contentId).toChatRoomInfo());
-        } else if (type.equals(ChatRoomType.SECONDHAND)) {
-            response.setContentNotice(secondhandService.getProduct(contentId).toChatRoomInfo());
+            return ResponseEntity.ok(response);
         }
-        return ResponseEntity.ok(response);
+        if (type.equals(ChatRoomType.PURCHASE)) {
+            response.setContentNotice(purchaseService.getOffer(contentId).toChatRoomInfo());
+            return ResponseEntity.ok(response);
+        }
+        if (type.equals(ChatRoomType.SECONDHAND)) {
+            response.setContentNotice(secondhandService.getProduct(contentId).toChatRoomInfo());
+            return ResponseEntity.ok(response);
+        }
+        throw new IllegalArgumentException("해당 채팅방 정보가 없습니다.");
     }
 
     //공지 등록
@@ -118,7 +107,6 @@ public class ChatController {
     }
 
     //채팅방 나가기
-    //TODO userId가 아닌 nickname 받아서 수정
     @DeleteMapping("/exit")
     public ResponseEntity<?> memberRemove(@RequestParam("roomId") String roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
