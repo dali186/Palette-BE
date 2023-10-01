@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,7 +14,7 @@ public class ChatMessagesDto {
     private String profileImgUrl;
     private String nickName;
     private String text;
-    private String image;
+    private List<String> image;
     private LocalDateTime createdAt;
     private ChatMessageType type;
 }

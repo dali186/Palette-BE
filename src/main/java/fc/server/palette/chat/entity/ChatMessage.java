@@ -5,8 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Document(collection = "chat")
@@ -16,7 +18,8 @@ public class ChatMessage {
     private String id;
     private ChatMessageType type;
     private String content;
-    private String image;
+    private List<String> image;
+    private List<MultipartFile> images;
     private Long sender;
     private String roomId;
     private LocalDateTime createdAt;

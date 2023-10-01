@@ -1,5 +1,7 @@
 package fc.server.palette.chat.controller;
 
+import fc.server.palette._common.s3.S3DirectoryNames;
+import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
 import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
 import fc.server.palette.chat.dto.response.*;
@@ -25,7 +27,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -40,14 +44,18 @@ public class ChatController {
     private final PurchaseService purchaseService;
     private final SecondhandService secondhandService;
     private final MemberRepository memberRepository;
+
+    private final S3ImageUploader s3ImageUploader;
     private final SimpMessageSendingOperations template;
 
     //개인 채팅방 생성
     @PostMapping("/open")
     public ResponseEntity<?> personalChatRoomOpen(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ChatRoomOpenDto request) {
         Long memberId = userDetails.getMember().getId();
+        Map<String, String> response = new HashMap<>();
+        response.put("roomId", chatRoomService.openPersonalChatRoom(memberId, request));
 
-        return ResponseEntity.ok(chatRoomService.openPersonalChatRoom(memberId, request));
+        return ResponseEntity.ok(response);
     }
 
     //채팅방 목록 조회
@@ -205,6 +213,10 @@ public class ChatController {
     @MessageMapping("/chat/send")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         chatMessage.setCreatedAt(LocalDateTime.now());
+        if (!chatMessage.getImage().isEmpty()) {
+            List<String> imageUrls = s3ImageUploader.save(S3DirectoryNames.CHAT, chatMessage.getImages());
+            chatMessage.setImage(imageUrls);
+        }
         chatMessageService.saveChat(chatMessage);
         template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
         return chatMessage;
