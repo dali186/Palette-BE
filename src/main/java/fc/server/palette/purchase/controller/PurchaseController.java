@@ -2,6 +2,8 @@ package fc.server.palette.purchase.controller;
 
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
+import fc.server.palette.chat.entity.type.ChatRoomType;
+import fc.server.palette.chat.service.ChatRoomService;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
@@ -30,6 +32,7 @@ import java.util.stream.Collectors;
 public class PurchaseController {
     private final PurchaseService purchaseService;
     private final S3ImageUploader s3ImageUploader;
+    private final ChatRoomService chatRoomService;
 
     @GetMapping("")
     public ResponseEntity<List<OfferListDto>> getAllOffers() {
@@ -51,6 +54,7 @@ public class PurchaseController {
         List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
         List<Media> mediaList = toMediaList(savedImageUrls, purchase);
         OfferDto offer = purchaseService.createOffer(purchase, mediaList);
+        chatRoomService.openGroupChatRoom(offer, userDetails.getMember().getId(),ChatRoomType.PURCHASE);
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
