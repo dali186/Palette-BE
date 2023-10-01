@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -106,10 +107,13 @@ public class PurchaseService {
     }
 
     private String getThumbnailUrl(Long purchaseId) {
-        return purchaseMediaRepository
-                .findAllByPurchase_id(purchaseId)
-                .get(0)
-                .getUrl();
+        Optional<Media> optionalThumbnail = purchaseMediaRepository.findAllByPurchase_id(purchaseId)
+                .stream()
+                .findFirst();
+        if (optionalThumbnail.isPresent()){
+            return optionalThumbnail.get().getUrl();
+        }
+        return ExceptionMessage.OBJECT_NOT_FOUND;
     }
 
     private List<String> getImagesUrl(Long purchaseId) {
