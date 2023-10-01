@@ -1,5 +1,6 @@
 package fc.server.palette.chat.service;
 
+import fc.server.palette.chat.dto.response.ChatMessagesDto;
 import fc.server.palette.chat.dto.response.ChatRoomListDto;
 import fc.server.palette.chat.dto.response.ChatRoomNoticeListDto;
 import fc.server.palette.chat.entity.ChatMessage;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +31,22 @@ public class ChatService {
     @Transactional
     public Optional<ChatMessage> findChatMessageById(String msgId) {
         return chatMessageRepository.findById(msgId);
+    }
+
+    @Transactional
+    public List<ChatMessagesDto> findChatMessageByRoomId(String roomId) {
+        return chatMessageRepository.findByRoomId(roomId).stream()
+                .map(message -> {
+                    ChatMessagesDto response = new ChatMessagesDto();
+                    response.setMemberId(message.getSender());
+                    response.setText(message.getContent());
+                    response.setImage(message.getImage());
+                    response.setType(message.getType());
+                    response.setCreatedAt(message.getCreatedAt());
+
+                    return response;
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional

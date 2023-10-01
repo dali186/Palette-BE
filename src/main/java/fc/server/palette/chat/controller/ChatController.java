@@ -2,6 +2,8 @@ package fc.server.palette.chat.controller;
 
 import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
 import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
+import fc.server.palette.chat.dto.response.ChatMemberDetailDto;
+import fc.server.palette.chat.dto.response.ChatMessagesDto;
 import fc.server.palette.chat.dto.response.ChatRoomDetailDto;
 import fc.server.palette.chat.dto.response.ChatRoomUserListDto;
 import fc.server.palette.chat.entity.ChatMessage;
@@ -26,7 +28,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -90,6 +91,36 @@ public class ChatController {
             return ResponseEntity.ok(response);
         }
         throw new IllegalArgumentException("해당 채팅방 정보가 없습니다.");
+    }
+
+    //채팅방 메세지 목록 조회
+    @GetMapping("/history")
+    public ResponseEntity<?> messageList(@RequestParam("roomId") String roomId) {
+        List<ChatMemberDetailDto> memberList = chatRoomService.findChatRoomById(roomId).getEnterList().keySet()
+                .stream()
+                .map(id -> {
+                    ChatMemberDetailDto memberDetail = new ChatMemberDetailDto();
+                    Optional<Member> member = memberRepository.findById(id);
+                    memberDetail.setId(id);
+                    memberDetail.setNickName(member.get().getNickname());
+                    memberDetail.setProfileUrl(member.get().getImage());
+                    return memberDetail;
+                })
+                .collect(Collectors.toList());
+
+        List<ChatMessagesDto> messageList = chatMessageService.findChatMessageByRoomId(roomId).stream()
+                .map(msg -> {
+                    ChatMemberDetailDto detail = memberList.stream()
+                            .filter(member -> member.getId().equals(msg.getMemberId()))
+                            .findFirst()
+                            .orElse(new ChatMemberDetailDto());
+                    msg.setProfileImgUrl(detail.getProfileUrl());
+                    msg.setNickName(detail.getNickName());
+                    return msg;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(messageList);
     }
 
     //채팅방 유저 목록 조회
