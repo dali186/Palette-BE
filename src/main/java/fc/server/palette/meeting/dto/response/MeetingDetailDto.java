@@ -1,5 +1,7 @@
 package fc.server.palette.meeting.dto.response;
 
+import fc.server.palette.chat.dto.response.ChatRoomDetailContentDto;
+import fc.server.palette.chat.entity.type.ChatRoomType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,4 +38,13 @@ public class MeetingDetailDto {
     private Integer hits;
     private Integer likes;
     private LocalDateTime createdAt;
+
+    public ChatRoomDetailContentDto toChatRoomInfo() {
+        return ChatRoomDetailContentDto.builder()
+                .contentId(id)
+                .type(ChatRoomType.MEETING)
+                .title(title)
+                .week(week)
+                .build();
+    }
 }
