@@ -7,4 +7,5 @@ public class ExceptionMessage {
     public static final String ACCESS_DENIED = "권한이 없습니다.";
     public static final String AlREADY_CLOSING = "이미 모집된 마감입니다.";
     public static final String OVER_CAPACITY = "남아있는 모집 인원수를 초과하였습니다.";
+    public static final String OBJECT_NOT_FOUND = "객체를 찾을 수 없습니다.";
 }
