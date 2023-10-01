@@ -1,5 +1,7 @@
 package fc.server.palette.purchase.service;
 
+import fc.server.palette._common.exception.Exception404;
+import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
@@ -39,7 +41,7 @@ public class PurchaseService {
     @Transactional(readOnly = true)
     public OfferDto getOffer(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND + offerId));
         return buildOffer(purchase);
     }
 
@@ -129,7 +131,7 @@ public class PurchaseService {
     @Transactional
     public void addBookmark(Long offerId, Member member) {
         Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
 
         Bookmark bookmark = Bookmark.builder()
                 .member(member)
@@ -146,7 +148,7 @@ public class PurchaseService {
     @Transactional
     public OfferDto editOffer(Long offerId, EditOfferDto editOfferDto) {
         Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         purchase.updateOffer(editOfferDto);
         return buildOffer(purchase);
     }
@@ -154,17 +156,15 @@ public class PurchaseService {
     @Transactional
     public OfferDto closeOffer(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         purchase.closeOffer();
-        Purchase updatedPurchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
-        return buildOffer(updatedPurchase);
+        return buildOffer(purchase);
     }
 
     @Transactional(readOnly = true)
     public Long getAuthorId(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         return purchase.getMember().getId();
     }
 }
