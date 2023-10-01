@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -43,7 +44,7 @@ public class SecondhandService {
     @Transactional(readOnly = true)
     public Secondhand getSecondhand(Long productId) {
         return secondhandRespository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("중고거래 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
     }
 
     @Transactional
@@ -120,14 +121,13 @@ public class SecondhandService {
     }
 
     private String getThumbnailUrl(Long secondhandId) {
-        List<Media> mediaList = secondhandMediaRepository.findAllBySecondhand_id(secondhandId);
-        if (mediaList.isEmpty()) {
-            //todo 예외발생으로 변경
-            return null;
+        Optional<Media> optionalThumbnail = secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
+                .stream()
+                .findFirst();
+        if (optionalThumbnail.isPresent()){
+            return optionalThumbnail.get().getUrl();
         }
-        return secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
-                .get(0)
-                .getUrl();
+        return ExceptionMessage.OBJECT_NOT_FOUND;
     }
 
     @Transactional(readOnly = true)
