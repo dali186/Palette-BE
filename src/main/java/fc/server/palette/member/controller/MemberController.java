@@ -15,19 +15,21 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/mypage")
 @RequiredArgsConstructor
 public class MemberController {
 
     private final MemberService memberService;
 
 
-    @GetMapping("/mypage/{memberId}")
-    public ResponseEntity<?> myPageInfo (@PathVariable Long memberId){
+    @GetMapping("/{memberId}")
+    public ResponseEntity<?> myPageInfo (@PathVariable Long memberId,
+                                         @AuthenticationPrincipal CustomUserDetails customUserDetails){
+
         return ResponseEntity.ok(memberService.myPageInfo(memberId));
     }
 
-    @PostMapping("/mypage/{memberId}")
+    @PostMapping("/{memberId}")
     public ResponseEntity<?> updateMember (
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long memberId,
@@ -40,32 +42,38 @@ public class MemberController {
 
 
 
-    @GetMapping("/mypage/followed/{followedId}")
-    public ResponseEntity<List<FollowInfoDto>> getFollowed(@PathVariable Long followedId) {
+    @GetMapping("/followed/{followedId}")
+    public ResponseEntity<List<FollowInfoDto>> getFollowed(@PathVariable Long followedId,
+                                                           @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         List<FollowInfoDto> followed = memberService.getFollowed(followedId);
         return ResponseEntity.ok(followed);
     }
 
 
 
-    @GetMapping("/mypage/following/{followingId}")
-    public ResponseEntity<List<FollowInfoDto>> getFollowings(@PathVariable Long followingId) {
+    @GetMapping("/following/{followingId}")
+    public ResponseEntity<List<FollowInfoDto>> getFollowings(@PathVariable Long followingId,
+                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         List<FollowInfoDto> following = memberService.getFollowings(followingId);
         return ResponseEntity.ok(following);
     }
 
 
 
-    @PostMapping("/mypage/follow/{followedId}")
-    public ResponseEntity<?> follow(@PathVariable Long followedId, @RequestBody FollowRequestDto Dto ){
+    @PostMapping("/follow/{followedId}")
+    public ResponseEntity<?> follow(@PathVariable Long followedId,
+                                    @RequestBody FollowRequestDto Dto,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails){
         memberService.follow(followedId, Dto.getFollowingId());
         return ResponseEntity.ok("팔로우완료");
     }
 
 
-    @DeleteMapping("/mypage/follow/{followedId}/{followingId}")
-    public ResponseEntity<?> unfollow(@PathVariable Long followedId, @PathVariable Long followingId) {
-        memberService.unfollow(followedId, followingId);
+    @DeleteMapping("/follow/{followingId}")
+    public ResponseEntity<?> unfollow(@PathVariable Long followingId,
+                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        memberService.unfollow(customUserDetails.getMember().getId(), followingId);
         return ResponseEntity.ok("언팔로우완료");
     }
 }
