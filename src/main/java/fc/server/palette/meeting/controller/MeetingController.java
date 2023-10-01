@@ -1,5 +1,7 @@
 package fc.server.palette.meeting.controller;
 
+import fc.server.palette.chat.entity.type.ChatRoomType;
+import fc.server.palette.chat.service.ChatRoomService;
 import fc.server.palette.meeting.dto.request.ApplicationDto;
 import fc.server.palette.meeting.dto.request.MeetingCreateDto;
 import fc.server.palette.meeting.dto.request.MeetingUpdateDto;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MeetingController {
     private final MeetingService meetingService;
+    private final ChatRoomService chatRoomService;
 
     @GetMapping("")
     public ResponseEntity<?> getMeetingList(@RequestParam Boolean isClose){
@@ -48,6 +51,7 @@ public class MeetingController {
             @RequestPart(value = "file", required = false)List<MultipartFile> images
     ) {
         meetingService.createMeeting(meetingCreateDto, userDetails.getMember(), images);
+        chatRoomService.openGroupChatRoom(meetingCreateDto, userDetails.getMember().getId(), ChatRoomType.MEETING);
         return ResponseEntity.ok("모임을 개설하였습니다.");
     }
 

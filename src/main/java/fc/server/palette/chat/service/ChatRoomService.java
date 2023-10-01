@@ -4,6 +4,8 @@ import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
 import fc.server.palette.chat.entity.ChatRoom;
 import fc.server.palette.chat.entity.type.ChatRoomType;
 import fc.server.palette.chat.repository.ChatRoomRepository;
+import fc.server.palette.meeting.dto.request.MeetingCreateDto;
+import fc.server.palette.purchase.dto.response.OfferDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -37,13 +39,13 @@ public class ChatRoomService {
         Long opId = request.getParticipant();
         Optional<ChatRoom> duplicatedRoom = chatRoomRepository.findChatRoomByEnterList(memberId, opId);
         if (!duplicatedRoom.isPresent()) {
-            return openNewChatRoom(memberId, request).getId();
+            return openNewPersonalChatRoom(memberId, request).getId();
         } else {
             if (duplicatedRoom.get().getMemberList().size() == 2) {
                 return duplicatedRoom.get().getId();
             }
             if (duplicatedRoom.get().getType().equals(ChatRoomType.SECONDHAND) && !duplicatedRoom.get().getContentId().equals(request.getContentId())) {
-                return openNewChatRoom(memberId, request).getId();
+                return openNewPersonalChatRoom(memberId, request).getId();
             }
             List<Long> memberList = duplicatedRoom.get().getMemberList();
             Map<Long, LocalDateTime> enterList = duplicatedRoom.get().getEnterList();
@@ -66,7 +68,7 @@ public class ChatRoomService {
         return duplicatedRoom.get().getId();
     }
 
-    private ChatRoom openNewChatRoom(Long memberId, ChatRoomOpenDto request) {
+    private ChatRoom openNewPersonalChatRoom(Long memberId, ChatRoomOpenDto request) {
         ChatRoom chatRoom = new ChatRoom();
         Long opId = request.getParticipant();
 
@@ -82,6 +84,30 @@ public class ChatRoomService {
             chatRoom.setContentId(request.getContentId());
         }
         return chatRoomRepository.save(chatRoom);
+    }
+
+    //그룹톡방 생성
+    @Transactional
+    public void openGroupChatRoom(Object request, Long memberId,ChatRoomType type) {
+        //단체톡방생성에 필요한 요소들 - 타이틀, 호스트, 썸넬, 컨텐트 아이디
+        ChatRoom chatRoom = new ChatRoom();
+        chatRoom.setType(type);
+        chatRoom.getMemberList().add(memberId);
+        chatRoom.getExitList().put(memberId, LocalDateTime.now());
+        chatRoom.getEnterList().put(memberId, LocalDateTime.now());
+        if (type.equals(ChatRoomType.PURCHASE)) {
+            OfferDto info = (OfferDto) request;
+            chatRoom.setTitle(info.getTitle());
+            chatRoom.setHost(memberId);
+            chatRoom.setContentId(info.getId());
+        } else if (type.equals(ChatRoomType.MEETING)) {
+            MeetingCreateDto info = (MeetingCreateDto) request;
+            chatRoom.setTitle(info.getTitle());
+            chatRoom.setHost(memberId);
+            chatRoom.setContentId(info.getId());
+        }
+
+        chatRoomRepository.save(chatRoom);
     }
 
     //개인 톡방 조회
