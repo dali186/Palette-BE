@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SecondhandMediaRepository extends JpaRepository<Media, Long> {
     List<Media> findAllBySecondhand_id(Long secondhandId);
+
+    Media findByUrl(String url);
 }

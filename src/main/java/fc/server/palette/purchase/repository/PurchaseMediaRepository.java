@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface PurchaseMediaRepository extends JpaRepository<Media, Long> {
     List<Media> findAllByPurchase_id(Long purchaseId);
+
+    Media findByUrl(String url);
 }

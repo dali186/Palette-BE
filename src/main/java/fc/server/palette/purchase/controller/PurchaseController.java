@@ -1,8 +1,11 @@
 package fc.server.palette.purchase.controller;
 
+import fc.server.palette._common.s3.S3DirectoryNames;
+import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.request.GroupPurchaseOfferDto;
+import fc.server.palette.purchase.dto.request.RemoveImageDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.dto.response.OfferListDto;
 import fc.server.palette.purchase.entity.Media;
@@ -14,7 +17,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +29,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PurchaseController {
     private final PurchaseService purchaseService;
+    private final S3ImageUploader s3ImageUploader;
 
     @GetMapping("")
     public ResponseEntity<List<OfferListDto>> getAllOffers() {
@@ -38,10 +44,12 @@ public class PurchaseController {
     }
 
     @PostMapping("")
-    public ResponseEntity<OfferDto> createOffer(@RequestBody GroupPurchaseOfferDto groupPurchaseOfferDto,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<OfferDto> createOffer(@RequestPart("dto") GroupPurchaseOfferDto groupPurchaseOfferDto,
+                                                @RequestPart("file") List<MultipartFile> images,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
         Purchase purchase = groupPurchaseOfferDto.toEntity(userDetails.getMember());
-        List<Media> mediaList = toMediaList(groupPurchaseOfferDto.getImages(), purchase);
+        List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
+        List<Media> mediaList = toMediaList(savedImageUrls, purchase);
         OfferDto offer = purchaseService.createOffer(purchase, mediaList);
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
@@ -69,12 +77,39 @@ public class PurchaseController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PatchMapping("/{offerId}")
+    @PatchMapping(value = "/{offerId}", params = {"dto", "removeFileUrl"})
     public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
-                                              @RequestBody EditOfferDto editOfferDto,
+                                              @RequestPart("dto") EditOfferDto editOfferDto,
+                                              @RequestPart(value = "file",  required = false) List<MultipartFile> images,
+                                              @RequestPart("removeFileUrl") RemoveImageDto removeImageDto,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
+
+        saveImages(images, offerId);
+
+        //s3삭제
+        s3ImageUploader.remove(removeImageDto.getUrls());
+        //db삭제
+        purchaseService.deleteImages(removeImageDto.getUrls());
+
+        //이미지 외 콘텐츠 수정
         OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
+
+        return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
+
+    @PatchMapping(value = "/{offerId}", params = {"dto"})
+    public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
+                                              @RequestPart("dto") EditOfferDto editOfferDto,
+                                              @RequestPart(value = "file", required = false) List<MultipartFile> images,
+                                              @AuthenticationPrincipal CustomUserDetails userDetails) {
+        userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
+
+        saveImages(images, offerId);
+
+        //이미지 외 콘텐츠 수정
+        OfferDto offer = purchaseService.editOffer(offerId, editOfferDto);
+
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
@@ -84,5 +119,15 @@ public class PurchaseController {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
         OfferDto offer = purchaseService.closeOffer(offerId);
         return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
+
+    private void saveImages(List<MultipartFile> images, Long offerId) {
+        if (images != null) {
+            //s3 저장
+            List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
+            //db 저장
+            List<Media> MediaList = toMediaList(savedImageUrls, purchaseService.getPurchase(offerId));
+            purchaseService.saveImages(MediaList);
+        }
     }
 }

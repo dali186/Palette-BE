@@ -22,7 +22,6 @@ public class GroupPurchaseOfferDto {
     private String description;
     private Integer price;
     private String shopUrl;
-    private List<String> images;
     private ClosingType closingType;
     private String bank;
     private String accountNumber;
