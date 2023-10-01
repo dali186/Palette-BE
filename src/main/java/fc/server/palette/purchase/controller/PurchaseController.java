@@ -21,7 +21,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +48,7 @@ public class PurchaseController {
     @PostMapping("")
     public ResponseEntity<OfferDto> createOffer(@RequestPart("dto") GroupPurchaseOfferDto groupPurchaseOfferDto,
                                                 @RequestPart("file") List<MultipartFile> images,
-                                                @AuthenticationPrincipal CustomUserDetails userDetails) throws IOException {
+                                                @AuthenticationPrincipal CustomUserDetails userDetails) {
         Purchase purchase = groupPurchaseOfferDto.toEntity(userDetails.getMember());
         List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
         List<Media> mediaList = toMediaList(savedImageUrls, purchase);
@@ -84,7 +83,7 @@ public class PurchaseController {
     @PatchMapping(value = "/{offerId}", params = {"dto", "removeFileUrl"})
     public ResponseEntity<OfferDto> editOffer(@PathVariable Long offerId,
                                               @RequestPart("dto") EditOfferDto editOfferDto,
-                                              @RequestPart(value = "file",  required = false) List<MultipartFile> images,
+                                              @RequestPart(value = "file", required = false) List<MultipartFile> images,
                                               @RequestPart("removeFileUrl") RemoveImageDto removeImageDto,
                                               @AuthenticationPrincipal CustomUserDetails userDetails) {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
