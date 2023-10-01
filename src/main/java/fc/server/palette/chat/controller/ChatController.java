@@ -2,10 +2,7 @@ package fc.server.palette.chat.controller;
 
 import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
 import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
-import fc.server.palette.chat.dto.response.ChatMemberDetailDto;
-import fc.server.palette.chat.dto.response.ChatMessagesDto;
-import fc.server.palette.chat.dto.response.ChatRoomDetailDto;
-import fc.server.palette.chat.dto.response.ChatRoomUserListDto;
+import fc.server.palette.chat.dto.response.*;
 import fc.server.palette.chat.entity.ChatMessage;
 import fc.server.palette.chat.entity.ChatRoom;
 import fc.server.palette.chat.entity.type.ChatMessageType;
@@ -46,7 +43,6 @@ public class ChatController {
     private final SimpMessageSendingOperations template;
 
     //개인 채팅방 생성
-    //TODO 개인 채팅방은 api이용해서 생성, 단체 채팅방은 해당 repository에서 생성
     @PostMapping("/open")
     public ResponseEntity<?> personalChatRoomOpen(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ChatRoomOpenDto request) {
         Long memberId = userDetails.getMember().getId();
@@ -157,12 +153,17 @@ public class ChatController {
     }
 
     //공지 리스트 조회
-    //TODO memberimageUrl 추가 로직
     @GetMapping("/notice")
     public ResponseEntity<?> noticeList(@RequestParam("roomId") String roomId) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
+        List<ChatRoomNoticeListDto> noticeList = chatMessageService.setChatRoomNoticeListResponse(chatRoom).stream()
+                .map(notice -> {
+                    notice.setProfileImgUrl(memberRepository.findById(notice.getMemberId()).get().getImage());
+                    return notice;
+                })
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(chatMessageService.setChatRoomNoticeListResponse(chatRoom));
+        return ResponseEntity.ok(noticeList);
     }
 
     //채팅방 나가기
