@@ -83,6 +83,8 @@ public class Purchase extends BaseEntity {
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Bookmark> bookmarks;
 
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<PurchaseParticipant> purchaseParticipants;
 
     // db에 저장된 기본값이 적용되지 않고 필드에 null로 저장되는데 따른 조치
     public ClosingType getClosingType() {
