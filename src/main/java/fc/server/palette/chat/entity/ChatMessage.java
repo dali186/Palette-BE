@@ -19,7 +19,6 @@ public class ChatMessage {
     private ChatMessageType type;
     private String content;
     private List<String> image;
-    private List<MultipartFile> images;
     private Long sender;
     private String roomId;
     private LocalDateTime createdAt;

@@ -2,6 +2,7 @@ package fc.server.palette.chat.controller;
 
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
+import fc.server.palette.chat.dto.request.ChatMessageImageDto;
 import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
 import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
 import fc.server.palette.chat.dto.response.*;
@@ -25,12 +26,10 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -148,6 +147,36 @@ public class ChatController {
         return ResponseEntity.ok(memberList);
     }
 
+    //채팅 이미지 전송
+    @PostMapping("/file")
+    public ResponseEntity<?> imageFileSend(@RequestPart("detail") ChatMessageImageDto request,
+                                           @RequestPart("file") List<MultipartFile> images,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<String> imgUrls = s3ImageUploader.save(S3DirectoryNames.CHAT, images);
+        ChatMessage chatMessage = ChatMessage.builder()
+                .sender(userDetails.getMember().getId())
+                .roomId(request.getRoomId())
+                .image(imgUrls)
+                .type(request.getType())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        List<ChatMessageImageDetailDto> response = imgUrls.stream()
+                .map(url -> {
+                    ChatMessageImageDetailDto details = ChatMessageImageDetailDto.builder()
+                            .image(url)
+                            .type(request.getType())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    return details;
+                })
+                .collect(Collectors.toList());
+        chatMessageService.saveChat(chatMessage);
+        template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
+
+        return ResponseEntity.ok(response);
+    }
+
     //공지 등록
     @PostMapping("/notice")
     public ResponseEntity<?> noticeSave(@RequestBody ChatRoomNoticeDto request) {
@@ -213,17 +242,13 @@ public class ChatController {
     @MessageMapping("/chat/send")
     public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
         chatMessage.setCreatedAt(LocalDateTime.now());
-        if (!chatMessage.getImage().isEmpty()) {
-            List<String> imageUrls = s3ImageUploader.save(S3DirectoryNames.CHAT, chatMessage.getImages());
-            chatMessage.setImage(imageUrls);
-        }
         chatMessageService.saveChat(chatMessage);
         template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
         return chatMessage;
     }
 
     @MessageMapping("/chat/enter")
-    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
         headerAccessor.getSessionAttributes().put("memberId", chatMessage.getSender());
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
