@@ -34,7 +34,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> authorize(@Valid @RequestBody LoginDto loginDto) {
 
-        UserDetails userDetails = customUserDetailService.loadUserByUsername(loginDto.getEmail());
+        CustomUserDetails userDetails = (CustomUserDetails) customUserDetailService.loadUserByUsername(loginDto.getEmail());
 
         isSamePwd(userDetails.getPassword(),loginDto.getPassword());
 
@@ -45,7 +45,7 @@ public class AuthController {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        String jwt = tokenProvider.createToken(authenticationToken);
+        String jwt = tokenProvider.createToken(authenticationToken, userDetails);
 
 
         HttpHeaders httpHeaders = new HttpHeaders();
