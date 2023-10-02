@@ -1,8 +1,11 @@
 package fc.server.palette.chat.controller;
 
+import fc.server.palette._common.s3.S3DirectoryNames;
+import fc.server.palette._common.s3.S3ImageUploader;
+import fc.server.palette.chat.dto.request.ChatMessageImageDto;
 import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
 import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
-import fc.server.palette.chat.dto.response.ChatRoomDetailDto;
+import fc.server.palette.chat.dto.response.*;
 import fc.server.palette.chat.entity.ChatMessage;
 import fc.server.palette.chat.entity.ChatRoom;
 import fc.server.palette.chat.entity.type.ChatMessageType;
@@ -12,6 +15,7 @@ import fc.server.palette.chat.service.ChatService;
 import fc.server.palette.meeting.service.MeetingService;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.member.entity.Member;
+import fc.server.palette.member.repository.MemberRepository;
 import fc.server.palette.purchase.service.PurchaseService;
 import fc.server.palette.secondhand.service.SecondhandService;
 import lombok.RequiredArgsConstructor;
@@ -22,8 +26,11 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -35,15 +42,19 @@ public class ChatController {
     private final MeetingService meetingService;
     private final PurchaseService purchaseService;
     private final SecondhandService secondhandService;
+    private final MemberRepository memberRepository;
+
+    private final S3ImageUploader s3ImageUploader;
     private final SimpMessageSendingOperations template;
 
     //개인 채팅방 생성
-    //TODO 개인 채팅방은 api이용해서 생성, 단체 채팅방은 해당 repository에서 생성
     @PostMapping("/open")
     public ResponseEntity<?> personalChatRoomOpen(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ChatRoomOpenDto request) {
         Long memberId = userDetails.getMember().getId();
+        Map<String, String> response = new HashMap<>();
+        response.put("roomId", chatRoomService.openPersonalChatRoom(memberId, request));
 
-        return ResponseEntity.ok(chatRoomService.openPersonalChatRoom(memberId, request));
+        return ResponseEntity.ok(response);
     }
 
     //채팅방 목록 조회
@@ -85,6 +96,87 @@ public class ChatController {
         throw new IllegalArgumentException("해당 채팅방 정보가 없습니다.");
     }
 
+    //채팅방 메세지 목록 조회
+    @GetMapping("/history")
+    public ResponseEntity<?> messageList(@RequestParam("roomId") String roomId) {
+        List<ChatMemberDetailDto> memberList = chatRoomService.findChatRoomById(roomId).getEnterList().keySet()
+                .stream()
+                .map(id -> {
+                    ChatMemberDetailDto memberDetail = new ChatMemberDetailDto();
+                    Optional<Member> member = memberRepository.findById(id);
+                    memberDetail.setId(id);
+                    memberDetail.setNickName(member.get().getNickname());
+                    memberDetail.setProfileUrl(member.get().getImage());
+                    return memberDetail;
+                })
+                .collect(Collectors.toList());
+
+        List<ChatMessagesDto> messageList = chatMessageService.findChatMessageByRoomId(roomId).stream()
+                .map(msg -> {
+                    ChatMemberDetailDto detail = memberList.stream()
+                            .filter(member -> member.getId().equals(msg.getMemberId()))
+                            .findFirst()
+                            .orElse(new ChatMemberDetailDto());
+                    msg.setProfileImgUrl(detail.getProfileUrl());
+                    msg.setNickName(detail.getNickName());
+                    return msg;
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(messageList);
+    }
+
+    //채팅방 유저 목록 조회
+    @GetMapping("/member")
+    public ResponseEntity<?> chatRoomUserList(@RequestParam("roomId") String roomId) {
+        ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
+        List<Long> memberIdList = chatRoom.getMemberList();
+
+        List<ChatRoomUserListDto> memberList = memberIdList.stream()
+                .map(id -> {
+                    Optional<Member> member = memberRepository.findById(id);
+                    return ChatRoomUserListDto.builder()
+                            .memberId(id)
+                            .nickName(member.get().getNickname())
+                            .profileImgUrl(member.get().getImage())
+                            .host(chatRoom.getHost())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(memberList);
+    }
+
+    //채팅 이미지 전송
+    @PostMapping("/file")
+    public ResponseEntity<?> imageFileSend(@RequestPart("detail") ChatMessageImageDto request,
+                                           @RequestPart("file") List<MultipartFile> images,
+                                           @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<String> imgUrls = s3ImageUploader.save(S3DirectoryNames.CHAT, images);
+        ChatMessage chatMessage = ChatMessage.builder()
+                .sender(userDetails.getMember().getId())
+                .roomId(request.getRoomId())
+                .image(imgUrls)
+                .type(request.getType())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        List<ChatMessageImageDetailDto> response = imgUrls.stream()
+                .map(url -> {
+                    ChatMessageImageDetailDto details = ChatMessageImageDetailDto.builder()
+                            .image(url)
+                            .type(request.getType())
+                            .createdAt(LocalDateTime.now())
+                            .build();
+                    return details;
+                })
+                .collect(Collectors.toList());
+        chatMessageService.saveChat(chatMessage);
+        template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
+
+        return ResponseEntity.ok(response);
+    }
+
     //공지 등록
     @PostMapping("/notice")
     public ResponseEntity<?> noticeSave(@RequestBody ChatRoomNoticeDto request) {
@@ -98,12 +190,17 @@ public class ChatController {
     }
 
     //공지 리스트 조회
-    //TODO memberimageUrl 추가 로직
     @GetMapping("/notice")
     public ResponseEntity<?> noticeList(@RequestParam("roomId") String roomId) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
+        List<ChatRoomNoticeListDto> noticeList = chatMessageService.setChatRoomNoticeListResponse(chatRoom).stream()
+                .map(notice -> {
+                    notice.setProfileImgUrl(memberRepository.findById(notice.getMemberId()).get().getImage());
+                    return notice;
+                })
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(chatMessageService.setChatRoomNoticeListResponse(chatRoom));
+        return ResponseEntity.ok(noticeList);
     }
 
     //채팅방 나가기
@@ -151,7 +248,7 @@ public class ChatController {
     }
 
     @MessageMapping("/chat/enter")
-    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor, @AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
         headerAccessor.getSessionAttributes().put("memberId", chatMessage.getSender());
         headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
 
