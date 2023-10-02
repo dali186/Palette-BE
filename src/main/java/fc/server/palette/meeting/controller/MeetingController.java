@@ -79,8 +79,11 @@ public class MeetingController {
     }
 
     @GetMapping("/{meetingId}")
-    public ResponseEntity<?> detailMeeting(@PathVariable Long meetingId){
-        return ResponseEntity.ok(meetingService.getDetailMeeting(meetingId));
+    public ResponseEntity<?> detailMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        return ResponseEntity.ok(meetingService.getDetailMeeting(userDetails.getMember().getId(), meetingId));
     }
 
     @PostMapping("/like/{meetingId}")
