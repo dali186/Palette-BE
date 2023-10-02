@@ -204,9 +204,17 @@ public class MeetingService {
 
     }
 
-    public MeetingDetailDto getDetailMeeting(Long meetingId) {
+    public MeetingDetailDto getDetailMeeting(Long loginMember, Long meetingId) {
         Meeting meeting = getMeeting(meetingId);
-        meeting.setHits(); //조회수 증가
+        if (!meeting.getMember().getId().equals(loginMember)) {
+            meeting.setHits(); //조회수 증가
+        }
+        String msg = "참여하고 있지않은 모임입니다.";
+        Application application = applicationRepository.findByMeetingIdAndMemberIdAndStatus(meetingId, loginMember, Status.APPROVAL);
+        if (application != null) {
+            msg = "이미 참여하고있는 모임입니다.";
+        }
+
         MeetingMemberDto responseMember = MeetingMemberDto.builder()
                 .id(meeting.getMember().getId())
                 .nickname(meeting.getMember().getNickname())
@@ -245,6 +253,7 @@ public class MeetingService {
                 .hits(meeting.getHits())
                 .likes(meeting.getLikes())
                 .createdAt(meeting.getCreatedAt())
+                .msg(msg)
                 .build();
     }
 

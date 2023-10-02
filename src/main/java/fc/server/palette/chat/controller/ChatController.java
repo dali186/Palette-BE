@@ -71,7 +71,7 @@ public class ChatController {
     //채팅방 관련 정보 조회
     //TODO PURCHASE의 경우 계좌번호
     @GetMapping("/room/detail")
-    public ResponseEntity<?> roomDetails(@RequestParam("roomId") String roomId) {
+    public ResponseEntity<?> roomDetails(@RequestParam("roomId") String roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
         ChatRoomType type = chatRoom.getType();
         Long contentId = chatRoom.getContentId();
@@ -82,7 +82,7 @@ public class ChatController {
             response.setNotice(chatMessageService.findChatMessageById(noticeId).get().getContent());
         }
         if (type.equals(ChatRoomType.MEETING)) {
-            response.setContentNotice(meetingService.getDetailMeeting(contentId).toChatRoomInfo());
+            response.setContentNotice(meetingService.getDetailMeeting(userDetails.getMember().getId(), contentId).toChatRoomInfo());
             return ResponseEntity.ok(response);
         }
         if (type.equals(ChatRoomType.PURCHASE)) {

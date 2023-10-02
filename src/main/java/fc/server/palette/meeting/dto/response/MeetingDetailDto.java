@@ -38,6 +38,7 @@ public class MeetingDetailDto {
     private Integer hits;
     private Integer likes;
     private LocalDateTime createdAt;
+    private String msg;
 
     public ChatRoomDetailContentDto toChatRoomInfo() {
         return ChatRoomDetailContentDto.builder()
