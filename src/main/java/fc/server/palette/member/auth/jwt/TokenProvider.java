@@ -1,6 +1,7 @@
 package fc.server.palette.member.auth.jwt;
 
 import fc.server.palette.member.auth.CustomUserDetailService;
+import fc.server.palette.member.auth.CustomUserDetails;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.Jwts;
@@ -43,7 +44,7 @@ public class TokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String createToken(Authentication authentication) {
+    public String createToken(Authentication authentication, CustomUserDetails userDetails) {
         log.info("authentication: {}",authentication);
         String autorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -57,6 +58,7 @@ public class TokenProvider {
         return Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, autorities)
+                .claim("memberId", userDetails.getMember().getId())
                 .signWith(key, SignatureAlgorithm.HS512)
                 .setExpiration(validity)
                 .compact();
