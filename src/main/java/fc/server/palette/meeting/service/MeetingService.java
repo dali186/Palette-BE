@@ -222,6 +222,23 @@ public class MeetingService {
                 mediaRepository.save(media);
             }
         }
+
+        String week = meetingUpdateDto.getWeek() != null && !meetingUpdateDto.getWeek().isEmpty()
+                ? meetingUpdateDto.getWeek()
+                : null;
+
+        List<String> days = meetingUpdateDto.getDays() != null && !meetingUpdateDto.getDays().isEmpty()
+                ? meetingUpdateDto.getDays()
+                : Collections.emptyList();
+
+        String progressTime = meetingUpdateDto.getProgressTime() != null && !meetingUpdateDto.getProgressTime().isEmpty()
+                ? meetingUpdateDto.getProgressTime()
+                : null;
+
+        String time = meetingUpdateDto.getTime() != null && !meetingUpdateDto.getTime().isEmpty()
+                ? meetingUpdateDto.getTime()
+                : null;
+        meetingUpdateDto.setUpdateValue(week, days, progressTime, time);
         meeting.update(meetingUpdateDto, mediaList);
 
     }
@@ -242,9 +259,10 @@ public class MeetingService {
             msg = "이미 참여하고있는 모임입니다.";
         }
         String weekDescription = meeting.getWeek() != null ? meeting.getWeek().getDescription() : null;
-        List<String> days = meeting.getDays().isEmpty() ? meeting.getDays().stream()
-                .map(Day::getDescription)
-                .collect(Collectors.toList()) :  Collections.emptyList();
+        List<String> days = meeting.getDays().isEmpty() ? Collections.emptyList() :
+                meeting.getDays().stream()
+                        .map(Day::getDescription)
+                        .collect(Collectors.toList());
 
         MeetingMemberDto responseMember = MeetingMemberDto.builder()
                 .id(meeting.getMember().getId())
@@ -295,9 +313,10 @@ public class MeetingService {
             likemsg = true;
         }
         String weekDescription = meeting.getWeek() != null ? meeting.getWeek().getDescription() : null;
-        List<String> days = meeting.getDays().isEmpty() ? meeting.getDays().stream()
-                .map(Day::getDescription)
-                .collect(Collectors.toList()) :  Collections.emptyList();
+        List<String> days = meeting.getDays().isEmpty() ? Collections.emptyList() :
+                meeting.getDays().stream()
+                        .map(Day::getDescription)
+                        .collect(Collectors.toList());
         return MeetingListDto.builder()
                 .id(meeting.getId())
                 .category(meeting.getCategory().getDescription())
