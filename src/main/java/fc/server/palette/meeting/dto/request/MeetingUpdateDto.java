@@ -8,6 +8,11 @@ import java.util.List;
 @Getter
 @NoArgsConstructor
 public class MeetingUpdateDto {
+    private String category;
+    private String type;
+    private List<String> jobs;
+    private List<String> positions;
+    private String sex;
     private String title;
     private String description;
     private int headCount;

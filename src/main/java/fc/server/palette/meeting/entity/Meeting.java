@@ -15,6 +15,7 @@ import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -119,6 +120,11 @@ public class Meeting extends BaseEntity {
     private Integer likes = 0;
 
     public void update(MeetingUpdateDto meetingUpdateDto, List<Media> image){
+        this.category = Category.fromValue(meetingUpdateDto.getCategory());
+        this.type = Type.fromValue(meetingUpdateDto.getType());
+        this.job = Job.fromValue(meetingUpdateDto.getJobs());
+        this.position = Position.fromValue(meetingUpdateDto.getPositions());
+        this.sex = Sex.fromValue(meetingUpdateDto.getSex());
         this.image = image;
         this.title = meetingUpdateDto.getTitle();
         this.description = meetingUpdateDto.getDescription();

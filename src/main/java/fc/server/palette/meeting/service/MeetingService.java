@@ -180,17 +180,21 @@ public class MeetingService {
         Meeting meeting = getMeeting(meetingId);
 
         List<Media> existingMedia = meeting.getImage();
-        existingMedia.stream().forEach(mediaRepository::delete);
+        if(!existingMedia.isEmpty()){
+            existingMedia.forEach(media -> {
+                mediaRepository.delete(media);
+            });
+            List<String> existingImageUrl = existingMedia.stream()
+                    .map(Media::getUrl)
+                    .collect(Collectors.toList());
+            s3ImageUploader.remove(existingImageUrl);
+        }
 
         List<Media> mediaList = new ArrayList<>();
         List<String> urlList = new ArrayList<>();
         boolean isImageEmpty = images.stream().anyMatch(MultipartFile::isEmpty);
 
         if (!isImageEmpty) {
-            List<String> existingImageUrl = existingMedia.stream()
-                    .map(Media::getUrl)
-                    .collect(Collectors.toList());
-            s3ImageUploader.remove(existingImageUrl);
             urlList = s3ImageUploader.save(S3DirectoryNames.MEETING, images);
             for(String imageUrl : urlList){
                 Media media = Media.builder()
