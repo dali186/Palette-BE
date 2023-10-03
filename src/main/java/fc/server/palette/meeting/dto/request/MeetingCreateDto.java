@@ -30,4 +30,8 @@ public class MeetingCreateDto {
     private String time;
     private String progressTime;
     private String acceptType;
+
+    public void setDto(String week){
+        this.week = week;
+    }
 }

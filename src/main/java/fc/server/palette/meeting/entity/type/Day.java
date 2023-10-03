@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -18,6 +19,9 @@ public enum Day {
     @JsonCreator
     public static List<Day> fromValue(List<String> values) {
         List<Day> days = new ArrayList<>();
+        if (values == null || values.isEmpty()) {
+            return days;
+        }
         for (String value : values){
             for (Day day : Day.values()) {
                 if (day.getDescription().equals(value)) {

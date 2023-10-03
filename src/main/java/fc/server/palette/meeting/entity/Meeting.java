@@ -97,10 +97,10 @@ public class Meeting extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private List<Day> days;
 
-    @Column(nullable = false, length = 45)
+    @Column(length = 45)
     private String time;
 
-    @Column(name = "progress_time", nullable = false, length = 10)
+    @Column(name = "progress_time", length = 10)
     private String progressTime;
 
     @Enumerated(EnumType.STRING)

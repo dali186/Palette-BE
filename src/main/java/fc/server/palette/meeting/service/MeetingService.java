@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -132,6 +133,22 @@ public class MeetingService {
             }
         }
 
+        Week week = meetingCreateDto.getWeek() != null && !meetingCreateDto.getWeek().isEmpty()
+                ? Week.fromValue(meetingCreateDto.getWeek())
+                : null;
+
+        List<Day> days = meetingCreateDto.getDays() != null && !meetingCreateDto.getDays().isEmpty()
+                ? Day.fromValue(meetingCreateDto.getDays())
+                : Collections.emptyList();
+
+        String progressTime = meetingCreateDto.getProgressTime() != null && !meetingCreateDto.getProgressTime().isEmpty()
+                ? meetingCreateDto.getProgressTime()
+                : null;
+
+        String time = meetingCreateDto.getTime() != null && !meetingCreateDto.getTime().isEmpty()
+                ? meetingCreateDto.getTime()
+                : null;
+
         Meeting meeting = Meeting.builder()
                 .member(member)
                 .category(Category.fromValue(meetingCreateDto.getCategory()))
@@ -147,10 +164,10 @@ public class MeetingService {
                 .endDate(meetingCreateDto.getEndDate())
                 .onOff(meetingCreateDto.isOnOff())
                 .place(meetingCreateDto.getPlace())
-                .week(Week.fromValue(meetingCreateDto.getWeek()))
-                .days(Day.fromValue(meetingCreateDto.getDays()))
-                .time(meetingCreateDto.getTime())
-                .progressTime(meetingCreateDto.getProgressTime())
+                .week(week)
+                .days(days)
+                .time(time)
+                .progressTime(progressTime)
                 .acceptType(AcceptType.fromValue(meetingCreateDto.getAcceptType()))
                 .build();
 
@@ -224,6 +241,10 @@ public class MeetingService {
         if (application != null) {
             msg = "이미 참여하고있는 모임입니다.";
         }
+        String weekDescription = meeting.getWeek() != null ? meeting.getWeek().getDescription() : null;
+        List<String> days = meeting.getDays().isEmpty() ? meeting.getDays().stream()
+                .map(Day::getDescription)
+                .collect(Collectors.toList()) :  Collections.emptyList();
 
         MeetingMemberDto responseMember = MeetingMemberDto.builder()
                 .id(meeting.getMember().getId())
@@ -253,10 +274,8 @@ public class MeetingService {
                 .endDate(meeting.getEndDate())
                 .onOff(meeting.isOnOff())
                 .place(meeting.getPlace())
-                .week(meeting.getWeek().getDescription())
-                .days(meeting.getDays().stream()
-                        .map(Day::getDescription)
-                        .collect(Collectors.toList()))
+                .week(weekDescription)
+                .days(days)
                 .time(meeting.getTime())
                 .progressTime(meeting.getProgressTime())
                 .acceptType(meeting.getAcceptType().getDescription())
@@ -275,6 +294,10 @@ public class MeetingService {
         if (bookmark != null){
             likemsg = true;
         }
+        String weekDescription = meeting.getWeek() != null ? meeting.getWeek().getDescription() : null;
+        List<String> days = meeting.getDays().isEmpty() ? meeting.getDays().stream()
+                .map(Day::getDescription)
+                .collect(Collectors.toList()) :  Collections.emptyList();
         return MeetingListDto.builder()
                 .id(meeting.getId())
                 .category(meeting.getCategory().getDescription())
@@ -297,10 +320,8 @@ public class MeetingService {
                 .endDate(meeting.getEndDate())
                 .onOff(meeting.isOnOff())
                 .place(meeting.getPlace())
-                .week(meeting.getWeek().getDescription())
-                .days(meeting.getDays().stream()
-                        .map(Day::getDescription)
-                        .collect(Collectors.toList()))
+                .week(weekDescription)
+                .days(days)
                 .time(meeting.getTime())
                 .progressTime(meeting.getProgressTime())
                 .isClosing(meeting.isClosing())
