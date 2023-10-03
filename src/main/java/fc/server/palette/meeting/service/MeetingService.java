@@ -252,6 +252,7 @@ public class MeetingService {
                 .acceptType(meeting.getAcceptType().getDescription())
                 .hits(meeting.getHits())
                 .likes(meeting.getLikes())
+                .isClosing(meeting.isClosing())
                 .createdAt(meeting.getCreatedAt())
                 .msg(msg)
                 .build();
