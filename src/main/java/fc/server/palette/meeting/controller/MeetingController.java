@@ -137,7 +137,6 @@ public class MeetingController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long meetingId
     ){
-        userDetails.validateAuthority(meetingService.getMeeting(meetingId).getMember().getId());
         if (!meetingService.checkParticipateMeeting(meetingId, userDetails.getMember())) {
             return ResponseEntity.ok("가입요건이 맞지 않아요");
         }
