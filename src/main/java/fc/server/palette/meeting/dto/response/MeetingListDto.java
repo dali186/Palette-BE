@@ -31,5 +31,6 @@ public class MeetingListDto {
     private boolean isClosing;
     private Integer hits;
     private Integer likes;
+    private boolean likemsg;
     private LocalDateTime createdAt;
 }

@@ -24,14 +24,18 @@ public class MeetingController {
     private final ChatRoomService chatRoomService;
 
     @GetMapping("")
-    public ResponseEntity<?> getMeetingList(@RequestParam Boolean isClose){
+    public ResponseEntity<?> getMeetingList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam Boolean isClose
+    ){
         List<MeetingListDto> meetingResponseDtoList;
-        meetingResponseDtoList = meetingService.getMeetingList(isClose);
+        meetingResponseDtoList = meetingService.getMeetingList(userDetails.getMember(), isClose);
         return ResponseEntity.ok(meetingResponseDtoList);
     }
 
     @GetMapping("/filter")
     public ResponseEntity<?> getMeetingFilterList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam Boolean isClose,
             @RequestParam String filter,
             @RequestParam String onOff,
@@ -40,7 +44,7 @@ public class MeetingController {
             @RequestParam String position,
             @RequestParam String sex
     ){
-        List<MeetingListDto> meetingListResponseDtoList = meetingService.getMeetingFilterList(isClose, filter, onOff, type, job, position, sex);
+        List<MeetingListDto> meetingListResponseDtoList = meetingService.getMeetingFilterList(userDetails.getMember(), isClose, filter, onOff, type, job, position, sex);
         return ResponseEntity.ok(meetingListResponseDtoList);
     }
 
@@ -129,7 +133,7 @@ public class MeetingController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long meetingId
     ){
-        return ResponseEntity.ok(meetingService.recommendMeeting(userDetails.getMember().getId(), meetingId));
+        return ResponseEntity.ok(meetingService.recommendMeeting(userDetails.getMember(), meetingId));
     }
 
     @PostMapping("/participate/check/{meetingId}")
