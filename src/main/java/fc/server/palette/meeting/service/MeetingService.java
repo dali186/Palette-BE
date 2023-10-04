@@ -353,6 +353,10 @@ public class MeetingService {
 
     public void likesMeeting(Long meetingId, Member member) {
         Meeting meeting = getMeeting(meetingId);
+        Bookmark existingBookmark = bookmarkRepository.findByMemberAndMeeting(member, meeting);
+        if (existingBookmark != null) {
+            throw new Exception400(member.getNickname(), ExceptionMessage.NO_DUPLICATED_LIKE);
+        }
         Bookmark bookmark = Bookmark.builder()
                 .member(member)
                 .meeting(meeting)
@@ -363,11 +367,11 @@ public class MeetingService {
 
     public void dislikesMeeting(Long meetingId, Member member) {
         Meeting meeting = getMeeting(meetingId);
-
         Bookmark bookmark = bookmarkRepository.findByMemberAndMeeting(member, meeting);
-        if (bookmark != null) {
-            bookmarkRepository.delete(bookmark);
+        if (bookmark == null) {
+            throw new Exception400(member.getNickname(), ExceptionMessage.NO_DISLIKE);
         }
+        bookmarkRepository.delete(bookmark);
         meeting.dislike();
     }
 
@@ -465,6 +469,9 @@ public class MeetingService {
     public void participateMeeting(Long meetingId, Member member, ApplicationDto applicationDto) {
         Meeting meeting = getMeeting(meetingId);
 
+        if(meeting.getMember().getId().equals(member.getId())){
+            throw new Exception400(member.getNickname(), ExceptionMessage.PARTICIPATE_YOURSELF_DENIED);
+        }
         Application application = Application.builder()
                 .meeting(meeting)
                 .member(member)
@@ -517,6 +524,9 @@ public class MeetingService {
 
     public void participateFirstComeMeeting(Long meetingId, Member member) {
         Meeting meeting = getMeeting(meetingId);
+        if(meeting.getMember().getId().equals(member.getId())){
+            throw new Exception400(member.getNickname(), ExceptionMessage.PARTICIPATE_YOURSELF_DENIED);
+        }
 
         if ((meeting.getHeadCount() - meeting.getRecruitedPersonnel()) <= 0) {
             throw new Exception400(meeting.getTitle(), ExceptionMessage.OVER_CAPACITY);
