@@ -5,11 +5,19 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class MemberMyPageDto {
+
+    private String sex;
+    private LocalDate birthday;
+    private String phoneNumber;
+    private String name;
+
 
     private String nickname;
 
@@ -28,8 +36,9 @@ public class MemberMyPageDto {
     private String roomNumber;
 
     private long followedCount;
-
     private long followingCount;
+
+    private boolean isFollowed;
 
 
 }

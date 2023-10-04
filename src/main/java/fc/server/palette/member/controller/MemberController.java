@@ -5,6 +5,7 @@ import fc.server.palette.member.dto.request.FollowRequestDto;
 import fc.server.palette.member.dto.request.MemberProfileDto;
 import fc.server.palette.member.dto.response.FollowInfoDto;
 import fc.server.palette.member.dto.response.MemberMyPageDto;
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.cache.spi.support.CacheUtils;
@@ -23,10 +24,25 @@ public class MemberController {
 
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<?> myPageInfo (@PathVariable Long memberId,
-                                         @AuthenticationPrincipal CustomUserDetails customUserDetails){
+    public ResponseEntity<?> myPageInfo (
+            @PathVariable Long memberId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
 
-        return ResponseEntity.ok(memberService.myPageInfo(memberId));
+        Member currentMember = customUserDetails.getMember();
+        MemberMyPageDto memberMyPageDto = memberService.myPageInfo(memberId, currentMember);
+        return ResponseEntity.ok(memberMyPageDto);
+    }
+
+    @GetMapping("/{memberId}/activities")
+    public ResponseEntity<?> myPageInfoActivities () {
+
+        return null;
+    }
+
+    @GetMapping("/{memberId}/bookmarks")
+    public ResponseEntity<?> myPageInfoBookmarks () {
+        return null;
     }
 
     @PostMapping("/{memberId}")
@@ -43,8 +59,10 @@ public class MemberController {
 
 
     @GetMapping("/followed/{followedId}")
-    public ResponseEntity<List<FollowInfoDto>> getFollowed(@PathVariable Long followedId,
-                                                           @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<List<FollowInfoDto>> getFollowed(
+            @PathVariable Long followedId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
         List<FollowInfoDto> followed = memberService.getFollowed(followedId);
         return ResponseEntity.ok(followed);
     }
@@ -52,8 +70,10 @@ public class MemberController {
 
 
     @GetMapping("/following/{followingId}")
-    public ResponseEntity<List<FollowInfoDto>> getFollowings(@PathVariable Long followingId,
-                                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<List<FollowInfoDto>> getFollowings(
+            @PathVariable Long followingId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
         List<FollowInfoDto> following = memberService.getFollowings(followingId);
         return ResponseEntity.ok(following);
     }
@@ -61,17 +81,21 @@ public class MemberController {
 
 
     @PostMapping("/follow/{followedId}")
-    public ResponseEntity<?> follow(@PathVariable Long followedId,
-                                    @RequestBody FollowRequestDto Dto,
-                                    @AuthenticationPrincipal CustomUserDetails userDetails){
+    public ResponseEntity<?> follow(
+            @PathVariable Long followedId,
+            @RequestBody FollowRequestDto Dto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+    ){
         memberService.follow(followedId, Dto.getFollowingId());
         return ResponseEntity.ok("팔로우완료");
     }
 
 
     @DeleteMapping("/follow/{followingId}")
-    public ResponseEntity<?> unfollow(@PathVariable Long followingId,
-                                      @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<?> unfollow(
+            @PathVariable Long followingId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
 
         memberService.unfollow(customUserDetails.getMember().getId(), followingId);
         return ResponseEntity.ok("언팔로우완료");
