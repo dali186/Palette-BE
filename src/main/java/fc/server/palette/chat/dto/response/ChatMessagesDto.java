@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ChatMessagesDto {
+    private String messageId;
     private Long memberId;
     private String profileImgUrl;
     private String nickName;

@@ -38,6 +38,7 @@ public class ChatService {
         return chatMessageRepository.findByRoomId(roomId).stream()
                 .map(message -> {
                     ChatMessagesDto response = new ChatMessagesDto();
+                    response.setMessageId(message.getId());
                     response.setMemberId(message.getSender());
                     response.setText(message.getContent());
                     response.setImage(message.getImage());
@@ -103,4 +104,7 @@ public class ChatService {
         return chatRoomNoticeResponseList;
     }
 
+    public void deleteChatRoomMessages(String roomId) {
+        chatMessageRepository.deleteAll(chatMessageRepository.findByRoomId(roomId));
+    }
 }

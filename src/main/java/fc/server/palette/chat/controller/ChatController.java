@@ -2,10 +2,7 @@ package fc.server.palette.chat.controller;
 
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
-import fc.server.palette.chat.dto.request.ChatMessageDto;
-import fc.server.palette.chat.dto.request.ChatMessageImageDto;
-import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
-import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
+import fc.server.palette.chat.dto.request.*;
 import fc.server.palette.chat.dto.response.*;
 import fc.server.palette.chat.entity.ChatMessage;
 import fc.server.palette.chat.entity.ChatRoom;
@@ -17,6 +14,8 @@ import fc.server.palette.meeting.service.MeetingService;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.repository.MemberRepository;
+import fc.server.palette.purchase.dto.request.EditOfferDto;
+import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.service.PurchaseService;
 import fc.server.palette.secondhand.service.SecondhandService;
 import lombok.RequiredArgsConstructor;
@@ -70,7 +69,6 @@ public class ChatController {
     }
 
     //채팅방 관련 정보 조회
-    //TODO PURCHASE의 경우 계좌번호
     @GetMapping("/room/detail")
     public ResponseEntity<?> roomDetails(@RequestParam("roomId") String roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
@@ -78,23 +76,69 @@ public class ChatController {
         Long contentId = chatRoom.getContentId();
         ChatRoomDetailDto response = new ChatRoomDetailDto();
         response.setHost(chatRoom.getHost());
-        if (!chatRoom.getNoticeList().isEmpty()) {
-            String noticeId = chatRoom.getNoticeList().get(chatRoom.getNoticeList().size() - 1);
-            response.setNotice(chatMessageService.findChatMessageById(noticeId).get().getContent());
+
+        int index = chatRoom.getNoticeList().size() - 1;
+        if (index >= 0) {
+            String noticeId = chatRoom.getNoticeList().get(index);
+            chatMessageService.findChatMessageById(noticeId).ifPresent(chatMessage -> response.setNotice(chatMessage.getContent()));
         }
+
         if (type.equals(ChatRoomType.MEETING)) {
             response.setContentNotice(meetingService.getDetailMeeting(userDetails.getMember().getId(), contentId).toChatRoomInfo());
+            if(meetingService.getMeeting(contentId).isClosing()) response.setDelete(true);
             return ResponseEntity.ok(response);
         }
         if (type.equals(ChatRoomType.PURCHASE)) {
             response.setContentNotice(purchaseService.getOffer(contentId).toChatRoomInfo());
+            if(purchaseService.getPurchase(contentId).getIsClosing()) response.setDelete(true);
             return ResponseEntity.ok(response);
         }
         if (type.equals(ChatRoomType.SECONDHAND)) {
             response.setContentNotice(secondhandService.getProduct(contentId).toChatRoomInfo());
+            if(secondhandService.getSecondhand(contentId).getIsSoldOut()) response.setDelete(true);
             return ResponseEntity.ok(response);
         }
-        throw new IllegalArgumentException("해당 채팅방 정보가 없습니다.");
+        return ResponseEntity.ok(response);
+    }
+
+    //계좌번호 조회
+    @GetMapping("/notice/account")
+    public ResponseEntity<?> accountInfo(@RequestParam("contentId") Long contentId) {
+        Purchase purchase = purchaseService.getPurchase(contentId);
+        ChatRoomAccountDto response = ChatRoomAccountDto.builder()
+                .bank(purchase.getBank())
+                .accountNumber(purchase.getAccountNumber())
+                .accountOwner(purchase.getAccountOwner())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    //계좌번호 수정
+    @PatchMapping("/notice/account")
+    public ResponseEntity<?> accountModify(@RequestParam("contentId") Long contentId, @RequestBody ChatRoomAccountModDto request) {
+        Purchase purchase = purchaseService.getPurchase(contentId);
+        EditOfferDto dto = new EditOfferDto(
+                purchase.getShopUrl(),
+                purchase.getStartDate(),
+                purchase.getEndDate(),
+                purchase.getHeadCount(),
+                purchase.getPrice(),
+                purchase.getDescription(),
+                request.getClosingType(),
+                request.getBank(),
+                request.getAccountNumber(),
+                request.getAccountOwner()
+        );
+        purchaseService.editOffer(contentId, dto);
+
+        ChatRoomAccountDto response = ChatRoomAccountDto.builder()
+                .bank(request.getBank())
+                .accountNumber(request.getAccountNumber())
+                .accountOwner(request.getAccountOwner())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     //채팅방 메세지 목록 조회
@@ -164,12 +208,11 @@ public class ChatController {
 
         List<ChatMessageImageDetailDto> response = imgUrls.stream()
                 .map(url -> {
-                    ChatMessageImageDetailDto details = ChatMessageImageDetailDto.builder()
+                    return ChatMessageImageDetailDto.builder()
                             .image(url)
                             .type(request.getType())
                             .createdAt(LocalDateTime.now())
                             .build();
-                    return details;
                 })
                 .collect(Collectors.toList());
         chatMessageService.saveChat(chatMessage);
@@ -182,7 +225,8 @@ public class ChatController {
     @PostMapping("/notice")
     public ResponseEntity<?> noticeSave(@RequestBody ChatRoomNoticeDto request) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(request.getRoomId());
-        if (!chatRoom.getNoticeList().contains(request.getMessageId())) {
+        Optional<ChatMessage> message = chatMessageService.findChatMessageById(request.getMessageId());
+        if (!chatRoom.getNoticeList().contains(request.getMessageId()) && message.isPresent()) {
             chatRoom.getNoticeList().add(request.getMessageId());
             chatRoomService.updateChatRoom(chatRoom);
         }
@@ -196,11 +240,10 @@ public class ChatController {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
         List<ChatRoomNoticeListDto> noticeList = chatMessageService.setChatRoomNoticeListResponse(chatRoom).stream()
                 .map(notice -> {
-                    notice.setProfileImgUrl(memberRepository.findById(notice.getMemberId()).get().getImage());
+                    memberRepository.findById(notice.getMemberId()).ifPresent(member -> notice.setProfileImgUrl(member.getImage()));
                     return notice;
                 })
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(noticeList);
     }
 
@@ -215,8 +258,9 @@ public class ChatController {
         chatRoom.getMemberList().remove(member.getId());
         chatRoom.getExitList().remove(member.getId());
 
-        if (chatRoom.getMemberList().size() == 0) {
+        if (chatRoom.getMemberList().isEmpty()) {
             chatRoomService.deleteChatRoom(chatRoom);
+            chatMessageService.deleteChatRoomMessages(chatRoom.getId());
         }
 
         if (chatRoom.getType().equals(ChatRoomType.MEETING) || chatRoom.getType().equals(ChatRoomType.PURCHASE)) {
