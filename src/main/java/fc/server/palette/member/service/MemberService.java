@@ -4,6 +4,8 @@ import com.sun.source.tree.PackageTree;
 import fc.server.palette._common.exception.Exception400;
 import fc.server.palette._common.exception.Exception403;
 import fc.server.palette._common.exception.message.ExceptionMessage;
+import fc.server.palette._common.s3.S3DirectoryNames;
+import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.meeting.dto.response.MeetingListDto;
 import fc.server.palette.meeting.entity.Application;
 import fc.server.palette.meeting.entity.Meeting;
@@ -32,6 +34,7 @@ import fc.server.palette.purchase.repository.PurchaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -55,18 +58,21 @@ public class MemberService {
 
     private final PurchaseParticipantRepository purchaseParticipantRepository;
 
-
+    private final S3ImageUploader s3ImageUploader;
 
     @Transactional
-    public void updateMember(Long loginMemberId, Long memberId, MemberProfileDto memberProfileDto) {
-        Member member = memberRepository.findById(memberId).orElseThrow(
-                () -> new Exception400(memberId.toString(), ExceptionMessage.NO_MEMBER_ID));
-        if (member.getId() != loginMemberId) {
-            throw new Exception403(ExceptionMessage.ACCESS_DENIED);
+    public void updateMember(Member loginMember, List<MultipartFile> image, MemberProfileDto memberProfileDto) {
+
+        if(image != null) {
+            List<String> urlist = s3ImageUploader.save(S3DirectoryNames.MEMBER, image);
+
+            loginMember.changeImageProfile(urlist.get(0));
+
+       }
+        if(memberProfileDto != null) {
+            loginMember.updateProfile(memberProfileDto);
         }
-
-        member.updateProfile(memberProfileDto);
-
+        memberRepository.save(loginMember);
     }
 
     public Member getMember(Long memberId) {
@@ -158,6 +164,8 @@ public class MemberService {
     public long getFollowingCount(Long memberId) {
         return followRepository.countByFollowingId(memberId);
     }
+
+
 
 
     public void follow(Long followedId, Long followingId) {
