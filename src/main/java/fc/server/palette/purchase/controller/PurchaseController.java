@@ -40,8 +40,9 @@ public class PurchaseController {
     }
 
     @GetMapping("/{offerId}")
-    public ResponseEntity<OfferDto> getOffer(@PathVariable Long offerId) {
-        OfferDto offer = purchaseService.getOffer(offerId);
+    public ResponseEntity<OfferDto> getOffer(@PathVariable Long offerId,
+                                             @AuthenticationPrincipal CustomUserDetails userDetails) {
+        OfferDto offer = purchaseService.getOffer(offerId, userDetails.getMember().getId());
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
@@ -53,7 +54,7 @@ public class PurchaseController {
         List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
         List<Media> mediaList = toMediaList(savedImageUrls, purchase);
         OfferDto offer = purchaseService.createOffer(purchase, mediaList);
-        chatRoomService.openGroupChatRoom(offer, userDetails.getMember().getId(),ChatRoomType.PURCHASE);
+        chatRoomService.openGroupChatRoom(offer, userDetails.getMember().getId(), ChatRoomType.PURCHASE);
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
