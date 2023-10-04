@@ -70,7 +70,6 @@ public class Member extends BaseEntity {
     private Tenant tenant;
 
     public void updateProfile(MemberProfileDto dto) {
-        this.image = dto.getImage();
         this.email = dto.getEmail();
         this.name = dto.getName();
         this.phoneNumber = dto.getPhoneNumber();
@@ -80,6 +79,10 @@ public class Member extends BaseEntity {
         this.sex = Sex.fromValue(dto.getSex());
         this.position = Position.fromOneValue(dto.getPosition());
         this.job = Job.fromOneValue(dto.getJob());
+    }
+
+    public void changeImageProfile(String imageurl) {
+        this.image = imageurl;
     }
 
 
