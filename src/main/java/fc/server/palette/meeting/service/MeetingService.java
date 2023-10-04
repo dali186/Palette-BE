@@ -31,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,20 +47,20 @@ public class MeetingService {
     private final ApplicationRepository applicationRepository;
     private final S3ImageUploader s3ImageUploader;
 
-    public List<MeetingListDto> getMeetingList(Boolean isClose){
+    public List<MeetingListDto> getMeetingList(Member member, Boolean isClose){
         List<Meeting> meetings = meetingRepository.findAll();
         List<MeetingListDto> meetingResponseDtoList = new ArrayList<>();
         if (isClose) {
             for (Meeting meeting : meetings) {
                 if (!meeting.isClosing()) {
-                    MeetingListDto meetingResponseDto = meetingListResponseDtoBuilder(meeting);
+                    MeetingListDto meetingResponseDto = meetingListResponseDtoBuilder(meeting, member);
                     meetingResponseDtoList.add(meetingResponseDto);
                 }
             }
         }
         else {
             for (Meeting meeting : meetings){
-                MeetingListDto meetingResponseDto = meetingListResponseDtoBuilder(meeting);
+                MeetingListDto meetingResponseDto = meetingListResponseDtoBuilder(meeting, member);
                 meetingResponseDtoList.add(meetingResponseDto);
             }
         }
@@ -67,7 +68,8 @@ public class MeetingService {
     }
 
     public List<MeetingListDto> getMeetingFilterList(
-            Boolean isClose, String filter, String onOff, String type,
+            Member member, Boolean isClose,
+            String filter, String onOff, String type,
             List<String> job, String position, String sex) {
         List<Meeting> meetings = meetingRepository.findAll();
         List<MeetingListDto> meetingListResponseDtoList = new ArrayList<>();
@@ -110,7 +112,7 @@ public class MeetingService {
         }
 
         meetingListResponseDtoList = meetings.stream().map(meeting -> {
-            MeetingListDto meetingListDto = meetingListResponseDtoBuilder(meeting);
+            MeetingListDto meetingListDto = meetingListResponseDtoBuilder(meeting, member);
             return meetingListDto;
         }).collect(Collectors.toList());
         return meetingListResponseDtoList;
@@ -131,6 +133,22 @@ public class MeetingService {
             }
         }
 
+        Week week = meetingCreateDto.getWeek() != null && !meetingCreateDto.getWeek().isEmpty()
+                ? Week.fromValue(meetingCreateDto.getWeek())
+                : null;
+
+        List<Day> days = meetingCreateDto.getDays() != null && !meetingCreateDto.getDays().isEmpty()
+                ? Day.fromValue(meetingCreateDto.getDays())
+                : Collections.emptyList();
+
+        String progressTime = meetingCreateDto.getProgressTime() != null && !meetingCreateDto.getProgressTime().isEmpty()
+                ? meetingCreateDto.getProgressTime()
+                : null;
+
+        String time = meetingCreateDto.getTime() != null && !meetingCreateDto.getTime().isEmpty()
+                ? meetingCreateDto.getTime()
+                : null;
+
         Meeting meeting = Meeting.builder()
                 .member(member)
                 .category(Category.fromValue(meetingCreateDto.getCategory()))
@@ -146,10 +164,10 @@ public class MeetingService {
                 .endDate(meetingCreateDto.getEndDate())
                 .onOff(meetingCreateDto.isOnOff())
                 .place(meetingCreateDto.getPlace())
-                .week(Week.fromValue(meetingCreateDto.getWeek()))
-                .days(Day.fromValue(meetingCreateDto.getDays()))
-                .time(meetingCreateDto.getTime())
-                .progressTime(meetingCreateDto.getProgressTime())
+                .week(week)
+                .days(days)
+                .time(time)
+                .progressTime(progressTime)
                 .acceptType(AcceptType.fromValue(meetingCreateDto.getAcceptType()))
                 .build();
 
@@ -179,17 +197,21 @@ public class MeetingService {
         Meeting meeting = getMeeting(meetingId);
 
         List<Media> existingMedia = meeting.getImage();
-        existingMedia.stream().forEach(mediaRepository::delete);
+        if(!existingMedia.isEmpty()){
+            existingMedia.forEach(media -> {
+                mediaRepository.delete(media);
+            });
+            List<String> existingImageUrl = existingMedia.stream()
+                    .map(Media::getUrl)
+                    .collect(Collectors.toList());
+            s3ImageUploader.remove(existingImageUrl);
+        }
 
         List<Media> mediaList = new ArrayList<>();
         List<String> urlList = new ArrayList<>();
         boolean isImageEmpty = images.stream().anyMatch(MultipartFile::isEmpty);
 
         if (!isImageEmpty) {
-            List<String> existingImageUrl = existingMedia.stream()
-                    .map(Media::getUrl)
-                    .collect(Collectors.toList());
-            s3ImageUploader.remove(existingImageUrl);
             urlList = s3ImageUploader.save(S3DirectoryNames.MEETING, images);
             for(String imageUrl : urlList){
                 Media media = Media.builder()
@@ -200,6 +222,23 @@ public class MeetingService {
                 mediaRepository.save(media);
             }
         }
+
+        String week = meetingUpdateDto.getWeek() != null && !meetingUpdateDto.getWeek().isEmpty()
+                ? meetingUpdateDto.getWeek()
+                : null;
+
+        List<String> days = meetingUpdateDto.getDays() != null && !meetingUpdateDto.getDays().isEmpty()
+                ? meetingUpdateDto.getDays()
+                : Collections.emptyList();
+
+        String progressTime = meetingUpdateDto.getProgressTime() != null && !meetingUpdateDto.getProgressTime().isEmpty()
+                ? meetingUpdateDto.getProgressTime()
+                : null;
+
+        String time = meetingUpdateDto.getTime() != null && !meetingUpdateDto.getTime().isEmpty()
+                ? meetingUpdateDto.getTime()
+                : null;
+        meetingUpdateDto.setUpdateValue(week, days, progressTime, time);
         meeting.update(meetingUpdateDto, mediaList);
 
     }
@@ -210,10 +249,20 @@ public class MeetingService {
             meeting.setHits(); //조회수 증가
         }
         String msg = "참여하고 있지않은 모임입니다.";
+        boolean likemsg = false;
+        Bookmark bookmark = bookmarkRepository.findByMemberIdAndMeeting(loginMember, meeting);
+        if (bookmark != null){
+            likemsg = true;
+        }
         Application application = applicationRepository.findByMeetingIdAndMemberIdAndStatus(meetingId, loginMember, Status.APPROVAL);
         if (application != null) {
             msg = "이미 참여하고있는 모임입니다.";
         }
+        String weekDescription = meeting.getWeek() != null ? meeting.getWeek().getDescription() : null;
+        List<String> days = meeting.getDays().isEmpty() ? Collections.emptyList() :
+                meeting.getDays().stream()
+                        .map(Day::getDescription)
+                        .collect(Collectors.toList());
 
         MeetingMemberDto responseMember = MeetingMemberDto.builder()
                 .id(meeting.getMember().getId())
@@ -243,22 +292,32 @@ public class MeetingService {
                 .endDate(meeting.getEndDate())
                 .onOff(meeting.isOnOff())
                 .place(meeting.getPlace())
-                .week(meeting.getWeek().getDescription())
-                .days(meeting.getDays().stream()
-                        .map(Day::getDescription)
-                        .collect(Collectors.toList()))
+                .week(weekDescription)
+                .days(days)
                 .time(meeting.getTime())
                 .progressTime(meeting.getProgressTime())
                 .acceptType(meeting.getAcceptType().getDescription())
                 .hits(meeting.getHits())
                 .likes(meeting.getLikes())
+                .isClosing(meeting.isClosing())
                 .createdAt(meeting.getCreatedAt())
                 .msg(msg)
+                .likemsg(likemsg)
                 .build();
     }
 
-    public MeetingListDto meetingListResponseDtoBuilder(Meeting meeting){
-         return MeetingListDto.builder()
+    public MeetingListDto meetingListResponseDtoBuilder(Meeting meeting, Member member){
+        boolean likemsg = false;
+        Bookmark bookmark = bookmarkRepository.findByMemberIdAndMeeting(member.getId(), meeting);
+        if (bookmark != null){
+            likemsg = true;
+        }
+        String weekDescription = meeting.getWeek() != null ? meeting.getWeek().getDescription() : null;
+        List<String> days = meeting.getDays().isEmpty() ? Collections.emptyList() :
+                meeting.getDays().stream()
+                        .map(Day::getDescription)
+                        .collect(Collectors.toList());
+        return MeetingListDto.builder()
                 .id(meeting.getId())
                 .category(meeting.getCategory().getDescription())
                 .type(meeting.getType().getDescription())
@@ -280,15 +339,14 @@ public class MeetingService {
                 .endDate(meeting.getEndDate())
                 .onOff(meeting.isOnOff())
                 .place(meeting.getPlace())
-                .week(meeting.getWeek().getDescription())
-                .days(meeting.getDays().stream()
-                        .map(Day::getDescription)
-                        .collect(Collectors.toList()))
+                .week(weekDescription)
+                .days(days)
                 .time(meeting.getTime())
                 .progressTime(meeting.getProgressTime())
                 .isClosing(meeting.isClosing())
                 .hits(meeting.getHits())
                 .likes(meeting.getLikes())
+                .likemsg(likemsg)
                 .createdAt(meeting.getCreatedAt())
                 .build();
     }
@@ -326,8 +384,9 @@ public class MeetingService {
         meeting.reopen();
     }
 
-    public List<MeetingListDto> recommendMeeting(Long loginMemberId, Long meetingId) {
+    public List<MeetingListDto> recommendMeeting(Member member, Long meetingId) {
         Meeting baseMeeting = getMeeting(meetingId);
+        Long loginMemberId = member.getId();
         List<Meeting> recommededMeeting = new ArrayList<>();
 
         if (recommededMeeting.size() < 2) {
@@ -376,7 +435,7 @@ public class MeetingService {
         }
 
         return recommededMeeting.stream()
-                .map(this::meetingListResponseDtoBuilder)
+                .map(meeting -> meetingListResponseDtoBuilder(meeting, member))
                 .collect(Collectors.toList());
     }
 

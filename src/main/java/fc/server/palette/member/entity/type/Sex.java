@@ -16,8 +16,10 @@ public enum Sex {
     public static Sex fromValue(String value) {
         if ("여성".equals(value) || "여성만".equals(value)) {
             return FEMALE;
-        } else if ("남성".equals(value)) {
+        } else if ("남성".equals(value) || "남성만".equals(value)) {
             return MALE;
+        } else if ("무관".equals(value)){
+            return IRRELEVANT;
         } else {
             throw new IllegalArgumentException("Invalid sex: " + value);
         }

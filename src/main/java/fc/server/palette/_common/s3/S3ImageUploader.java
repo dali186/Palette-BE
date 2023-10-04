@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -44,7 +45,7 @@ public class S3ImageUploader {
         try {
             for (MultipartFile image : images) {
                 InputStream inputStream = image.getInputStream();
-                String path = directory + "/" + image.getOriginalFilename();
+                String path = directory + "/" + UUID.randomUUID().toString() + "_" + image.getOriginalFilename();
 
                 paths.add(endPoint + path);
 

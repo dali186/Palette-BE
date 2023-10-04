@@ -13,6 +13,9 @@ public enum Week {
 
     @JsonCreator
     public static Week fromValue(String value) {
+        if (value == null){
+            return null;
+        }
         for (Week week : Week.values()) {
             if (week.getDescription().equals(value)) {
                 return week;
