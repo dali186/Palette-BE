@@ -2,10 +2,7 @@ package fc.server.palette.chat.controller;
 
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
-import fc.server.palette.chat.dto.request.ChatMessageDto;
-import fc.server.palette.chat.dto.request.ChatMessageImageDto;
-import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
-import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
+import fc.server.palette.chat.dto.request.*;
 import fc.server.palette.chat.dto.response.*;
 import fc.server.palette.chat.entity.ChatMessage;
 import fc.server.palette.chat.entity.ChatRoom;
@@ -17,6 +14,8 @@ import fc.server.palette.meeting.service.MeetingService;
 import fc.server.palette.member.auth.CustomUserDetails;
 import fc.server.palette.member.entity.Member;
 import fc.server.palette.member.repository.MemberRepository;
+import fc.server.palette.purchase.dto.request.EditOfferDto;
+import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.service.PurchaseService;
 import fc.server.palette.secondhand.service.SecondhandService;
 import lombok.RequiredArgsConstructor;
@@ -94,7 +93,47 @@ public class ChatController {
             response.setContentNotice(secondhandService.getProduct(contentId).toChatRoomInfo());
             return ResponseEntity.ok(response);
         }
-        throw new IllegalArgumentException("해당 채팅방 정보가 없습니다.");
+        return ResponseEntity.ok(response);
+    }
+
+    //계좌번호 조회
+    @GetMapping("/notice/account")
+    public ResponseEntity<?> accountInfo(@RequestParam("contentId") Long contentId) {
+        Purchase purchase = purchaseService.getPurchase(contentId);
+        ChatRoomAccountDto response = ChatRoomAccountDto.builder()
+                .bank(purchase.getBank())
+                .accountNumber(purchase.getAccountNumber())
+                .accountOwner(purchase.getAccountOwner())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
+    //계좌번호 수정
+    @PatchMapping("/notice/account")
+    public ResponseEntity<?> accountModify(@RequestParam("contentId") Long contentId, @RequestBody ChatRoomAccountModDto request) {
+        Purchase purchase = purchaseService.getPurchase(contentId);
+        EditOfferDto dto = new EditOfferDto(
+                purchase.getShopUrl(),
+                purchase.getStartDate(),
+                purchase.getEndDate(),
+                purchase.getHeadCount(),
+                purchase.getPrice(),
+                purchase.getDescription(),
+                request.getClosingType(),
+                request.getBank(),
+                request.getAccountNumber(),
+                request.getAccountOwner()
+                );
+        purchaseService.editOffer(contentId, dto);
+
+        ChatRoomAccountDto response = ChatRoomAccountDto.builder()
+                .bank(request.getBank())
+                .accountNumber(request.getAccountNumber())
+                .accountOwner(request.getAccountOwner())
+                .build();
+
+        return ResponseEntity.ok(response);
     }
 
     //채팅방 메세지 목록 조회
@@ -164,12 +203,11 @@ public class ChatController {
 
         List<ChatMessageImageDetailDto> response = imgUrls.stream()
                 .map(url -> {
-                    ChatMessageImageDetailDto details = ChatMessageImageDetailDto.builder()
+                    return ChatMessageImageDetailDto.builder()
                             .image(url)
                             .type(request.getType())
                             .createdAt(LocalDateTime.now())
                             .build();
-                    return details;
                 })
                 .collect(Collectors.toList());
         chatMessageService.saveChat(chatMessage);
