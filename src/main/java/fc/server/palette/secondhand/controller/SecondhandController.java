@@ -36,8 +36,9 @@ public class SecondhandController {
     }
 
     @GetMapping("/{productId}")
-    public ResponseEntity<ProductDto> getProduct(@PathVariable Long productId) {
-        ProductDto product = secondhandService.getProduct(productId);
+    public ResponseEntity<ProductDto> getProduct(@PathVariable Long productId,
+                                                 @AuthenticationPrincipal CustomUserDetails userDetails) {
+        ProductDto product = secondhandService.getProduct(productId, userDetails.getMember().getId());
         return new ResponseEntity<>(product, HttpStatus.OK);
     }
 
