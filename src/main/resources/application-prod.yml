@@ -5,6 +5,14 @@ server:
       charset: utf-8
       force: true
 
+logging:
+  file:
+    path: log
+  level:
+    root: warn
+  pattern:
+    dateformat: yyyy-MM-dd HH:mm
+
 spring:
   jackson:
     default-property-inclusion: ALWAYS
@@ -17,19 +25,16 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
-    show-sql: true
+      ddl-auto: none
     properties:
-      hibernate:
-        format_sql: true
       default_batch_fetch_size: 100
     open-in-view: false
-    defer-datasource-initialization: true
+#    defer-datasource-initialization: true
 
-  sql:
-    init:
-      data-locations: classpath*:db/data.sql
-      mode: always
+#  sql:
+#    init:
+#      data-locations: classpath*:db/data.sql
+#      mode: always
 
   data:
     mongodb:
