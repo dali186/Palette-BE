@@ -21,51 +21,45 @@ public class ChatRoomService {
 
     private final ChatRoomRepository chatRoomRepository;
 
-//    @Transactional
-//    public String openGroupChatRoom(Long memberId, ChatRoomOpenDto request) {
-//        ChatRoom chatRoom = request.toEntity();
-//        chatRoom.setHost(memberId);
-//        chatRoom.setContentId(request.getContentId());
-//        chatRoom.getMemberList().add(memberId);
-//        chatRoom.getExitList().put(memberId, LocalDateTime.now());
-//        chatRoom.getEnterList().put(memberId, LocalDateTime.now());
-//
-//        return chatRoomRepository.save(chatRoom).getId();
-//    }
+    private static final int PERSONAL_ROOM_MAX_MEMBER = 2;
 
-    //현재 둘 다 있는 방 / 한명이 나간 방 / 중고거래 게시글마다
     @Transactional
     public String openPersonalChatRoom(Long memberId, ChatRoomOpenDto request) {
-        Long opId = request.getParticipant();
-        Optional<ChatRoom> duplicatedRoom = chatRoomRepository.findChatRoomByEnterList(memberId, opId);
-        if (!duplicatedRoom.isPresent()) {
-            return openNewPersonalChatRoom(memberId, request).getId();
-        } else {
-            if (duplicatedRoom.get().getMemberList().size() == 2) {
-                return duplicatedRoom.get().getId();
-            }
-            if (duplicatedRoom.get().getType().equals(ChatRoomType.SECONDHAND) && !duplicatedRoom.get().getContentId().equals(request.getContentId())) {
-                return openNewPersonalChatRoom(memberId, request).getId();
-            }
-            List<Long> memberList = duplicatedRoom.get().getMemberList();
-            Map<Long, LocalDateTime> enterList = duplicatedRoom.get().getEnterList();
-            Map<Long, LocalDateTime> exitList = duplicatedRoom.get().getExitList();
-            if (!memberList.contains(memberId)) {
-                memberList.add(memberId);
-                enterList.put(memberId, LocalDateTime.now());
-                exitList.put(memberId, LocalDateTime.now());
+        Optional<ChatRoom> duplicatedChatRoom = getRequestTypeChatRoom(memberId, request);
 
-                chatRoomRepository.save(duplicatedRoom.get());
-            }
-            if (!memberList.contains(request.getParticipant())) {
-                memberList.add(request.getParticipant());
-                enterList.put(request.getParticipant(), LocalDateTime.now());
-                exitList.put(request.getParticipant(), LocalDateTime.now());
-
-                chatRoomRepository.save(duplicatedRoom.get());
-            }
+        if (duplicatedChatRoom.isPresent()) {
+            personalChatRoomMemberResolver(memberId, duplicatedChatRoom.get());
+            return duplicatedChatRoom.get().getId();
         }
-        return duplicatedRoom.get().getId();
+
+        ChatRoom newChatRoom = openNewPersonalChatRoom(memberId, request);
+        return newChatRoom.getId();
+    }
+
+    private Optional<ChatRoom> getRequestTypeChatRoom(Long memberId, ChatRoomOpenDto request) {
+        if (request.getType() == ChatRoomType.PERSONAL) {
+            return chatRoomRepository.findPersonalChatRoomByEnterList(memberId, request.getParticipant());
+        }
+        return chatRoomRepository.findSecondHandChatRoomByEnterList(memberId, request.getParticipant(), request.getContentId());
+    }
+
+    public void personalChatRoomMemberResolver(Long memberId, ChatRoom personalChatRoom) {
+        List<Long> memberList = personalChatRoom.getMemberList();
+        Map<Long, LocalDateTime> enterList = personalChatRoom.getEnterList();
+
+        if (memberList.size() == PERSONAL_ROOM_MAX_MEMBER) {
+            return;
+        }
+
+        Long participant = enterList.keySet().stream()
+                .filter(id -> id.equals(memberId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 채팅방입니다."));
+
+        memberList.add(participant);
+        enterList.put(participant, LocalDateTime.now());
+
+        chatRoomRepository.save(personalChatRoom);
     }
 
     private ChatRoom openNewPersonalChatRoom(Long memberId, ChatRoomOpenDto request) {
@@ -108,6 +102,12 @@ public class ChatRoomService {
         }
 
         chatRoomRepository.save(chatRoom);
+    }
+
+    @Transactional
+    public void validateRoomIdAndMemberId(String roomId, Long memberId) {
+        chatRoomRepository.findChatRoomByIdAndMemberId(roomId, memberId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 채팅방을 찾을 수 없습니다."));
     }
 
     //개인 톡방 조회

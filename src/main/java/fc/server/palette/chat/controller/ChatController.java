@@ -2,6 +2,7 @@ package fc.server.palette.chat.controller;
 
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
+import fc.server.palette.chat.dto.request.ChatMessageDto;
 import fc.server.palette.chat.dto.request.ChatMessageImageDto;
 import fc.server.palette.chat.dto.request.ChatRoomNoticeDto;
 import fc.server.palette.chat.dto.request.ChatRoomOpenDto;
@@ -240,18 +241,39 @@ public class ChatController {
      */
 
     @MessageMapping("/chat/send")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        chatMessage.setCreatedAt(LocalDateTime.now());
+    public void sendMessage(@Payload ChatMessageDto chatMessageDto,
+                            SimpMessageHeaderAccessor headerAccessor) {
+        Long memberId = (Long) Objects.requireNonNull(headerAccessor.getSessionAttributes().get("memberId"));
+        String roomId = (String) Objects.requireNonNull(headerAccessor.getSessionAttributes().get("roomId"));
+
+        ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
+        ChatRoomType roomType = chatRoom.getType();
+
+        if (roomType == ChatRoomType.PERSONAL || roomType == ChatRoomType.SECONDHAND) {
+            chatRoomService.personalChatRoomMemberResolver(memberId, chatRoom);
+        }
+
+        ChatMessage chatMessage = ChatMessage.builder()
+                .sender(memberId)
+                .roomId(roomId)
+                .type(ChatMessageType.CHAT)
+                .content(chatMessageDto.getContent())
+                .createdAt(LocalDateTime.now())
+                .build();
+
         chatMessageService.saveChat(chatMessage);
-        template.convertAndSend("/sub/public/" + chatMessage.getRoomId(), chatMessage);
-        return chatMessage;
+
+        template.convertAndSend("/sub/public/" + roomId, chatMessage);
     }
 
     @MessageMapping("/chat/enter")
-    public ChatMessage addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("memberId", chatMessage.getSender());
-        headerAccessor.getSessionAttributes().put("roomId", chatMessage.getRoomId());
+    public void addUser(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
+        String roomId = chatMessage.getRoomId();
+        Long memberId = chatMessage.getSender();
 
-        return chatMessage;
+        chatRoomService.validateRoomIdAndMemberId(roomId, memberId);
+
+        headerAccessor.getSessionAttributes().put("memberId", memberId);
+        headerAccessor.getSessionAttributes().put("roomId", roomId);
     }
 }
