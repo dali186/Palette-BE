@@ -12,6 +12,7 @@ import org.hibernate.cache.spi.support.CacheUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -49,9 +50,10 @@ public class MemberController {
     public ResponseEntity<?> updateMember (
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @PathVariable Long memberId,
-            @RequestBody MemberProfileDto memberProfileDto
+            @RequestPart(name = "image", required = false) List<MultipartFile> image,
+            @RequestPart(name ="dto", required = false) MemberProfileDto memberProfileDto
    ){
-       memberService.updateMember(userDetails.getMember().getId(), memberId, memberProfileDto );
+       memberService.updateMember(userDetails.getMember(), image, memberProfileDto );
 
         return ResponseEntity.ok("수정완료");
     }
