@@ -46,6 +46,16 @@ public class PurchaseService {
         return buildOffer(purchase);
     }
 
+    @Transactional
+    public OfferDto getOffer(Long offerId, Long loginMember) {
+        if (!loginMember.equals(getAuthorId(offerId))) {
+            increaseHit(offerId);
+        }
+        Purchase purchase = purchaseRepository.findById(offerId)
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND + offerId));
+        return buildOffer(purchase);
+    }
+
     @Transactional(readOnly = true)
     public Purchase getPurchase(Long offerId) {
         return purchaseRepository.findById(offerId)
@@ -110,7 +120,7 @@ public class PurchaseService {
         Optional<Media> optionalThumbnail = purchaseMediaRepository.findAllByPurchase_id(purchaseId)
                 .stream()
                 .findFirst();
-        if (optionalThumbnail.isPresent()){
+        if (optionalThumbnail.isPresent()) {
             return optionalThumbnail.get().getUrl();
         }
         return ExceptionMessage.OBJECT_NOT_FOUND;
@@ -163,6 +173,12 @@ public class PurchaseService {
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         purchase.closeOffer();
         return buildOffer(purchase);
+    }
+
+    private void increaseHit(Long offerId) {
+        Purchase purchase = purchaseRepository.findById(offerId)
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
+        purchase.increaseHit();
     }
 
     @Transactional(readOnly = true)
