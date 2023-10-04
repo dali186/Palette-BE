@@ -48,7 +48,7 @@ public class PurchaseService {
         }
         Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND + offerId));
-        return buildOffer(purchase);
+        return buildOffer(purchase, offerId, loginMember);
     }
 
     @Transactional(readOnly = true)
@@ -96,6 +96,28 @@ public class PurchaseService {
                 .isClosing(purchase.getIsClosing())
                 .hits(purchase.getHits())
                 .created_at(purchase.getCreatedAt())
+                .build();
+    }
+
+    private OfferDto buildOffer(Purchase purchase, Long offerId, Long memberId){
+        return OfferDto.builder()
+                .id(purchase.getId())
+                .member(MemberDto.of(purchase.getMember()))
+                .title(purchase.getTitle())
+                .category(purchase.getCategory())
+                .startDate(purchase.getStartDate())
+                .endDate(purchase.getEndDate())
+                .price(purchase.getPrice())
+                .description(purchase.getDescription())
+                .shopUrl(purchase.getShopUrl())
+                .headCount(purchase.getHeadCount())
+                .bookmarkCount(getBookmarkCount(purchase.getId()))
+                .image(getImagesUrl(purchase.getId()))
+                .currentParticipantCount(getCurrentParticipants(purchase.getId()))
+                .isClosing(purchase.getIsClosing())
+                .hits(purchase.getHits())
+                .created_at(purchase.getCreatedAt())
+                .isParticipating(isParticipating(offerId, memberId))
                 .build();
     }
 
