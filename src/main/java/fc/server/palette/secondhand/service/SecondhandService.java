@@ -4,6 +4,7 @@ import fc.server.palette._common.exception.Exception404;
 import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
+import fc.server.palette.secondhand.dto.response.AnotherProductDto;
 import fc.server.palette.secondhand.dto.response.ProductDto;
 import fc.server.palette.secondhand.dto.response.ProductListDto;
 import fc.server.palette.secondhand.entity.Media;
@@ -133,7 +134,15 @@ public class SecondhandService {
                 .isSoldOut(secondhand.getIsSoldOut())
                 .isFree(secondhand.getIsFree())
                 .createdAt(secondhand.getCreatedAt())
+                .anotherProductDtos(getAnotherProducts(secondhand.getMember().getId(), secondhand.getId()))
                 .build();
+    }
+    private List<AnotherProductDto> getAnotherProducts(Long memberId, Long productId){
+        List<Secondhand> anotherProducts = secondhandRespository.findAllByMemberIdAndExcludeId(memberId, productId);
+        return anotherProducts
+                .stream()
+                .map(anotherProduct -> AnotherProductDto.of(anotherProduct, getThumbnailUrl(anotherProduct.getId())))
+                .collect(Collectors.toList());
     }
 
     private String getThumbnailUrl(Long secondhandId) {
