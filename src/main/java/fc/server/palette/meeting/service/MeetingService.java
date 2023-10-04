@@ -515,4 +515,18 @@ public class MeetingService {
         return meeting;
     }
 
+    public void participateFirstComeMeeting(Long meetingId, Member member) {
+        Meeting meeting = getMeeting(meetingId);
+
+        if ((meeting.getHeadCount() - meeting.getRecruitedPersonnel()) <= 0) {
+            throw new Exception400(meeting.getTitle(), ExceptionMessage.OVER_CAPACITY);
+        }
+        Application application = Application.builder()
+                .meeting(meeting)
+                .member(member)
+                .status(Status.APPROVAL)
+                .build();
+        applicationRepository.save(application);
+        application.getMeeting().setRecruitedPersonnel();
+    }
 }

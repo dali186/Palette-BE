@@ -162,6 +162,15 @@ public class MeetingController {
         return ResponseEntity.ok("모임 신청이 완료되었습니다");
     }
 
+    @PostMapping("/participate/firstCome/{meetingId}")
+    public ResponseEntity<?> participateMeeting(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long meetingId
+    ){
+        meetingService.participateFirstComeMeeting(meetingId, userDetails.getMember());
+        return ResponseEntity.ok("모임 신청이 완료되었습니다");
+    }
+
     @GetMapping("/{meetingId}/participate/member")
     public ResponseEntity<?> waitingParticipateMemberList(
             @AuthenticationPrincipal CustomUserDetails userDetails,
