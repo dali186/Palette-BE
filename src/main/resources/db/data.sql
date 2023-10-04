@@ -223,6 +223,44 @@ values
     (39, 'MANAGER'), (39, 'INTERN'), (39, 'GENERALMANAGER'),
     (40, 'GENERALMANAGER'), (40, 'EMPLOYEE'), (40, 'ASSISTANTMANAGER');
 
+nsert Into meeting_media (meeting_id, url)
+values
+    (1, 'https://fc-palette.s3.ap-northeast-2.amazonaws.com/meeting/test.jpg'), (1, 'https://fc-palette.s3.ap-northeast-2.amazonaws.com/meeting/다운로드.jpg'),
+    (2, 'https://fc-palette.s3.ap-northeast-2.amazonaws.com/meeting/test.jpg'), (2, 'https://fc-palette.s3.ap-northeast-2.amazonaws.com/meeting/다운로드.jpg'),
+    (3, 'https://fc-palette.s3.ap-northeast-2.amazonaws.com/meeting/test.jpg'), (3, 'https://fc-palette.s3.ap-northeast-2.amazonaws.com/meeting/다운로드.jpg');
+
+insert Into meeting_days (meeting_id, days)
+values
+    (1, 'MONDAY'), (1, 'TUESDAY'),
+    (2, 'TUESDAY'), (2, 'THURSDAY'),
+    (3, 'TUESDAY'), (3, 'MONDAY'),
+    (4, 'THURSDAY'), (5, 'MONDAY'),
+    (6, 'TUESDAY'), (6, 'MONDAY'),
+    (7, 'MONDAY'), (8, 'THURSDAY'),
+    (9, 'TUESDAY'), (9, 'SATURDAY'),
+    (10, 'TUESDAY'), (11, 'THURSDAY'),
+    (12, 'THURSDAY'), (12, 'FRIDAY'),
+    (13, 'FRIDAY'), (14, 'FRIDAY'),
+    (15, 'TUESDAY'), (15, 'WEDNESDAY'),
+    (16, 'FRIDAY'), (17, 'FRIDAY'),
+    (18, 'FRIDAY'), (18, 'SATURDAY'),
+    (19, 'SATURDAY'), (20, 'WEDNESDAY'),
+    (21, 'SATURDAY'), (21, 'SUNDAY'),
+    (22, 'WEDNESDAY'), (23, 'WEDNESDAY'),
+    (24, 'SATURDAY'), (24, 'SATURDAY'),
+    (25, 'SATURDAY'), (26, 'SUNDAY'),
+    (27, 'SATURDAY'), (27, 'SUNDAY'),
+    (28, 'SUNDAY'), (29, 'WEDNESDAY'),
+    (30, 'THURSDAY'), (30, 'MONDAY'),
+    (31, 'WEDNESDAY'), (32, 'SUNDAY'),
+    (33, 'MONDAY'), (34, 'THURSDAY'),
+    (35, 'THURSDAY'), (35, 'FRIDAY'),
+    (36, 'FRIDAY'), (37, 'FRIDAY'),
+    (38, 'THURSDAY'), (38, 'TUESDAY'),
+    (39, 'FRIDAY'), (40, 'MONDAY');
+
+
+
 -- 멤버
 INSERT INTO member (email, password, name, nickname, phone_number, bio, birthday, sex, position, job, created_at,
                     updated_at, office_room_id, building_id, tenant_id)
