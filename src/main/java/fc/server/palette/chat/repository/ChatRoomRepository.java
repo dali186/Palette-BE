@@ -12,6 +12,7 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
 
     @Query(value = "{memberList: ?0, type: {$in: ['PERSONAL', 'SECONDHAND']}}")
     List<ChatRoom> findPersonalRoomByMemberId(Long memberId);
+
     @Query(value = "{memberList: ?0, type: {$in: ['MEETING', 'PURCHASE']}}")
     List<ChatRoom> findGroupRoomByMemberId(Long memberId);
 
@@ -26,5 +27,14 @@ public interface ChatRoomRepository extends MongoRepository<ChatRoom, String> {
 
     @Query(value = "{memberList: {$in: [?0, ?1]}}")
     Optional<ChatRoom> findChatRoomByMemberList(Long memberId, Long opId);
+
+    @Query(value = "{ 'enterList.?0': { $exists: true }, 'enterList.?1': { $exists: true }, type: 'PERSONAL'}")
+    Optional<ChatRoom> findPersonalChatRoomByEnterList(Long memberId, Long opId);
+
+    @Query(value = "{ 'enterList.?0': { $exists: true }, 'enterList.?1': { $exists: true }, contentId: ?2, type: 'SECONDHAND'}")
+    Optional<ChatRoom> findSecondHandChatRoomByEnterList(Long memberId, Long opId, Long contentId);
+
+    @Query(value = "{_id: ?0, memberList: ?1}")
+    Optional<ChatRoom> findChatRoomByIdAndMemberId(String roomId, Long memberId);
 
 }
