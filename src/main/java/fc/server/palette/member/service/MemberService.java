@@ -13,8 +13,6 @@ import fc.server.palette.meeting.repository.MeetingRepository;
 import fc.server.palette.meeting.service.MeetingService;
 import fc.server.palette.member.dto.request.MemberProfileDto;
 import fc.server.palette.member.dto.response.FollowInfoDto;
-import fc.server.palette.member.dto.response.MemberActivitiesDto;
-import fc.server.palette.member.dto.response.MemberBookmarksDto;
 import fc.server.palette.member.dto.response.MemberMyPageDto;
 import fc.server.palette.member.entity.Building;
 import fc.server.palette.member.entity.Follow;
@@ -27,13 +25,10 @@ import fc.server.palette.meeting.entity.type.Day;
 import fc.server.palette.member.repository.FollowRepository;
 import fc.server.palette.member.repository.MemberRepository;
 import fc.server.palette.purchase.entity.ParticipantMember;
-import fc.server.palette.purchase.entity.Purchase;
 import fc.server.palette.purchase.entity.PurchaseParticipant;
 import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
-import fc.server.palette.purchase.repository.PurchaseParticipantMemberRepository;
 import fc.server.palette.purchase.repository.PurchaseParticipantRepository;
 import fc.server.palette.purchase.repository.PurchaseRepository;
-import fc.server.palette.purchase.service.PurchaseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +55,7 @@ public class MemberService {
 
     private final PurchaseParticipantRepository purchaseParticipantRepository;
 
-    private final PurchaseParticipantMemberRepository purchaseParticipantMemberRepository;
+
 
     @Transactional
     public void updateMember(Long loginMemberId, Long memberId, MemberProfileDto memberProfileDto) {
@@ -220,15 +215,6 @@ public class MemberService {
                 .bio(member.getBio())
                 .build();
     }
-
-    private List<PurchaseParticipant> getPurchaseParticipant(Long memberId) {
-        List<ParticipantMember> participantMembers = purchaseParticipantMemberRepository.findAllByMemberId(memberId);
-        return participantMembers
-                .stream()
-                .map(ParticipantMember::getPurchaseParticipant)
-                .collect(Collectors.toList());
-    }
-
 
 }
 
