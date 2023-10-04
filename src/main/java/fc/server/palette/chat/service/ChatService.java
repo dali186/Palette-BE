@@ -104,4 +104,7 @@ public class ChatService {
         return chatRoomNoticeResponseList;
     }
 
+    public void deleteChatRoomMessages(String roomId) {
+        chatMessageRepository.deleteAll(chatMessageRepository.findByRoomId(roomId));
+    }
 }

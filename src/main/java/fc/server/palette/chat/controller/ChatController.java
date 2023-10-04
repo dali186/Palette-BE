@@ -69,7 +69,6 @@ public class ChatController {
     }
 
     //채팅방 관련 정보 조회
-    //TODO PURCHASE의 경우 계좌번호
     @GetMapping("/room/detail")
     public ResponseEntity<?> roomDetails(@RequestParam("roomId") String roomId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
@@ -261,6 +260,7 @@ public class ChatController {
 
         if (chatRoom.getMemberList().isEmpty()) {
             chatRoomService.deleteChatRoom(chatRoom);
+            chatMessageService.deleteChatRoomMessages(chatRoom.getId());
         }
 
         if (chatRoom.getType().equals(ChatRoomType.MEETING) || chatRoom.getType().equals(ChatRoomType.PURCHASE)) {
