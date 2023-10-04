@@ -7,14 +7,8 @@ import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.dto.response.OfferListDto;
-import fc.server.palette.purchase.entity.Bookmark;
-import fc.server.palette.purchase.entity.Media;
-import fc.server.palette.purchase.entity.Purchase;
-import fc.server.palette.purchase.entity.PurchaseParticipant;
-import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
-import fc.server.palette.purchase.repository.PurchaseMediaRepository;
-import fc.server.palette.purchase.repository.PurchaseParticipantRepository;
-import fc.server.palette.purchase.repository.PurchaseRepository;
+import fc.server.palette.purchase.entity.*;
+import fc.server.palette.purchase.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +24,7 @@ public class PurchaseService {
     private final PurchaseMediaRepository purchaseMediaRepository;
     private final PurchaseBookmarkRepository purchaseBookmarkRepository;
     private final PurchaseParticipantRepository purchaseParticipantRepository;
+    private final PurchaseParticipantMemberRepository purchaseParticipantMemberRepository;
 
     @Transactional(readOnly = true)
     public List<OfferListDto> getAllOffers() {
@@ -173,6 +168,21 @@ public class PurchaseService {
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         purchase.closeOffer();
         return buildOffer(purchase);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isParticipating(Long productId, Long memberId){
+        List<ParticipantMember> participants = purchaseParticipantMemberRepository.findAllByMemberId(memberId);
+        ParticipantMember participantMember = participants
+                .stream()
+                .filter(participant -> participant
+                        .getPurchaseParticipant()
+                        .getPurchase()
+                        .getId().
+                        equals(productId))
+                .findAny()
+                .orElse(null);
+        return participantMember != null;
     }
 
     private void increaseHit(Long offerId) {
