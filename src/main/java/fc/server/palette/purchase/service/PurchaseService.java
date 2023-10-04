@@ -170,8 +170,7 @@ public class PurchaseService {
         return buildOffer(purchase);
     }
 
-    @Transactional(readOnly = true)
-    public boolean isParticipating(Long productId, Long memberId){
+    private boolean isParticipating(Long offerId, Long memberId){
         List<ParticipantMember> participants = purchaseParticipantMemberRepository.findAllByMemberId(memberId);
         ParticipantMember participantMember = participants
                 .stream()
@@ -179,7 +178,7 @@ public class PurchaseService {
                         .getPurchaseParticipant()
                         .getPurchase()
                         .getId().
-                        equals(productId))
+                        equals(offerId))
                 .findAny()
                 .orElse(null);
         return participantMember != null;
