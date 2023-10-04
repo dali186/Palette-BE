@@ -288,6 +288,7 @@ public class MeetingService {
                 .title(meeting.getTitle())
                 .description(meeting.getDescription())
                 .headCount(meeting.getHeadCount())
+                .recruitedPersonnel(meeting.getRecruitedPersonnel())
                 .startDate(meeting.getStartDate())
                 .endDate(meeting.getEndDate())
                 .onOff(meeting.isOnOff())
