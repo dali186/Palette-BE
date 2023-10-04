@@ -42,6 +42,22 @@ public class SecondhandService {
     }
 
     @Transactional(readOnly = true)
+    public ProductDto getProduct(Long productId, Long loginMember) {
+        if (!loginMember.equals(getAuthorId(productId))) {
+            increaseHit(productId);
+        }
+        Secondhand product = secondhandRespository.findById(productId)
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
+        return buildProductDto(product);
+    }
+
+    private void increaseHit(Long productId) {
+        Secondhand secondhand = secondhandRespository.findById(productId)
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
+        secondhand.increaseHit();
+    }
+
+    @Transactional(readOnly = true)
     public Secondhand getSecondhand(Long productId) {
         return secondhandRespository.findById(productId)
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
@@ -124,7 +140,7 @@ public class SecondhandService {
         Optional<Media> optionalThumbnail = secondhandMediaRepository.findAllBySecondhand_id(secondhandId)
                 .stream()
                 .findFirst();
-        if (optionalThumbnail.isPresent()){
+        if (optionalThumbnail.isPresent()) {
             return optionalThumbnail.get().getUrl();
         }
         return ExceptionMessage.OBJECT_NOT_FOUND;
