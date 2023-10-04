@@ -77,10 +77,13 @@ public class ChatController {
         Long contentId = chatRoom.getContentId();
         ChatRoomDetailDto response = new ChatRoomDetailDto();
         response.setHost(chatRoom.getHost());
-        if (!chatRoom.getNoticeList().isEmpty()) {
-            String noticeId = chatRoom.getNoticeList().get(chatRoom.getNoticeList().size() - 1);
-            response.setNotice(chatMessageService.findChatMessageById(noticeId).get().getContent());
+
+        int index = chatRoom.getNoticeList().size() - 1;
+        if (index >= 0) {
+            String noticeId = chatRoom.getNoticeList().get(index);
+            chatMessageService.findChatMessageById(noticeId).ifPresent(chatMessage -> response.setNotice(chatMessage.getContent()));
         }
+
         if (type.equals(ChatRoomType.MEETING)) {
             response.setContentNotice(meetingService.getDetailMeeting(userDetails.getMember().getId(), contentId).toChatRoomInfo());
             return ResponseEntity.ok(response);
@@ -124,7 +127,7 @@ public class ChatController {
                 request.getBank(),
                 request.getAccountNumber(),
                 request.getAccountOwner()
-                );
+        );
         purchaseService.editOffer(contentId, dto);
 
         ChatRoomAccountDto response = ChatRoomAccountDto.builder()
@@ -220,7 +223,8 @@ public class ChatController {
     @PostMapping("/notice")
     public ResponseEntity<?> noticeSave(@RequestBody ChatRoomNoticeDto request) {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(request.getRoomId());
-        if (!chatRoom.getNoticeList().contains(request.getMessageId())) {
+        Optional<ChatMessage> message = chatMessageService.findChatMessageById(request.getMessageId());
+        if (!chatRoom.getNoticeList().contains(request.getMessageId()) && message.isPresent()) {
             chatRoom.getNoticeList().add(request.getMessageId());
             chatRoomService.updateChatRoom(chatRoom);
         }
@@ -234,11 +238,10 @@ public class ChatController {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
         List<ChatRoomNoticeListDto> noticeList = chatMessageService.setChatRoomNoticeListResponse(chatRoom).stream()
                 .map(notice -> {
-                    notice.setProfileImgUrl(memberRepository.findById(notice.getMemberId()).get().getImage());
+                    memberRepository.findById(notice.getMemberId()).ifPresent(member -> notice.setProfileImgUrl(member.getImage()));
                     return notice;
                 })
                 .collect(Collectors.toList());
-
         return ResponseEntity.ok(noticeList);
     }
 
@@ -253,7 +256,7 @@ public class ChatController {
         chatRoom.getMemberList().remove(member.getId());
         chatRoom.getExitList().remove(member.getId());
 
-        if (chatRoom.getMemberList().size() == 0) {
+        if (chatRoom.getMemberList().isEmpty()) {
             chatRoomService.deleteChatRoom(chatRoom);
         }
 
