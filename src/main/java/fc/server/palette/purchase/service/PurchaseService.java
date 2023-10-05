@@ -201,13 +201,7 @@ public class PurchaseService {
 
     @Transactional
     public void participateOffer(Long offerId, Member member){
-        List<ParticipantMember> participants = purchaseParticipantMemberRepository.findAllByMemberId(member.getId());
-        ParticipantMember participant = participants
-                .stream()
-                .filter(participantMember -> participantMember.getPurchaseParticipant().getPurchase().getId().equals(offerId))
-                .findAny()
-                .orElse(null);
-        if(participant!=null){
+        if(isParticipating(offerId, member.getId())){
             throw new Exception400(offerId.toString(), ExceptionMessage.PARTICIPANT_ALREADY_EXIST);
         }
         PurchaseParticipant purchaseParticipant = PurchaseParticipant.of(getPurchase(offerId));
