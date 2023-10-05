@@ -76,8 +76,9 @@ public class PurchaseService {
     }
 
     @Transactional
-    public OfferDto createOffer(Purchase purchase, List<Media> mediaList) {
+    public OfferDto createOffer(Purchase purchase, Member member,List<Media> mediaList) {
         Purchase savedPurchase = purchaseRepository.save(purchase);
+        participateOffer(purchase.getId(), member);
         purchaseMediaRepository.saveAll(mediaList);
         return buildOffer(savedPurchase);
     }
