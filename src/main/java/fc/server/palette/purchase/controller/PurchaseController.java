@@ -56,7 +56,7 @@ public class PurchaseController {
         Purchase purchase = groupPurchaseOfferDto.toEntity(userDetails.getMember());
         List<String> savedImageUrls = s3ImageUploader.save(S3DirectoryNames.PURCHASE, images);
         List<Media> mediaList = toMediaList(savedImageUrls, purchase);
-        OfferDto offer = purchaseService.createOffer(purchase, mediaList);
+        OfferDto offer = purchaseService.createOffer(purchase, userDetails.getMember(), mediaList);
         chatRoomService.openGroupChatRoom(offer, userDetails.getMember().getId(), ChatRoomType.PURCHASE);
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
@@ -129,6 +129,14 @@ public class PurchaseController {
         userDetails.validateAuthority(purchaseService.getAuthorId(offerId));
         OfferDto offer = purchaseService.closeOffer(offerId);
         return new ResponseEntity<>(offer, HttpStatus.OK);
+    }
+
+    @PostMapping("{offerId}/participate")
+    public ResponseEntity<?> participateOffer(@PathVariable Long offerId,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails){
+        purchaseService.participateOffer(offerId, userDetails.getMember());
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private void saveImages(List<MultipartFile> images, Long offerId) {

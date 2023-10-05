@@ -121,6 +121,7 @@ public class SecondhandService {
                 .bookmarkCount(getBookmarkCount(secondhand.getId()))
                 .hits(secondhand.getHits())
                 .isBookmarked(isBookmarked)
+                .isSoldOut(secondhand.getIsSoldOut())
                 .build();
     }
 

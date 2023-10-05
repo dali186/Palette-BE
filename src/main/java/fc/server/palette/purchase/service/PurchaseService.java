@@ -1,7 +1,6 @@
 package fc.server.palette.purchase.service;
 
 import fc.server.palette._common.exception.Exception400;
-import fc.server.palette._common.exception.Exception403;
 import fc.server.palette._common.exception.Exception404;
 import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.member.entity.Member;
@@ -41,7 +40,7 @@ public class PurchaseService {
     @Transactional(readOnly = true)
     public OfferDto getOffer(Long offerId) {
         Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND + offerId));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         return buildOffer(purchase);
     }
 
@@ -51,14 +50,14 @@ public class PurchaseService {
             increaseHit(offerId);
         }
         Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND + offerId));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         return buildOffer(purchase, offerId, loginMember);
     }
 
     @Transactional(readOnly = true)
     public Purchase getPurchase(Long offerId) {
         return purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new IllegalArgumentException("공동구매 객체가 존재하지 않습니다."));
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
     }
 
     @Transactional
@@ -76,8 +75,9 @@ public class PurchaseService {
     }
 
     @Transactional
-    public OfferDto createOffer(Purchase purchase, List<Media> mediaList) {
+    public OfferDto createOffer(Purchase purchase, Member member,List<Media> mediaList) {
         Purchase savedPurchase = purchaseRepository.save(purchase);
+        participateOffer(purchase.getId(), member);
         purchaseMediaRepository.saveAll(mediaList);
         return buildOffer(savedPurchase);
     }
@@ -135,6 +135,7 @@ public class PurchaseService {
                 .bookmarkCount(getBookmarkCount(purchase.getId()))
                 .hits(purchase.getHits())
                 .isBookmarked(isBookmarked)
+                .isclosing(purchase.getIsClosing())
                 .build();
     }
 
@@ -197,6 +198,17 @@ public class PurchaseService {
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         purchase.closeOffer();
         return buildOffer(purchase);
+    }
+
+    @Transactional
+    public void participateOffer(Long offerId, Member member){
+        if(isParticipating(offerId, member.getId())){
+            throw new Exception400(offerId.toString(), ExceptionMessage.PARTICIPANT_ALREADY_EXIST);
+        }
+        PurchaseParticipant purchaseParticipant = PurchaseParticipant.of(getPurchase(offerId));
+        purchaseParticipantRepository.save(purchaseParticipant);
+        ParticipantMember participantMember = ParticipantMember.of(member, purchaseParticipant);
+        purchaseParticipantMemberRepository.save(participantMember);
     }
 
     private boolean isParticipating(Long offerId, Long memberId){
