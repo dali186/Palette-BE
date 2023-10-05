@@ -1,5 +1,7 @@
 package fc.server.palette.purchase.service;
 
+import fc.server.palette._common.exception.Exception400;
+import fc.server.palette._common.exception.Exception403;
 import fc.server.palette._common.exception.Exception404;
 import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.member.entity.Member;
@@ -16,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static fc.server.palette._common.exception.message.ExceptionMessage.BOOKMARK_ALREADY_EXIST;
 
 @Service
 @RequiredArgsConstructor
@@ -161,6 +165,11 @@ public class PurchaseService {
 
     @Transactional
     public void addBookmark(Long offerId, Member member) {
+        Bookmark bookmark = purchaseBookmarkRepository.findByMemberIdAndPurchaseId(member.getId(), offerId)
+                .orElse(null);
+        if(bookmark!=null){
+            throw new Exception400(offerId.toString(),BOOKMARK_ALREADY_EXIST);
+        }
         purchaseBookmarkRepository.save(Bookmark.of(getPurchase(offerId), member));
     }
 
