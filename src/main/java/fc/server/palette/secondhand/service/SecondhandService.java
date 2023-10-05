@@ -1,5 +1,6 @@
 package fc.server.palette.secondhand.service;
 
+import fc.server.palette._common.exception.Exception400;
 import fc.server.palette._common.exception.Exception404;
 import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.member.entity.Member;
@@ -21,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static fc.server.palette._common.exception.message.ExceptionMessage.BOOKMARK_ALREADY_EXIST;
 
 @Service
 @RequiredArgsConstructor
@@ -139,7 +142,8 @@ public class SecondhandService {
                 .anotherProductDtos(getAnotherProducts(secondhand.getMember().getId(), secondhand.getId()))
                 .build();
     }
-    private List<AnotherProductDto> getAnotherProducts(Long memberId, Long productId){
+
+    private List<AnotherProductDto> getAnotherProducts(Long memberId, Long productId) {
         List<Secondhand> anotherProducts = secondhandRespository.findAllByMemberIdAndExcludeId(memberId, productId);
         return anotherProducts
                 .stream()
@@ -165,7 +169,12 @@ public class SecondhandService {
     }
 
     @Transactional
-    public void addBookmark(Long productId, Member member){
+    public void addBookmark(Long productId, Member member) {
+        Bookmark bookmark = secondhandBookmarkRepository.findByMemberIdAndSecondhandId(member.getId(), productId)
+                .orElse(null);
+        if (bookmark != null) {
+            throw new Exception400(productId.toString(), BOOKMARK_ALREADY_EXIST);
+        }
         secondhandBookmarkRepository.save(Bookmark.of(getSecondhand(productId), member));
     }
 
