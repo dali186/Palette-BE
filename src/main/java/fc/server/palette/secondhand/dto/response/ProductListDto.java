@@ -16,4 +16,5 @@ public class ProductListDto {
     private String thumbnailUrl;
     private Integer bookmarkCount;
     private Integer hits;
+    private Boolean isBookmarked;
 }
