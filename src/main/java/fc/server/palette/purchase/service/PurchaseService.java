@@ -31,10 +31,10 @@ public class PurchaseService {
     private final PurchaseParticipantMemberRepository purchaseParticipantMemberRepository;
 
     @Transactional(readOnly = true)
-    public List<OfferListDto> getAllOffers() {
+    public List<OfferListDto> getAllOffers(Long memberId) {
         List<Purchase> purchases = purchaseRepository.findAll();
         return purchases.stream()
-                .map(this::buildOfferList)
+                .map(purchase -> buildOfferList(purchase, isBookmarked(purchase.getId(), memberId)))
                 .collect(Collectors.toList());
     }
 
@@ -125,7 +125,7 @@ public class PurchaseService {
                 .build();
     }
 
-    private OfferListDto buildOfferList(Purchase purchase) {
+    private OfferListDto buildOfferList(Purchase purchase, Boolean isBookmarked) {
         return OfferListDto.builder()
                 .id(purchase.getId())
                 .title(purchase.getTitle())
@@ -134,6 +134,7 @@ public class PurchaseService {
                 .thumbnailUrl(getThumbnailUrl(purchase.getId()))
                 .bookmarkCount(getBookmarkCount(purchase.getId()))
                 .hits(purchase.getHits())
+                .isBookmarked(isBookmarked)
                 .build();
     }
 
@@ -171,6 +172,12 @@ public class PurchaseService {
             throw new Exception400(offerId.toString(),BOOKMARK_ALREADY_EXIST);
         }
         purchaseBookmarkRepository.save(Bookmark.of(getPurchase(offerId), member));
+    }
+
+    private boolean isBookmarked(Long offerId, Long memberId){
+        Bookmark bookmark = purchaseBookmarkRepository.findByMemberIdAndPurchaseId(memberId, offerId)
+                .orElse(null);
+        return bookmark!=null;
     }
 
     @Transactional
