@@ -82,7 +82,7 @@ public class ChatRoomService {
 
     //그룹톡방 생성
     @Transactional
-    public void openGroupChatRoom(Object request, Long memberId,ChatRoomType type) {
+    public void openGroupChatRoom(Object request, Long memberId, ChatRoomType type) {
         //단체톡방생성에 필요한 요소들 - 타이틀, 호스트, 썸넬, 컨텐트 아이디
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.setType(type);
@@ -104,6 +104,17 @@ public class ChatRoomService {
         chatRoomRepository.save(chatRoom);
     }
 
+    //그룹톡방 참여
+    public void participantGroupChatRoom(Long memberId, Long contentId, ChatRoomType type) {
+        ChatRoom chatRoom = chatRoomRepository.findChatRoomByContentIdAndType(contentId, type)
+                .orElseThrow(() -> new IllegalArgumentException("해당 채팅방을 찾을 수 없습니다."));
+        chatRoom.getMemberList().add(memberId);
+        chatRoom.getEnterList().put(memberId, LocalDateTime.now());
+        chatRoom.getExitList().put(memberId, LocalDateTime.now());
+
+        chatRoomRepository.save(chatRoom);
+    }
+
     @Transactional
     public void validateRoomIdAndMemberId(String roomId, Long memberId) {
         chatRoomRepository.findChatRoomByIdAndMemberId(roomId, memberId)
@@ -115,11 +126,13 @@ public class ChatRoomService {
     public List<ChatRoom> findPersonalChatRoomList(Long memberId) {
         return chatRoomRepository.findPersonalRoomByMemberId(memberId);
     }
+
     //단체 톡방 조회
     @Transactional
     public List<ChatRoom> findGroupChatRoomList(Long memberId) {
         return chatRoomRepository.findGroupRoomByMemberId(memberId);
     }
+
     //roomId로 채팅방 조회
     @Transactional
     public ChatRoom findChatRoomById(String roomId) {
@@ -132,18 +145,13 @@ public class ChatRoomService {
     public void updateChatRoom(ChatRoom chatRoom) {
         chatRoomRepository.save(chatRoom);
     }
+
     //소켓 연결 해제 시 시간 정보 업데이트
     @Transactional
     public void updateChatRoomExitTime(Long memberId, String roomId) {
         ChatRoom chatRoom = findChatRoomById(roomId);
         chatRoom.getExitList().put(memberId, LocalDateTime.now());
         chatRoomRepository.save(chatRoom);
-    }
-
-    //단체 채팅방 유저 추가, meeting - confirm, purchase - 공동구매 제안
-    @Transactional
-    public void addParticipant() {
-
     }
 
     @Transactional
