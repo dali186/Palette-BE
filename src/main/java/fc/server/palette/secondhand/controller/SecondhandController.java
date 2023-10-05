@@ -34,8 +34,8 @@ public class SecondhandController {
     private final S3ImageUploader s3ImageUploader;
 
     @GetMapping("")
-    public ResponseEntity<List<ProductListDto>> getAllProducts() {
-        List<ProductListDto> products = secondhandService.getAllProducts();
+    public ResponseEntity<List<ProductListDto>> getAllProducts(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<ProductListDto> products = secondhandService.getAllProducts(userDetails.getMember().getId());
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
