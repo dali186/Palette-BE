@@ -468,7 +468,12 @@ public class MeetingService {
     }
 
     public void participateMeeting(Long meetingId, Member member, ApplicationDto applicationDto) {
+        if (applicationDto.getPr() != null && applicationDto.getPr().trim().isEmpty()) {
+            throw new Exception400(member.getNickname(), ExceptionMessage.NO_PR);
+        }
+
         Meeting meeting = getMeeting(meetingId);
+
         Application existingApplication = applicationRepository.findByMeetingIdAndMemberIdAndStatusIn(
                 meetingId,
                 member.getId(),
