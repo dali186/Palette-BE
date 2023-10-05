@@ -17,4 +17,5 @@ public class OfferListDto {
     private String thumbnailUrl;
     private Integer bookmarkCount;
     private Integer hits;
+    private Boolean isBookmarked;
 }

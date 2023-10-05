@@ -1,5 +1,7 @@
 package fc.server.palette.purchase.service;
 
+import fc.server.palette._common.exception.Exception400;
+import fc.server.palette._common.exception.Exception403;
 import fc.server.palette._common.exception.Exception404;
 import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette.member.entity.Member;
@@ -7,14 +9,8 @@ import fc.server.palette.purchase.dto.request.EditOfferDto;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.purchase.dto.response.OfferDto;
 import fc.server.palette.purchase.dto.response.OfferListDto;
-import fc.server.palette.purchase.entity.Bookmark;
-import fc.server.palette.purchase.entity.Media;
-import fc.server.palette.purchase.entity.Purchase;
-import fc.server.palette.purchase.entity.PurchaseParticipant;
-import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
-import fc.server.palette.purchase.repository.PurchaseMediaRepository;
-import fc.server.palette.purchase.repository.PurchaseParticipantRepository;
-import fc.server.palette.purchase.repository.PurchaseRepository;
+import fc.server.palette.purchase.entity.*;
+import fc.server.palette.purchase.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static fc.server.palette._common.exception.message.ExceptionMessage.BOOKMARK_ALREADY_EXIST;
+
 @Service
 @RequiredArgsConstructor
 public class PurchaseService {
@@ -30,12 +28,13 @@ public class PurchaseService {
     private final PurchaseMediaRepository purchaseMediaRepository;
     private final PurchaseBookmarkRepository purchaseBookmarkRepository;
     private final PurchaseParticipantRepository purchaseParticipantRepository;
+    private final PurchaseParticipantMemberRepository purchaseParticipantMemberRepository;
 
     @Transactional(readOnly = true)
-    public List<OfferListDto> getAllOffers() {
+    public List<OfferListDto> getAllOffers(Long memberId) {
         List<Purchase> purchases = purchaseRepository.findAll();
         return purchases.stream()
-                .map(this::buildOfferList)
+                .map(purchase -> buildOfferList(purchase, isBookmarked(purchase.getId(), memberId)))
                 .collect(Collectors.toList());
     }
 
@@ -44,6 +43,16 @@ public class PurchaseService {
         Purchase purchase = purchaseRepository.findById(offerId)
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND + offerId));
         return buildOffer(purchase);
+    }
+
+    @Transactional
+    public OfferDto getOffer(Long offerId, Long loginMember) {
+        if (!loginMember.equals(getAuthorId(offerId))) {
+            increaseHit(offerId);
+        }
+        Purchase purchase = purchaseRepository.findById(offerId)
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND + offerId));
+        return buildOffer(purchase, offerId, loginMember);
     }
 
     @Transactional(readOnly = true)
@@ -94,7 +103,29 @@ public class PurchaseService {
                 .build();
     }
 
-    private OfferListDto buildOfferList(Purchase purchase) {
+    private OfferDto buildOffer(Purchase purchase, Long offerId, Long memberId){
+        return OfferDto.builder()
+                .id(purchase.getId())
+                .member(MemberDto.of(purchase.getMember()))
+                .title(purchase.getTitle())
+                .category(purchase.getCategory())
+                .startDate(purchase.getStartDate())
+                .endDate(purchase.getEndDate())
+                .price(purchase.getPrice())
+                .description(purchase.getDescription())
+                .shopUrl(purchase.getShopUrl())
+                .headCount(purchase.getHeadCount())
+                .bookmarkCount(getBookmarkCount(purchase.getId()))
+                .image(getImagesUrl(purchase.getId()))
+                .currentParticipantCount(getCurrentParticipants(purchase.getId()))
+                .isClosing(purchase.getIsClosing())
+                .hits(purchase.getHits())
+                .created_at(purchase.getCreatedAt())
+                .isParticipating(isParticipating(offerId, memberId))
+                .build();
+    }
+
+    private OfferListDto buildOfferList(Purchase purchase, Boolean isBookmarked) {
         return OfferListDto.builder()
                 .id(purchase.getId())
                 .title(purchase.getTitle())
@@ -103,6 +134,7 @@ public class PurchaseService {
                 .thumbnailUrl(getThumbnailUrl(purchase.getId()))
                 .bookmarkCount(getBookmarkCount(purchase.getId()))
                 .hits(purchase.getHits())
+                .isBookmarked(isBookmarked)
                 .build();
     }
 
@@ -110,7 +142,7 @@ public class PurchaseService {
         Optional<Media> optionalThumbnail = purchaseMediaRepository.findAllByPurchase_id(purchaseId)
                 .stream()
                 .findFirst();
-        if (optionalThumbnail.isPresent()){
+        if (optionalThumbnail.isPresent()) {
             return optionalThumbnail.get().getUrl();
         }
         return ExceptionMessage.OBJECT_NOT_FOUND;
@@ -134,14 +166,16 @@ public class PurchaseService {
 
     @Transactional
     public void addBookmark(Long offerId, Member member) {
-        Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
+        if(isBookmarked(offerId, member.getId())){
+            throw new Exception400(offerId.toString(),BOOKMARK_ALREADY_EXIST);
+        }
+        purchaseBookmarkRepository.save(Bookmark.of(getPurchase(offerId), member));
+    }
 
-        Bookmark bookmark = Bookmark.builder()
-                .member(member)
-                .purchase(purchase)
-                .build();
-        purchaseBookmarkRepository.save(bookmark);
+    private boolean isBookmarked(Long offerId, Long memberId){
+        Bookmark bookmark = purchaseBookmarkRepository.findByMemberIdAndPurchaseId(memberId, offerId)
+                .orElse(null);
+        return bookmark!=null;
     }
 
     @Transactional
@@ -163,6 +197,26 @@ public class PurchaseService {
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         purchase.closeOffer();
         return buildOffer(purchase);
+    }
+
+    private boolean isParticipating(Long offerId, Long memberId){
+        List<ParticipantMember> participants = purchaseParticipantMemberRepository.findAllByMemberId(memberId);
+        ParticipantMember participantMember = participants
+                .stream()
+                .filter(participant -> participant
+                        .getPurchaseParticipant()
+                        .getPurchase()
+                        .getId().
+                        equals(offerId))
+                .findAny()
+                .orElse(null);
+        return participantMember != null;
+    }
+
+    private void increaseHit(Long offerId) {
+        Purchase purchase = purchaseRepository.findById(offerId)
+                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
+        purchase.increaseHit();
     }
 
     @Transactional(readOnly = true)
