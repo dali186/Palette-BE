@@ -161,14 +161,7 @@ public class PurchaseService {
 
     @Transactional
     public void addBookmark(Long offerId, Member member) {
-        Purchase purchase = purchaseRepository.findById(offerId)
-                .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
-
-        Bookmark bookmark = Bookmark.builder()
-                .member(member)
-                .purchase(purchase)
-                .build();
-        purchaseBookmarkRepository.save(bookmark);
+        purchaseBookmarkRepository.save(Bookmark.of(getPurchase(offerId), member));
     }
 
     @Transactional
