@@ -33,10 +33,10 @@ public class SecondhandService {
     private final SecondhandBookmarkRepository secondhandBookmarkRepository;
 
     @Transactional(readOnly = true)
-    public List<ProductListDto> getAllProducts() {
+    public List<ProductListDto> getAllProducts(Long memberId) {
         List<Secondhand> products = secondhandRespository.findAll();
         return products.stream()
-                .map(this::buildProductList)
+                .map(product -> buildProductList(product, isBookmarked(product.getId(), memberId)))
                 .collect(Collectors.toList());
     }
 
@@ -111,7 +111,7 @@ public class SecondhandService {
         return buildProductDto(product);
     }
 
-    private ProductListDto buildProductList(Secondhand secondhand) {
+    private ProductListDto buildProductList(Secondhand secondhand, Boolean isBookmarked) {
         return ProductListDto.builder()
                 .id(secondhand.getId())
                 .title(secondhand.getTitle())
@@ -120,6 +120,7 @@ public class SecondhandService {
                 .thumbnailUrl(getThumbnailUrl(secondhand.getId()))
                 .bookmarkCount(getBookmarkCount(secondhand.getId()))
                 .hits(secondhand.getHits())
+                .isBookmarked(isBookmarked)
                 .build();
     }
 
@@ -176,6 +177,12 @@ public class SecondhandService {
             throw new Exception400(productId.toString(), BOOKMARK_ALREADY_EXIST);
         }
         secondhandBookmarkRepository.save(Bookmark.of(getSecondhand(productId), member));
+    }
+
+    private boolean isBookmarked(Long productId, Long memberId){
+        Bookmark bookmark = secondhandBookmarkRepository.findByMemberIdAndSecondhandId(memberId, productId)
+                .orElse(null);
+        return bookmark!=null;
     }
 
     private List<String> getImagesUrl(Long secondhandId) {
