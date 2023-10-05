@@ -199,6 +199,14 @@ public class PurchaseService {
         return buildOffer(purchase);
     }
 
+    @Transactional
+    public void participateOffer(Long offerId, Member member){
+        PurchaseParticipant purchaseParticipant = PurchaseParticipant.of(getPurchase(offerId));
+        purchaseParticipantRepository.save(purchaseParticipant);
+        ParticipantMember participantMember = ParticipantMember.of(member, purchaseParticipant);
+        purchaseParticipantMemberRepository.save(participantMember);
+    }
+
     private boolean isParticipating(Long offerId, Long memberId){
         List<ParticipantMember> participants = purchaseParticipantMemberRepository.findAllByMemberId(memberId);
         ParticipantMember participantMember = participants
