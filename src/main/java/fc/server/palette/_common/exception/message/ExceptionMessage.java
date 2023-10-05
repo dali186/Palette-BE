@@ -13,4 +13,6 @@ public class ExceptionMessage {
     public static final String NO_DISLIKE = "좋아요를 누른적이 없습니다.";
     public static final String CANNOT_BOOKMARK_YOURS = "자신의 게시물은 찜할 수 없습니다.";
     public static final String BOOKMARK_ALREADY_EXIST = "이미 추가된 북마크입니다.";
+    public static final String FOLLOWED_FOLLOWING_EXIST = "해당 팔로우 팔로워 관계가 이미 존재합니다.";
+    public static final String CANNOT_FOLLOWING_YOURSELF = "나 자신을 팔로우 할 수 없습니다.";
 }

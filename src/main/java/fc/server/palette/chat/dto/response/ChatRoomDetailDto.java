@@ -7,8 +7,10 @@ import lombok.Setter;
 @Setter
 public class ChatRoomDetailDto {
     private Long host;
+    private String noticeId;
     private String notice;
     //개인 - false, 미팅,중고거래, 공동구매 - true
     private boolean isDelete;
+
     private ChatRoomDetailContentDto contentNotice;
 }

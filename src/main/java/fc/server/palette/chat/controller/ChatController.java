@@ -80,6 +80,7 @@ public class ChatController {
         int index = chatRoom.getNoticeList().size() - 1;
         if (index >= 0) {
             String noticeId = chatRoom.getNoticeList().get(index);
+            response.setNoticeId(noticeId);
             chatMessageService.findChatMessageById(noticeId).ifPresent(chatMessage -> response.setNotice(chatMessage.getContent()));
         }
 
@@ -240,7 +241,10 @@ public class ChatController {
         ChatRoom chatRoom = chatRoomService.findChatRoomById(roomId);
         List<ChatRoomNoticeListDto> noticeList = chatMessageService.setChatRoomNoticeListResponse(chatRoom).stream()
                 .map(notice -> {
-                    memberRepository.findById(notice.getMemberId()).ifPresent(member -> notice.setProfileImgUrl(member.getImage()));
+                    memberRepository.findById(notice.getMemberId()).ifPresent(member -> {
+                        notice.setProfileImgUrl(member.getImage());
+                        notice.setNickName(member.getNickname());
+                    });
                     return notice;
                 })
                 .collect(Collectors.toList());
