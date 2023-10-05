@@ -131,6 +131,14 @@ public class PurchaseController {
         return new ResponseEntity<>(offer, HttpStatus.OK);
     }
 
+    @PostMapping("{offerId}/participate")
+    public ResponseEntity<?> participateOffer(@PathVariable Long offerId,
+                                                @AuthenticationPrincipal CustomUserDetails userDetails){
+        purchaseService.participateOffer(offerId, userDetails.getMember());
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     private void saveImages(List<MultipartFile> images, Long offerId) {
         if (images != null) {
             //s3 저장
