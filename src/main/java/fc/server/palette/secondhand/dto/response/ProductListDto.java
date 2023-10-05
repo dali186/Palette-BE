@@ -17,4 +17,5 @@ public class ProductListDto {
     private Integer bookmarkCount;
     private Integer hits;
     private Boolean isBookmarked;
+    private Boolean isSoldOut;
 }
