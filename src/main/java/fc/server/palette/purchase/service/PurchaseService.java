@@ -166,9 +166,7 @@ public class PurchaseService {
 
     @Transactional
     public void addBookmark(Long offerId, Member member) {
-        Bookmark bookmark = purchaseBookmarkRepository.findByMemberIdAndPurchaseId(member.getId(), offerId)
-                .orElse(null);
-        if(bookmark!=null){
+        if(isBookmarked(offerId, member.getId())){
             throw new Exception400(offerId.toString(),BOOKMARK_ALREADY_EXIST);
         }
         purchaseBookmarkRepository.save(Bookmark.of(getPurchase(offerId), member));
