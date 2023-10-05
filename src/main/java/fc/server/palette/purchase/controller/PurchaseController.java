@@ -37,8 +37,8 @@ public class PurchaseController {
     private final ChatRoomService chatRoomService;
 
     @GetMapping("")
-    public ResponseEntity<List<OfferListDto>> getAllOffers() {
-        List<OfferListDto> offers = purchaseService.getAllOffers();
+    public ResponseEntity<List<OfferListDto>> getAllOffers(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        List<OfferListDto> offers = purchaseService.getAllOffers(customUserDetails.getMember().getId());
         return new ResponseEntity<>(offers, HttpStatus.OK);
     }
 
