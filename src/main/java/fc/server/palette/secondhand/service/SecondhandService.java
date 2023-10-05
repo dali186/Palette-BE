@@ -2,11 +2,13 @@ package fc.server.palette.secondhand.service;
 
 import fc.server.palette._common.exception.Exception404;
 import fc.server.palette._common.exception.message.ExceptionMessage;
+import fc.server.palette.member.entity.Member;
 import fc.server.palette.purchase.dto.response.MemberDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
 import fc.server.palette.secondhand.dto.response.AnotherProductDto;
 import fc.server.palette.secondhand.dto.response.ProductDto;
 import fc.server.palette.secondhand.dto.response.ProductListDto;
+import fc.server.palette.secondhand.entity.Bookmark;
 import fc.server.palette.secondhand.entity.Media;
 import fc.server.palette.secondhand.entity.Secondhand;
 import fc.server.palette.secondhand.repository.SecondhandBookmarkRepository;
@@ -160,6 +162,11 @@ public class SecondhandService {
         Secondhand product = secondhandRespository.findById(productId)
                 .orElseThrow(() -> new Exception404(ExceptionMessage.OBJECT_NOT_FOUND));
         return product.getMember().getId();
+    }
+
+    @Transactional
+    public void addBookmark(Long productId, Member member){
+        secondhandBookmarkRepository.save(Bookmark.of(getSecondhand(productId), member));
     }
 
     private List<String> getImagesUrl(Long secondhandId) {
