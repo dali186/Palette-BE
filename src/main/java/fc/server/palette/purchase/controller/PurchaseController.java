@@ -1,5 +1,6 @@
 package fc.server.palette.purchase.controller;
 
+import fc.server.palette._common.exception.Exception403;
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.chat.entity.type.ChatRoomType;
@@ -23,6 +24,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static fc.server.palette._common.exception.message.ExceptionMessage.CANNOT_BOOKMARK_YOURS;
 
 @RestController
 @RequestMapping("/api/groupPurchase")
@@ -69,6 +72,9 @@ public class PurchaseController {
     @PostMapping("/{offerId}/bookmark")
     public ResponseEntity<?> addBookmark(@PathVariable Long offerId,
                                          @AuthenticationPrincipal CustomUserDetails userDetails) {
+        if(userDetails.getMember().getId().equals(purchaseService.getAuthorId(offerId))){
+            throw new Exception403(CANNOT_BOOKMARK_YOURS);
+        }
         purchaseService.addBookmark(offerId, userDetails.getMember());
         return new ResponseEntity<>(HttpStatus.OK);
     }
