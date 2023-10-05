@@ -1,5 +1,6 @@
 package fc.server.palette.secondhand.controller;
 
+import fc.server.palette._common.exception.Exception403;
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
 import fc.server.palette.member.auth.CustomUserDetails;
@@ -8,6 +9,7 @@ import fc.server.palette.secondhand.dto.request.CreateProductDto;
 import fc.server.palette.secondhand.dto.request.EditProductDto;
 import fc.server.palette.secondhand.dto.response.ProductDto;
 import fc.server.palette.secondhand.dto.response.ProductListDto;
+import fc.server.palette.secondhand.entity.Bookmark;
 import fc.server.palette.secondhand.entity.Media;
 import fc.server.palette.secondhand.entity.Secondhand;
 import fc.server.palette.secondhand.service.SecondhandService;
@@ -21,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static fc.server.palette._common.exception.message.ExceptionMessage.CANNOT_BOOKMARK_YOURS;
 
 @RestController
 @RequestMapping("/api/secondhand")
@@ -108,6 +112,18 @@ public class SecondhandController {
 
         return new ResponseEntity<>(product, HttpStatus.OK);
 
+    }
+
+    @PostMapping("{productId}/bookmark")
+    public ResponseEntity<?> addBookmark(@PathVariable Long productId,
+                                         @AuthenticationPrincipal CustomUserDetails userDetails){
+        if(userDetails.getMember().getId().equals(secondhandService.getAuthorId(productId))){
+            throw new Exception403(CANNOT_BOOKMARK_YOURS);
+        }
+        Bookmark bookmark = Bookmark.of(secondhandService.getSecondhand(productId),
+                userDetails.getMember());
+        secondhandService.addBookmark(productId, userDetails.getMember());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private void saveImages(List<MultipartFile> images, Long productId) {
