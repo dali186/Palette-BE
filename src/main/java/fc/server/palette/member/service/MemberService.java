@@ -175,9 +175,6 @@ public class MemberService {
                     .following(memberRepository.getReferenceById(followingId))
                     .build();
             followRepository.save(follow);
-        } else {
-            throw new Exception404(ExceptionMessage.FOLLOWED_FOLLOWING_EXIST);
-
         }
 
         if(followedId.equals(followingId)) {
@@ -222,6 +219,7 @@ public class MemberService {
 
     public FollowInfoDto followInfo(Member member) {
         return new FollowInfoDto().builder()
+                .memberId(member.getId())
                 .image(member.getImage())
                 .nickname(member.getNickname())
                 .bio(member.getBio())
