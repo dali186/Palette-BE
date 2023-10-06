@@ -14,6 +14,7 @@ public class ChatRoomNoticeListDto {
     private String notice;
     private Long memberId;
     private String profileImgUrl;
+    private String nickName;
     private LocalDateTime createdAt;
     private Long host;
 }

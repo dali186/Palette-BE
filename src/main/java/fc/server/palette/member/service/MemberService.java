@@ -1,8 +1,7 @@
 package fc.server.palette.member.service;
 
-import com.sun.source.tree.PackageTree;
 import fc.server.palette._common.exception.Exception400;
-import fc.server.palette._common.exception.Exception403;
+import fc.server.palette._common.exception.Exception404;
 import fc.server.palette._common.exception.message.ExceptionMessage;
 import fc.server.palette._common.s3.S3DirectoryNames;
 import fc.server.palette._common.s3.S3ImageUploader;
@@ -26,8 +25,6 @@ import fc.server.palette.meeting.entity.Media;
 import fc.server.palette.meeting.entity.type.Day;
 import fc.server.palette.member.repository.FollowRepository;
 import fc.server.palette.member.repository.MemberRepository;
-import fc.server.palette.purchase.entity.ParticipantMember;
-import fc.server.palette.purchase.entity.PurchaseParticipant;
 import fc.server.palette.purchase.repository.PurchaseBookmarkRepository;
 import fc.server.palette.purchase.repository.PurchaseParticipantRepository;
 import fc.server.palette.purchase.repository.PurchaseRepository;
@@ -37,7 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Collections;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -83,6 +80,8 @@ public class MemberService {
 
     public MemberMyPageDto myPageInfo(Long memberId, Member currentMember) {
         Member member = getMember(memberId);
+
+
 
         Building building = member.getBuilding();
         Room room = member.getRoom();
@@ -170,12 +169,14 @@ public class MemberService {
 
     public void follow(Long followedId, Long followingId) {
         Optional<Follow> existingFollow = followRepository.findByFollowedIdAndFollowingId(followedId, followingId);
+
         if (existingFollow.isEmpty()) {
-            Follow follow = Follow.builder()
-                    .followed(memberRepository.getById(followedId))
-                    .following(memberRepository.getReferenceById(followingId))
-                    .build();
-            followRepository.save(follow);
+                Follow follow = Follow.builder()
+                        .followed(memberRepository.getById(followedId))
+                        .following(memberRepository.getReferenceById(followingId))
+                        .build();
+                followRepository.save(follow);
+
         }
     }
 
@@ -201,7 +202,6 @@ public class MemberService {
         return followerInfoList;
     }
 
-
     public List<FollowInfoDto> getFollowings(Long memberId) {
         List<Follow> followingList = followRepository.findByFollowingId(memberId);
         List<FollowInfoDto> followingInfoList = new ArrayList<>();
@@ -215,9 +215,9 @@ public class MemberService {
         return followingInfoList;
     }
 
-
     public FollowInfoDto followInfo(Member member) {
         return new FollowInfoDto().builder()
+                .memberId(member.getId())
                 .image(member.getImage())
                 .nickname(member.getNickname())
                 .bio(member.getBio())
