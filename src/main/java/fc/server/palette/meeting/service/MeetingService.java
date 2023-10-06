@@ -288,6 +288,7 @@ public class MeetingService {
                 .title(meeting.getTitle())
                 .description(meeting.getDescription())
                 .headCount(meeting.getHeadCount())
+                .recruitedPersonnel(meeting.getRecruitedPersonnel())
                 .startDate(meeting.getStartDate())
                 .endDate(meeting.getEndDate())
                 .onOff(meeting.isOnOff())
@@ -467,11 +468,26 @@ public class MeetingService {
     }
 
     public void participateMeeting(Long meetingId, Member member, ApplicationDto applicationDto) {
+        if (applicationDto.getPr() != null && applicationDto.getPr().trim().isEmpty()) {
+            throw new Exception400(member.getNickname(), ExceptionMessage.NO_PR);
+        }
+
         Meeting meeting = getMeeting(meetingId);
+
+        Application existingApplication = applicationRepository.findByMeetingIdAndMemberIdAndStatusIn(
+                meetingId,
+                member.getId(),
+                List.of(Status.WAITING, Status.APPROVAL)
+        );
 
         if(meeting.getMember().getId().equals(member.getId())){
             throw new Exception400(member.getNickname(), ExceptionMessage.PARTICIPATE_YOURSELF_DENIED);
         }
+
+        if (existingApplication != null) {
+            throw new Exception400(member.getNickname(), ExceptionMessage.ALREADY_APPLIED);
+        }
+
         Application application = Application.builder()
                 .meeting(meeting)
                 .member(member)
@@ -524,8 +540,18 @@ public class MeetingService {
 
     public void participateFirstComeMeeting(Long meetingId, Member member) {
         Meeting meeting = getMeeting(meetingId);
+        Application existingApplication = applicationRepository.findByMeetingIdAndMemberIdAndStatusIn(
+                meetingId,
+                member.getId(),
+                List.of(Status.WAITING, Status.APPROVAL)
+        );
+
         if(meeting.getMember().getId().equals(member.getId())){
             throw new Exception400(member.getNickname(), ExceptionMessage.PARTICIPATE_YOURSELF_DENIED);
+        }
+
+        if (existingApplication != null) {
+            throw new Exception400(member.getNickname(), ExceptionMessage.ALREADY_APPLIED);
         }
 
         if ((meeting.getHeadCount() - meeting.getRecruitedPersonnel()) <= 0) {
