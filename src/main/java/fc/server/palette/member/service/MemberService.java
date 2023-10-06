@@ -171,15 +171,12 @@ public class MemberService {
         Optional<Follow> existingFollow = followRepository.findByFollowedIdAndFollowingId(followedId, followingId);
 
         if (existingFollow.isEmpty()) {
-            if(followedId.equals(followingId)) {
-                throw new Exception404(ExceptionMessage.CANNOT_FOLLOWING_YOURSELF);
-            }else {
                 Follow follow = Follow.builder()
                         .followed(memberRepository.getById(followedId))
                         .following(memberRepository.getReferenceById(followingId))
                         .build();
                 followRepository.save(follow);
-            }
+
         }
     }
 
